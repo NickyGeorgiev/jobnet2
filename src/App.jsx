@@ -4,6 +4,7 @@ import { Register } from './pages/Register'
 import { Login } from './pages/Login'
 import { MyCv } from './pages/MyCv'
 import { CompanySearch } from './pages/CompanySearch'
+import { CompanyProfile } from './pages/CompanyProfile'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
 
@@ -35,7 +36,10 @@ function App() {
         )}
 
         {session && profile?.role === 'company' && (
-          <Link to="/search" style={{ marginRight: '1rem' }}>Търсене на кандидати</Link>
+          <>
+            <Link to="/company-profile" style={{ marginRight: '1rem' }}>Профил на фирмата</Link>
+            <Link to="/search" style={{ marginRight: '1rem' }}>Търсене на кандидати</Link>
+          </>
         )}
 
         {session && (
@@ -54,6 +58,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/my-cv" element={<MyCv />} />
         <Route path="/search" element={<CompanySearch />} />
+        <Route path="/company-profile" element={<CompanyProfile />} />
       </Routes>
     </div>
   )

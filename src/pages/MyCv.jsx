@@ -6,6 +6,7 @@ import { allCities } from '../data/citiesByRegion'
 import { WorkExperienceSection } from './WorkExperienceSection'
 import { EducationSection } from './EducationSection'
 import { LanguagesSection } from './LanguagesSection'
+import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 
 const LEVEL_OPTIONS = [
   'Ниво работници',
@@ -98,11 +99,6 @@ export function MyCv() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  function handleMultiSelectChange(e) {
-    const selectedValues = Array.from(e.target.selectedOptions).map(option => option.value)
-    setFormData({ ...formData, [e.target.name]: selectedValues })
-  }
-
   function handleCheckboxGroupChange(field, value, checked) {
     setFormData((prev) => {
       const current = prev[field]
@@ -111,7 +107,6 @@ export function MyCv() {
     })
   }
 
-  // --- Снимка на профила ---
   async function handleAvatarUpload(e) {
     const file = e.target.files[0]
     if (!file) return
@@ -136,28 +131,24 @@ export function MyCv() {
     setUploadingAvatar(false)
   }
 
-  // Работен опит
   function addWorkExperience() { setWorkExperience([...workExperience, emptyWorkExperience()]) }
   function handleWorkExperienceChange(id, field, value) {
     setWorkExperience(workExperience.map(exp => exp.id === id ? { ...exp, [field]: value } : exp))
   }
   function removeWorkExperience(id) { setWorkExperience(workExperience.filter(exp => exp.id !== id)) }
 
-  // Образование
   function addEducation() { setEducation([...education, emptyEducation()]) }
   function handleEducationChange(id, field, value) {
     setEducation(education.map(edu => edu.id === id ? { ...edu, [field]: value } : edu))
   }
   function removeEducation(id) { setEducation(education.filter(edu => edu.id !== id)) }
 
-  // Езици
   function addLanguage() { setLanguages([...languages, emptyLanguage()]) }
   function handleLanguageChange(id, field, value) {
     setLanguages(languages.map(lang => lang.id === id ? { ...lang, [field]: value } : lang))
   }
   function removeLanguage(id) { setLanguages(languages.filter(lang => lang.id !== id)) }
 
-  // Курсове
   function addCourse() { setMoreCourses([...moreCourses, '']) }
   function handleCourseChange(index, value) {
     setMoreCourses(moreCourses.map((c, i) => i === index ? value : c))
@@ -343,23 +334,19 @@ export function MyCv() {
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Желани сектори (задръж Ctrl/Cmd за избор на няколко)</label>
-          <select multiple name="target_sector" value={formData.target_sector}
-            onChange={handleMultiSelectChange}
-            style={{ width: '100%', padding: '0.5rem', height: '150px' }}>
-            {sectors.map(sector => <option key={sector} value={sector}>{sector}</option>)}
-          </select>
-        </div>
+        <CheckboxMultiSelect
+          label="Желани сектори"
+          options={sectors}
+          selected={formData.target_sector}
+          onChange={(values) => setFormData({ ...formData, target_sector: values })}
+        />
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Желани градове (задръж Ctrl/Cmd за избор на няколко)</label>
-          <select multiple name="target_cities" value={formData.target_cities}
-            onChange={handleMultiSelectChange}
-            style={{ width: '100%', padding: '0.5rem', height: '150px' }}>
-            {allCities.map(city => <option key={city} value={city}>{city}</option>)}
-          </select>
-        </div>
+        <CheckboxMultiSelect
+          label="Желани градове"
+          options={allCities}
+          selected={formData.target_cities}
+          onChange={(values) => setFormData({ ...formData, target_cities: values })}
+        />
 
         <div style={{ marginBottom: '1rem' }}>
           <label>На какво ниво искате да се реализирате?</label>
