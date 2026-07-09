@@ -46,7 +46,7 @@ export function MyCv() {
     fname: '', lname: '', phone: '', birth_date: '', gender: '',
     current_city: '', description: '', skills: '', computer_skills: '',
     driver_license: '', target_salary: '', target_sector: [], target_cities: [],
-    target_level: [], target_duration: [],
+    target_level: [], target_duration: [], avatar_url: '',
   })
   const [workExperience, setWorkExperience] = useState([])
   const [education, setEducation] = useState([])
@@ -54,6 +54,7 @@ export function MyCv() {
   const [moreCourses, setMoreCourses] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -81,6 +82,7 @@ export function MyCv() {
           target_cities: data.target_cities || [],
           target_level: data.target_level || [],
           target_duration: data.target_duration || [],
+          avatar_url: data.avatar_url || '',
         })
         setWorkExperience(data.work_experience?.length > 0 ? data.work_experience : [])
         setEducation(data.education?.length > 0 ? data.education : [])
@@ -101,13 +103,37 @@ export function MyCv() {
     setFormData({ ...formData, [e.target.name]: selectedValues })
   }
 
-  // Чекбокс групи (target_level, target_duration) — добавя/маха стойност от масив
   function handleCheckboxGroupChange(field, value, checked) {
     setFormData((prev) => {
       const current = prev[field]
       const updated = checked ? [...current, value] : current.filter((v) => v !== value)
       return { ...prev, [field]: updated }
     })
+  }
+
+  // --- Снимка на профила ---
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+
+    setUploadingAvatar(true)
+    setMessage('')
+
+    const filePath = `${session.user.id}/${Date.now()}_${file.name}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true })
+
+    if (uploadError) {
+      setMessage('Грешка при качване на снимка: ' + uploadError.message)
+      setUploadingAvatar(false)
+      return
+    }
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
+    setFormData((prev) => ({ ...prev, avatar_url: data.publicUrl }))
+    setUploadingAvatar(false)
   }
 
   // Работен опит
@@ -131,7 +157,7 @@ export function MyCv() {
   }
   function removeLanguage(id) { setLanguages(languages.filter(lang => lang.id !== id)) }
 
-  // Допълнителни курсове (прост масив от текстове)
+  // Курсове
   function addCourse() { setMoreCourses([...moreCourses, '']) }
   function handleCourseChange(index, value) {
     setMoreCourses(moreCourses.map((c, i) => i === index ? value : c))
@@ -158,6 +184,7 @@ export function MyCv() {
         skills: formData.skills,
         computer_skills: formData.computer_skills,
         driver_license: formData.driver_license,
+        avatar_url: formData.avatar_url,
         target_salary: formData.target_salary ? parseInt(formData.target_salary) : null,
         target_sector: formData.target_sector,
         target_cities: formData.target_cities,
@@ -187,6 +214,16 @@ export function MyCv() {
 
       <form onSubmit={handleSubmit}>
         <h3>Основна информация</h3>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Снимка на профила</label><br />
+          {formData.avatar_url && (
+            <img src={formData.avatar_url} alt="avatar"
+              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%', display: 'block', marginBottom: '0.5rem' }} />
+          )}
+          <input type="file" accept="image/*" onChange={handleAvatarUpload} />
+          {uploadingAvatar && <p>Качвам...</p>}
+        </div>
 
         <div style={{ marginBottom: '1rem' }}>
           <label>Име</label>
