@@ -3,6 +3,7 @@ import { Home } from './pages/Home'
 import { Register } from './pages/Register'
 import { Login } from './pages/Login'
 import { MyCv } from './pages/MyCv'
+import { CompanySearch } from './pages/CompanySearch'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
 
@@ -33,6 +34,10 @@ function App() {
           <Link to="/my-cv" style={{ marginRight: '1rem' }}>Моето CV</Link>
         )}
 
+        {session && profile?.role === 'company' && (
+          <Link to="/search" style={{ marginRight: '1rem' }}>Търсене на кандидати</Link>
+        )}
+
         {session && (
           <>
             <span style={{ marginRight: '1rem' }}>
@@ -48,6 +53,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/my-cv" element={<MyCv />} />
+        <Route path="/search" element={<CompanySearch />} />
       </Routes>
     </div>
   )
