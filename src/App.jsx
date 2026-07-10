@@ -5,6 +5,10 @@ import { Login } from './pages/Login'
 import { MyCv } from './pages/MyCv'
 import { CompanySearch } from './pages/CompanySearch'
 import { CompanyProfile } from './pages/CompanyProfile'
+import { CandidateDashboard } from './pages/CandidateDashboard'
+import { CompanyDashboard } from './pages/CompanyDashboard'
+import { PaymentSuccess } from './pages/PaymentSuccess'
+import { PaymentCancelled } from './pages/PaymentCancelled'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
 
@@ -18,6 +22,13 @@ function App() {
   }
 
   if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+
+  let homeElement = <Home />
+  if (session && profile?.role === 'candidate') {
+    homeElement = <CandidateDashboard />
+  } else if (session && profile?.role === 'company') {
+    homeElement = <CompanyDashboard />
+  }
 
   return (
     <div>
@@ -53,12 +64,14 @@ function App() {
       </nav>
 
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={homeElement} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/my-cv" element={<MyCv />} />
         <Route path="/search" element={<CompanySearch />} />
         <Route path="/company-profile" element={<CompanyProfile />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       </Routes>
     </div>
   )

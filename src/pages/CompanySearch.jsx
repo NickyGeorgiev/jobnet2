@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
+import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 
 const LEVEL_OPTIONS = [
   'Ниво работници',
@@ -16,8 +17,6 @@ const DURATION_OPTIONS = [
   'Стажант/Freelancer',
 ]
 
-// Превръща JS масив в правилно "опакован" Postgres array literal,
-// така стойности със запетаи вътре (напр. имена на сектори) не се чупят.
 function toPgArrayLiteral(arr) {
   const escaped = arr.map((v) => `"${v.replace(/"/g, '\\"')}"`)
   return `{${escaped.join(',')}}`
@@ -32,13 +31,6 @@ export function CompanySearch() {
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  function handleMultiSelectChange(setter) {
-    return (e) => {
-      const values = Array.from(e.target.selectedOptions).map((o) => o.value)
-      setter(values)
-    }
-  }
 
   function handleCheckboxGroup(setter, currentValues, value, checked) {
     setter(checked ? [...currentValues, value] : currentValues.filter((v) => v !== value))
@@ -98,21 +90,19 @@ export function CompanySearch() {
           />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Сектор (задръж Ctrl/Cmd за няколко)</label>
-          <select multiple value={selectedSectors} onChange={handleMultiSelectChange(setSelectedSectors)}
-            style={{ width: '100%', padding: '0.5rem', height: '150px' }}>
-            {sectors.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
+        <CheckboxMultiSelect
+          label="Сектор"
+          options={sectors}
+          selected={selectedSectors}
+          onChange={setSelectedSectors}
+        />
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Град (задръж Ctrl/Cmd за няколко)</label>
-          <select multiple value={selectedCities} onChange={handleMultiSelectChange(setSelectedCities)}
-            style={{ width: '100%', padding: '0.5rem', height: '150px' }}>
-            {allCities.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </div>
+        <CheckboxMultiSelect
+          label="Град"
+          options={allCities}
+          selected={selectedCities}
+          onChange={setSelectedCities}
+        />
 
         <div style={{ marginBottom: '1rem' }}>
           <label>Ниво</label>
@@ -164,6 +154,10 @@ export function CompanySearch() {
           {results.map((c) => (
             <div key={c.id} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', borderRadius: '4px' }}>
               {c.is_gold && <span style={{ background: 'gold', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>ЗЛАТЕН</span>}
+              {c.avatar_url && (
+                <img src={c.avatar_url} alt="avatar"
+                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '50%', float: 'right' }} />
+              )}
               <h4>{c.fname} {c.lname}</h4>
               <p>Град: {c.current_city}</p>
               <p>Желана заплата: {c.target_salary} лв</p>

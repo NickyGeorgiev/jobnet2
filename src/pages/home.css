@@ -1,0 +1,37 @@
+.home {
+    min-height: 100vh;
+}
+
+.hero {
+    text-align: center;
+
+    padding: 120px 0;
+}
+
+.hero h1 {
+    font-size: 3.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+
+    margin-bottom: 20px;
+
+    color: var(--secondary);
+}
+
+.hero p {
+    font-size: 1.25rem;
+
+    color: var(--text-light);
+
+    margin-bottom: 40px;
+}
+
+.hero-buttons {
+    display: flex;
+
+    justify-content: center;
+
+    gap: 20px;
+
+    flex-wrap: wrap;
+}
