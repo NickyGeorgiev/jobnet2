@@ -53,12 +53,24 @@ export function CompanySearch() {
   useEffect(() => {
     async function checkAccess() {
       if (!session) return
-      const { data } = await supabase
+
+      const { data: companyData } = await supabase
+        .from('companies')
+        .select('trial_ends_at')
+        .eq('id', session.user.id)
+        .single()
+
+      const isInTrial = companyData?.trial_ends_at && new Date(companyData.trial_ends_at) > new Date()
+
+      const { data: subData } = await supabase
         .from('subscriptions')
         .select('status')
         .eq('company_id', session.user.id)
         .maybeSingle()
-      setHasAccess(data ? ['active', 'trialing'].includes(data.status) : false)
+
+      const hasActiveSub = subData?.status === 'active'
+
+      setHasAccess(isInTrial || hasActiveSub)
     }
     checkAccess()
   }, [session])

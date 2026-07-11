@@ -9,7 +9,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Проверяваме дали вече има активна сесия (напр. след refresh)
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       if (session) {
@@ -19,7 +18,6 @@ export function AuthProvider({ children }) {
       }
     })
 
-    // Слушаме за промени в auth статуса (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
       if (session) {
@@ -43,8 +41,17 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
+  // Позволява на други части от приложението (напр. Register.jsx) да поискат
+  // презареждане на профила веднага след като знаят, че редът вече съществува —
+  // вместо да чакат следващо auth събитие да го "хване" случайно.
+  async function refreshProfile() {
+    if (session) {
+      await loadProfile(session.user.id)
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ session, profile, loading }}>
+    <AuthContext.Provider value={{ session, profile, loading, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

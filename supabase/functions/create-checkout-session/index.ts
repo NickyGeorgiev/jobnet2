@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { priceId, trialDays } = await req.json()
+    const { priceId } = await req.json()
 
     const authHeader = req.headers.get("Authorization")!
     const supabaseClient = createClient(
@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
       })
     }
 
-    const sessionConfig = {
+    // Никакъв trial тук вече — просто нормален checkout, таксуване веднага.
+    const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -43,14 +44,7 @@ Deno.serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/payment-cancelled`,
       client_reference_id: user.id,
       customer_email: user.email,
-    }
-
-    // Ако е подаден trial период (само за Company Plan), добавяме го тук
-    if (trialDays) {
-      sessionConfig.subscription_data = { trial_period_days: trialDays }
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionConfig)
+    })
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

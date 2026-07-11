@@ -7,6 +7,7 @@ import { CheckoutButton } from './CheckoutButton'
 export function CompanyDashboard() {
   const { session } = useAuth()
   const [subscription, setSubscription] = useState(null)
+  const [trialEndsAt, setTrialEndsAt] = useState(null)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [message, setMessage] = useState('')
@@ -16,12 +17,20 @@ export function CompanyDashboard() {
   }, [session])
 
   async function loadStatus() {
-    const { data } = await supabase
+    const { data: companyData } = await supabase
+      .from('companies')
+      .select('trial_ends_at')
+      .eq('id', session.user.id)
+      .single()
+    setTrialEndsAt(companyData?.trial_ends_at || null)
+
+    const { data: subData } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('company_id', session.user.id)
       .maybeSingle()
-    setSubscription(data)
+    setSubscription(subData)
+
     setLoading(false)
   }
 
@@ -44,7 +53,11 @@ export function CompanyDashboard() {
     setCancelling(false)
   }
 
-  const hasActiveSubscription = subscription && ['active', 'trialing'].includes(subscription.status)
+  const hasActiveSubscription = subscription && subscription.status === 'active'
+  const isInTrial = trialEndsAt && new Date(trialEndsAt) > new Date()
+  const trialDaysLeft = isInTrial
+    ? Math.ceil((new Date(trialEndsAt) - new Date()) / (1000 * 60 * 60 * 24))
+    : 0
 
   return (
     <div style={{ padding: '2rem' }}>
@@ -71,7 +84,6 @@ export function CompanyDashboard() {
           {hasActiveSubscription ? (
             <>
               <h3>✅ Абонаментът е активен</h3>
-              <p>Статус: {subscription.status === 'trialing' ? 'Пробен период' : 'Активен'}</p>
               {subscription.current_period_end && (
                 <p>
                   {subscription.cancel_at_period_end ? 'Ще спре на: ' : 'Подновява се на: '}
@@ -87,15 +99,23 @@ export function CompanyDashboard() {
               )}
               {message && <p>{message}</p>}
             </>
-          ) : (
+          ) : isInTrial ? (
             <>
-              <h3>Абонирайте се</h3>
-              <p>30€/месец за неограничен достъп до търсене на кандидати.</p>
-              <p style={{ color: 'green' }}>Първите 14 дни са безплатни!</p>
+              <h3>🎁 Пробен период</h3>
+              <p>Остават ви <strong>{trialDaysLeft}</strong> {trialDaysLeft === 1 ? 'ден' : 'дни'} безплатен достъп до търсене.</p>
+              <p>30€/месец след изтичане на пробния период — можете да се абонирате отсега, за да не се прекъсва достъпът.</p>
               <CheckoutButton
                 priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
-                trialDays={14}
-                label="Започни 14-дневен безплатен период"
+                label="Абонирай се сега — 30€/мес"
+              />
+            </>
+          ) : (
+            <>
+              <h3>Пробният период е изтекъл</h3>
+              <p>Абонирайте се за 30€/месец, за да продължите да търсите кандидати.</p>
+              <CheckoutButton
+                priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
+                label="Абонирай се — 30€/мес"
               />
             </>
           )}

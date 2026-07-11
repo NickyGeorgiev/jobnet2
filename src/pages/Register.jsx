@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { useAuth } from '../AuthContext'
 
 export function Register() {
+  const { refreshProfile } = useAuth()
   const navigate = useNavigate()
   const [role, setRole] = useState('candidate')
   const [email, setEmail] = useState('')
@@ -46,6 +48,10 @@ export function Register() {
     } else {
       await supabase.from('companies').insert({ id: userId, company_name: '' })
     }
+
+    // Гарантираме, че AuthContext знае за новосъздадения профил
+    // ПРЕДИ да пренасочим — иначе навигацията за момент показва грешна/празна роля
+    await refreshProfile()
 
     setLoading(false)
     navigate('/')
