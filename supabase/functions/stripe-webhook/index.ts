@@ -41,6 +41,11 @@ Deno.serve(async (req) => {
     const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
     const companyPriceId = Deno.env.get("STRIPE_COMPANY_PRICE_ID")
 
+    console.log("DEBUG — получен priceId:", priceId)
+    console.log("DEBUG — goldPriceId от secrets:", goldPriceId)
+    console.log("DEBUG — companyPriceId от secrets:", companyPriceId)
+    console.log("DEBUG — userId:", userId)
+
     if (priceId === goldPriceId) {
       // Candidate купува "gold" статус
       await supabaseAdmin
@@ -49,7 +54,7 @@ Deno.serve(async (req) => {
         .eq("id", userId)
     } else if (priceId === companyPriceId) {
       // Company купува план — записваме/обновяваме subscription запис
-      await supabaseAdmin
+      const { error: upsertError } = await supabaseAdmin
         .from("subscriptions")
         .upsert({
           company_id: userId,
@@ -59,6 +64,10 @@ Deno.serve(async (req) => {
           stripe_subscription_id: subscriptionId,
           current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
         }, { onConflict: "company_id" })
+
+      if (upsertError) {
+        console.error("Грешка при запис на subscription:", upsertError.message)
+      }
     }
   }
 
