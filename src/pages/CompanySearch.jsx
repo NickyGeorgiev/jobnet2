@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
@@ -22,7 +24,23 @@ function toPgArrayLiteral(arr) {
   return `{${escaped.join(',')}}`
 }
 
+// Разбърква на случаен принцип (Fisher-Yates), но само редовете, които НЕ са gold —
+// gold кандидатите остават най-отгоре, само редът помежду им и на останалите се случайности всеки път.
+function shuffleNonGold(data) {
+  const goldOnes = data.filter((c) => c.is_gold)
+  const others = data.filter((c) => !c.is_gold)
+
+  for (let i = others.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[others[i], others[j]] = [others[j], others[i]]
+  }
+
+  return [...goldOnes, ...others]
+}
+
 export function CompanySearch() {
+  const { session } = useAuth()
+  const [hasAccess, setHasAccess] = useState(null)
   const [offeredSalary, setOfferedSalary] = useState('')
   const [selectedSectors, setSelectedSectors] = useState([])
   const [selectedCities, setSelectedCities] = useState([])
@@ -32,14 +50,33 @@ export function CompanySearch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    async function checkAccess() {
+      if (!session) return
+      const { data } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('company_id', session.user.id)
+        .maybeSingle()
+      setHasAccess(data ? ['active', 'trialing'].includes(data.status) : false)
+    }
+    checkAccess()
+  }, [session])
+
   function handleCheckboxGroup(setter, currentValues, value, checked) {
     setter(checked ? [...currentValues, value] : currentValues.filter((v) => v !== value))
   }
 
   async function handleSearch(e) {
     e.preventDefault()
-    setLoading(true)
     setError('')
+
+    if (!offeredSalary) {
+      setError('Моля, въведете предлагана заплата — това е основният критерий за търсене.')
+      return
+    }
+
+    setLoading(true)
 
     let query = supabase
       .from('candidates')
@@ -62,16 +99,35 @@ export function CompanySearch() {
       query = query.filter('target_duration', 'ov', toPgArrayLiteral(selectedDurations))
     }
 
-    query = query.order('is_gold', { ascending: false }).order('updated_at', { ascending: false })
+    query = query.order('is_gold', { ascending: false })
 
     const { data, error: queryError } = await query
 
     if (queryError) {
       setError(queryError.message)
     } else {
-      setResults(data)
+      setResults(shuffleNonGold(data))
     }
     setLoading(false)
+  }
+
+  // Все още проверяваме достъпа
+  if (hasAccess === null) {
+    return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  }
+
+  // Няма активен абонамент — не показваме формата изобщо
+  if (!hasAccess) {
+    return (
+      <div style={{ padding: '2rem', maxWidth: '500px' }}>
+        <h2>Търсене на кандидати</h2>
+        <div style={{ border: '1px solid #f0ad4e', background: '#fff8e6', padding: '1.5rem', borderRadius: '8px' }}>
+          <h3>Нямате активен абонамент</h3>
+          <p>За да търсите кандидати, трябва да имате активен абонамент (30€/месец, с 14 дни безплатен пробен период).</p>
+          <Link to="/">Отиди към началния екран за абониране</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -80,12 +136,13 @@ export function CompanySearch() {
 
       <form onSubmit={handleSearch}>
         <div style={{ marginBottom: '1rem' }}>
-          <label>Предлагана нетна заплата (лв)</label>
+          <label>Предлагана нетна заплата (лв) *</label>
           <input
             type="number"
             value={offeredSalary}
             onChange={(e) => setOfferedSalary(e.target.value)}
             placeholder="напр. 2000"
+            required
             style={{ width: '100%', padding: '0.5rem' }}
           />
         </div>

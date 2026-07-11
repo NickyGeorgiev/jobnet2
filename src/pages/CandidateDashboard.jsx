@@ -8,19 +8,40 @@ export function CandidateDashboard() {
   const { session } = useAuth()
   const [isGold, setIsGold] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    async function loadStatus() {
-      const { data } = await supabase
-        .from('candidates')
-        .select('is_gold')
-        .eq('id', session.user.id)
-        .single()
-      setIsGold(data?.is_gold || false)
-      setLoading(false)
-    }
     loadStatus()
   }, [session])
+
+  async function loadStatus() {
+    const { data } = await supabase
+      .from('candidates')
+      .select('is_gold')
+      .eq('id', session.user.id)
+      .single()
+    setIsGold(data?.is_gold || false)
+    setLoading(false)
+  }
+
+  async function handleCancel() {
+    if (!confirm('Сигурни ли сте, че искате да отмените Gold абонамента?')) return
+
+    setCancelling(true)
+    setMessage('')
+
+    const { error } = await supabase.functions.invoke('cancel-subscription', {
+      body: { type: 'candidate' },
+    })
+
+    if (error) {
+      setMessage('Грешка: ' + error.message)
+    } else {
+      setMessage('Абонаментът е отменен. Ще остане активен до края на платения период.')
+    }
+    setCancelling(false)
+  }
 
   return (
     <div style={{ padding: '2rem' }}>
@@ -42,6 +63,10 @@ export function CandidateDashboard() {
             <>
               <h3>⭐ Имаш Gold статус</h3>
               <p>CV-то ти излиза най-отгоре в резултатите на фирмите.</p>
+              <button onClick={handleCancel} disabled={cancelling} style={{ color: 'red' }}>
+                {cancelling ? 'Отменям...' : 'Отмени Gold абонамент'}
+              </button>
+              {message && <p>{message}</p>}
             </>
           ) : (
             <>

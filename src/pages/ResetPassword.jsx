@@ -1,27 +1,33 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { Link } from 'react-router-dom'
 
-export function Login() {
+export function ResetPassword() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (password !== confirmPassword) {
+      setError('Паролите не съвпадат')
+      return
+    }
+    if (password.length < 6) {
+      setError('Паролата трябва да е поне 6 символа')
+      return
+    }
+
     setLoading(true)
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: updateError } = await supabase.auth.updateUser({ password })
 
-    if (loginError) {
-      setError(loginError.message)
+    if (updateError) {
+      setError(updateError.message)
       setLoading(false)
       return
     }
@@ -32,16 +38,17 @@ export function Login() {
 
   return (
     <div style={{ padding: '2rem', maxWidth: '400px' }}>
-      <h2>Вход</h2>
+      <h2>Нова парола</h2>
 
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '1rem' }}>
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="password"
+            placeholder="Нова парола"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={6}
             style={{ width: '100%', padding: '0.5rem' }}
           />
         </div>
@@ -49,9 +56,9 @@ export function Login() {
         <div style={{ marginBottom: '1rem' }}>
           <input
             type="password"
-            placeholder="Парола"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Повтори паролата"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             style={{ width: '100%', padding: '0.5rem' }}
           />
@@ -60,13 +67,9 @@ export function Login() {
         {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <button type="submit" disabled={loading}>
-          {loading ? 'Влизам...' : 'Влез'}
+          {loading ? 'Запазвам...' : 'Запази новата парола'}
         </button>
       </form>
-
-      <p style={{ marginTop: '1rem' }}>
-        <Link to="/forgot-password">Забравена парола?</Link>
-      </p>
     </div>
   )
 }

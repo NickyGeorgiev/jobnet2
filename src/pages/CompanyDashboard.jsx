@@ -8,19 +8,41 @@ export function CompanyDashboard() {
   const { session } = useAuth()
   const [subscription, setSubscription] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [cancelling, setCancelling] = useState(false)
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
-    async function loadStatus() {
-      const { data } = await supabase
-        .from('subscriptions')
-        .select('*')
-        .eq('company_id', session.user.id)
-        .maybeSingle()
-      setSubscription(data)
-      setLoading(false)
-    }
     loadStatus()
   }, [session])
+
+  async function loadStatus() {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('company_id', session.user.id)
+      .maybeSingle()
+    setSubscription(data)
+    setLoading(false)
+  }
+
+  async function handleCancel() {
+    if (!confirm('Сигурни ли сте, че искате да отмените абонамента?')) return
+
+    setCancelling(true)
+    setMessage('')
+
+    const { error } = await supabase.functions.invoke('cancel-subscription', {
+      body: { type: 'company' },
+    })
+
+    if (error) {
+      setMessage('Грешка: ' + error.message)
+    } else {
+      setMessage('Абонаментът е отменен. Ще остане активен до края на платения период.')
+      loadStatus()
+    }
+    setCancelling(false)
+  }
 
   const hasActiveSubscription = subscription && ['active', 'trialing'].includes(subscription.status)
 
@@ -51,8 +73,19 @@ export function CompanyDashboard() {
               <h3>✅ Абонаментът е активен</h3>
               <p>Статус: {subscription.status === 'trialing' ? 'Пробен период' : 'Активен'}</p>
               {subscription.current_period_end && (
-                <p>Подновява се на: {new Date(subscription.current_period_end).toLocaleDateString('bg-BG')}</p>
+                <p>
+                  {subscription.cancel_at_period_end ? 'Ще спре на: ' : 'Подновява се на: '}
+                  {new Date(subscription.current_period_end).toLocaleDateString('bg-BG')}
+                </p>
               )}
+              {subscription.cancel_at_period_end ? (
+                <p style={{ color: '#a66' }}>Абонаментът е зададен да спре в края на периода.</p>
+              ) : (
+                <button onClick={handleCancel} disabled={cancelling} style={{ color: 'red' }}>
+                  {cancelling ? 'Отменям...' : 'Отмени абонамент'}
+                </button>
+              )}
+              {message && <p>{message}</p>}
             </>
           ) : (
             <>

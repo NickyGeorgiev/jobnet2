@@ -157,10 +157,33 @@ export function MyCv() {
     setMoreCourses(moreCourses.filter((_, i) => i !== index))
   }
 
+  // Проверява задължителните полета и връща списък с липсващи (на български, за показване)
+  function validate() {
+    const missing = []
+    if (!formData.fname.trim()) missing.push('Име')
+    if (!formData.lname.trim()) missing.push('Фамилия')
+    if (!formData.phone.trim()) missing.push('Телефон')
+    if (!formData.current_city) missing.push('Настоящ град')
+    if (!formData.avatar_url) missing.push('Снимка на профила')
+    if (!formData.target_salary) missing.push('Желана заплата')
+    if (formData.target_sector.length === 0) missing.push('Желани сектори (поне 1)')
+    if (formData.target_cities.length === 0) missing.push('Желани градове (поне 1)')
+    if (formData.target_level.length === 0) missing.push('Ниво (поне 1)')
+    if (formData.target_duration.length === 0) missing.push('Заетост (поне 1)')
+    return missing
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
-    setSaving(true)
     setMessage('')
+
+    const missing = validate()
+    if (missing.length > 0) {
+      setMessage('Моля, попълнете задължителните полета: ' + missing.join(', '))
+      return
+    }
+
+    setSaving(true)
 
     const { error } = await supabase
       .from('candidates')
@@ -202,12 +225,13 @@ export function MyCv() {
   return (
     <div style={{ padding: '2rem', maxWidth: '600px' }}>
       <h2>Моето CV</h2>
+      <p style={{ color: '#888', fontSize: '0.9rem' }}>Полетата, отбелязани с * , са задължителни.</p>
 
       <form onSubmit={handleSubmit}>
         <h3>Основна информация</h3>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Снимка на профила</label><br />
+          <label>Снимка на профила *</label><br />
           {formData.avatar_url && (
             <img src={formData.avatar_url} alt="avatar"
               style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%', display: 'block', marginBottom: '0.5rem' }} />
@@ -217,14 +241,14 @@ export function MyCv() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Име</label>
-          <input name="fname" value={formData.fname} onChange={handleChange}
+          <label>Име *</label>
+          <input name="fname" value={formData.fname} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Фамилия</label>
-          <input name="lname" value={formData.lname} onChange={handleChange}
+          <label>Фамилия *</label>
+          <input name="lname" value={formData.lname} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
@@ -247,14 +271,14 @@ export function MyCv() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Телефон</label>
-          <input name="phone" value={formData.phone} onChange={handleChange}
+          <label>Телефон *</label>
+          <input name="phone" value={formData.phone} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Настоящ град</label>
-          <select name="current_city" value={formData.current_city} onChange={handleChange}
+          <label>Настоящ град *</label>
+          <select name="current_city" value={formData.current_city} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }}>
             <option value="">-- Избери град --</option>
             {allCities.map(city => <option key={city} value={city}>{city}</option>)}
@@ -329,27 +353,27 @@ export function MyCv() {
         <h3>Критерии за търсене на работа</h3>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Желана нетна заплата (лв)</label>
-          <input type="number" name="target_salary" value={formData.target_salary} onChange={handleChange}
+          <label>Желана нетна заплата (лв) *</label>
+          <input type="number" name="target_salary" value={formData.target_salary} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
         <CheckboxMultiSelect
-          label="Желани сектори"
+          label="Желани сектори *"
           options={sectors}
           selected={formData.target_sector}
           onChange={(values) => setFormData({ ...formData, target_sector: values })}
         />
 
         <CheckboxMultiSelect
-          label="Желани градове"
+          label="Желани градове *"
           options={allCities}
           selected={formData.target_cities}
           onChange={(values) => setFormData({ ...formData, target_cities: values })}
         />
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>На какво ниво искате да се реализирате?</label>
+          <label>На какво ниво искате да се реализирате? *</label>
           {LEVEL_OPTIONS.map((level) => (
             <div key={level}>
               <label>
@@ -365,7 +389,7 @@ export function MyCv() {
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Каква заетост предпочитате?</label>
+          <label>Каква заетост предпочитате? *</label>
           {DURATION_OPTIONS.map((duration) => (
             <div key={duration}>
               <label>
@@ -380,7 +404,11 @@ export function MyCv() {
           ))}
         </div>
 
-        {message && <p style={{ color: message.startsWith('Грешка') ? 'red' : 'green' }}>{message}</p>}
+        {message && (
+          <p style={{ color: message.startsWith('Грешка') || message.startsWith('Моля') ? 'red' : 'green' }}>
+            {message}
+          </p>
+        )}
 
         <button type="submit" disabled={saving}>
           {saving ? 'Записвам...' : 'Запази CV'}

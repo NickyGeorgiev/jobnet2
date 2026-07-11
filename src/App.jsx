@@ -11,6 +11,8 @@ import { PaymentSuccess } from './pages/PaymentSuccess'
 import { PaymentCancelled } from './pages/PaymentCancelled'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { ResetPassword } from './pages/ResetPassword'
 
 function App() {
   const { session, profile, loading } = useAuth()
@@ -72,6 +74,8 @@ function App() {
         <Route path="/company-profile" element={<CompanyProfile />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </div>
   )

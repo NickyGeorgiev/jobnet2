@@ -8,13 +8,17 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
 
 const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!
 
-// Тук ползваме service_role key (не anon key) — само тази функция,
-// живееща на сървъра, има право да пипа данни в заобикаляне на RLS,
-// защото трябва да обнови subscription статус на всеки потребител.
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 )
+
+// Безопасно взима "current_period_end" — понякога е на горно ниво,
+// понякога живее вътре в items.data[0] (зависи от Stripe API версията на payload-а)
+function getPeriodEnd(subscription) {
+  const raw = subscription.current_period_end ?? subscription.items?.data?.[0]?.current_period_end
+  return raw ? new Date(raw * 1000).toISOString() : null
+}
 
 Deno.serve(async (req) => {
   const signature = req.headers.get("Stripe-Signature")!
@@ -27,33 +31,24 @@ Deno.serve(async (req) => {
     return new Response(`Webhook грешка: ${err.message}`, { status: 400 })
   }
 
-  // Плащането е успешно завършено (първо плащане при нов абонамент)
+  const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
+  const companyPriceId = Deno.env.get("STRIPE_COMPANY_PRICE_ID")
+
   if (event.type === "checkout.session.completed") {
     const session = event.data.object
     const userId = session.client_reference_id
     const customerId = session.customer
     const subscriptionId = session.subscription
 
-    // Вземаме детайли за абонамента, за да разберем за какъв продукт става дума
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
     const priceId = subscription.items.data[0].price.id
 
-    const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
-    const companyPriceId = Deno.env.get("STRIPE_COMPANY_PRICE_ID")
-
-    console.log("DEBUG — получен priceId:", priceId)
-    console.log("DEBUG — goldPriceId от secrets:", goldPriceId)
-    console.log("DEBUG — companyPriceId от secrets:", companyPriceId)
-    console.log("DEBUG — userId:", userId)
-
     if (priceId === goldPriceId) {
-      // Candidate купува "gold" статус
       await supabaseAdmin
         .from("candidates")
         .update({ is_gold: true, stripe_customer_id: customerId })
         .eq("id", userId)
     } else if (priceId === companyPriceId) {
-      // Company купува план — записваме/обновяваме subscription запис
       const { error: upsertError } = await supabaseAdmin
         .from("subscriptions")
         .upsert({
@@ -62,7 +57,8 @@ Deno.serve(async (req) => {
           status: subscription.status,
           stripe_customer_id: customerId,
           stripe_subscription_id: subscriptionId,
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_end: getPeriodEnd(subscription),
+          cancel_at_period_end: false,
         }, { onConflict: "company_id" })
 
       if (upsertError) {
@@ -71,11 +67,26 @@ Deno.serve(async (req) => {
     }
   }
 
-  // Абонаментът е отменен/изтекъл
+  if (event.type === "customer.subscription.updated") {
+    const subscription = event.data.object
+
+    const { error: updateError } = await supabaseAdmin
+      .from("subscriptions")
+      .update({
+        status: subscription.status,
+        current_period_end: getPeriodEnd(subscription),
+        cancel_at_period_end: subscription.cancel_at_period_end,
+      })
+      .eq("stripe_subscription_id", subscription.id)
+
+    if (updateError) {
+      console.error("Грешка при update:", updateError.message)
+    }
+  }
+
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object
     const priceId = subscription.items.data[0].price.id
-    const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
 
     if (priceId === goldPriceId) {
       await supabaseAdmin
