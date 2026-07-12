@@ -5,6 +5,8 @@ import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
+import { CvPaper } from './CvPaper'
+import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
   'Ниво работници',
@@ -24,17 +26,13 @@ function toPgArrayLiteral(arr) {
   return `{${escaped.join(',')}}`
 }
 
-// Разбърква на случаен принцип (Fisher-Yates), но само редовете, които НЕ са gold —
-// gold кандидатите остават най-отгоре, само редът помежду им и на останалите се случайности всеки път.
 function shuffleNonGold(data) {
   const goldOnes = data.filter((c) => c.is_gold)
   const others = data.filter((c) => !c.is_gold)
-
   for (let i = others.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[others[i], others[j]] = [others[j], others[i]]
   }
-
   return [...goldOnes, ...others]
 }
 
@@ -49,6 +47,7 @@ export function CompanySearch() {
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [selectedCandidate, setSelectedCandidate] = useState(null)
 
   useEffect(() => {
     async function checkAccess() {
@@ -94,10 +93,8 @@ export function CompanySearch() {
       .from('candidates')
       .select('*')
       .eq('active', true)
+      .lte('target_salary', parseInt(offeredSalary))
 
-    if (offeredSalary) {
-      query = query.lte('target_salary', parseInt(offeredSalary))
-    }
     if (selectedSectors.length > 0) {
       query = query.filter('target_sector', 'ov', toPgArrayLiteral(selectedSectors))
     }
@@ -123,28 +120,92 @@ export function CompanySearch() {
     setLoading(false)
   }
 
-  // Все още проверяваме достъпа
+  function backToSearch() {
+    setResults(null)
+  }
+
   if (hasAccess === null) {
     return <div style={{ padding: '2rem' }}>Зареждане...</div>
   }
 
-  // Няма активен абонамент — не показваме формата изобщо
   if (!hasAccess) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '500px' }}>
-        <h2>Търсене на кандидати</h2>
-        <div style={{ border: '1px solid #f0ad4e', background: '#fff8e6', padding: '1.5rem', borderRadius: '8px' }}>
-          <h3>Нямате активен абонамент</h3>
-          <p>За да търсите кандидати, трябва да имате активен абонамент (30€/месец, с 14 дни безплатен пробен период).</p>
-          <Link to="/">Отиди към началния екран за абониране</Link>
+      <div className="search-shell" style={{ maxWidth: '500px' }}>
+        <h2 style={{ fontFamily: 'var(--font-display)' }}>Търсене на кандидати</h2>
+        <div className="status-card" style={{ borderColor: 'var(--color-gold)' }}>
+          <h3 className="status-title">Нямате активен абонамент</h3>
+          <p className="status-sub" style={{ marginBottom: '1rem' }}>
+            За да търсите кандидати, трябва да имате активен абонамент (30€/месец) или неизтекъл пробен период.
+          </p>
+          <Link to="/" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+            Към началния екран
+          </Link>
         </div>
       </div>
     )
   }
 
+  // --- Изгледът с резултати (grid визитки) ---
+  if (results !== null) {
+    return (
+      <div className="search-shell">
+        <div className="search-results-header">
+          <h2 className="search-results-count">
+            Намерени кандидати: <span>{results.length}</span>
+          </h2>
+          <button className="btn-secondary" onClick={backToSearch}>← Коригирай търсенето</button>
+        </div>
+
+        {results.length === 0 && (
+          <div className="no-results">
+            <p>Няма кандидати, отговарящи на тези критерии.</p>
+            <p>Опитайте с по-висока заплата или по-малко филтри.</p>
+          </div>
+        )}
+
+        <div className="candidate-grid">
+          {results.map((c) => {
+            const fullName = [c.fname, c.lname].filter(Boolean).join(' ') || 'Кандидат'
+            return (
+              <div key={c.id} className={`candidate-card ${c.is_gold ? 'candidate-card--gold' : ''}`}>
+                {c.is_gold && <span className="candidate-gold-ribbon">GOLD</span>}
+
+                {c.avatar_url ? (
+                  <img src={c.avatar_url} alt={fullName} className="candidate-card-avatar" />
+                ) : (
+                  <div className="candidate-card-avatar-placeholder">{fullName[0]?.toUpperCase() || '👤'}</div>
+                )}
+
+                <h3 className="candidate-card-name">{fullName}</h3>
+                {c.contact_email && <p className="candidate-card-detail">{c.contact_email}</p>}
+                {c.phone && <p className="candidate-card-detail">{c.phone}</p>}
+
+                <p className="candidate-card-salary">от {c.target_salary} лв</p>
+
+                <button className="candidate-card-btn" onClick={() => setSelectedCandidate(c)}>
+                  Виж подробности
+                </button>
+              </div>
+            )
+          })}
+        </div>
+
+        {selectedCandidate && (
+          <div className="cv-modal-backdrop" onClick={() => setSelectedCandidate(null)}>
+            <div className="cv-modal-inner" onClick={(e) => e.stopPropagation()}>
+              <button className="cv-modal-close" onClick={() => setSelectedCandidate(null)}>✕</button>
+              <CvPaper cv={selectedCandidate} />
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // --- Изгледът с формата за търсене ---
   return (
-    <div style={{ padding: '2rem', maxWidth: '700px' }}>
-      <h2>Търсене на кандидати</h2>
+    <div className="search-shell" style={{ maxWidth: '700px' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '1.5rem' }}>Търсене на кандидати</h2>
 
       <form onSubmit={handleSearch}>
         <div style={{ marginBottom: '1rem' }}>
@@ -189,7 +250,7 @@ export function CompanySearch() {
           ))}
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
+        <div style={{ marginBottom: '1.5rem' }}>
           <label>Заетост</label>
           {DURATION_OPTIONS.map((duration) => (
             <div key={duration}>
@@ -205,38 +266,12 @@ export function CompanySearch() {
           ))}
         </div>
 
-        <button type="submit" disabled={loading}>
+        {error && <p style={{ color: 'var(--color-danger)' }}>{error}</p>}
+
+        <button type="submit" className="btn-primary" disabled={loading}>
           {loading ? 'Търся...' : 'Търси'}
         </button>
       </form>
-
-      {error && <p style={{ color: 'red' }}>Грешка: {error}</p>}
-
-      {results !== null && (
-        <div style={{ marginTop: '2rem' }}>
-          <h3>Намерени кандидати: {results.length}</h3>
-
-          {results.length === 0 && (
-            <p>Няма кандидати, отговарящи на тези критерии. Опитайте с по-висока заплата или по-малко филтри.</p>
-          )}
-
-          {results.map((c) => (
-            <div key={c.id} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', borderRadius: '4px' }}>
-              {c.is_gold && <span style={{ background: 'gold', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem' }}>ЗЛАТЕН</span>}
-              {c.avatar_url && (
-                <img src={c.avatar_url} alt="avatar"
-                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '50%', float: 'right' }} />
-              )}
-              <h4>{c.fname} {c.lname}</h4>
-              <p>Град: {c.current_city}</p>
-              <p>Желана заплата: {c.target_salary} лв</p>
-              <p>Сектори: {(c.target_sector || []).join(', ')}</p>
-              <p>Градове: {(c.target_cities || []).join(', ')}</p>
-              <p>{c.description}</p>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

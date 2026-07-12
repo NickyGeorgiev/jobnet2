@@ -1,0 +1,74 @@
+:root {
+  /* ===== Основни фонове и повърхности ===== */
+  --color-bg: #10161d;              /* Фон на цялата страница (body) */
+  --color-surface: #1a232d;         /* Фон на карти/панели (status-card, action-tile, candidate-card) */
+  --color-surface-raised: #212c38;  /* По-светла повърхност — вложени елементи (плейсхолдър лого/аватар, tag фон) */
+  --color-border: #2c3946;          /* Всички рамки/разделители (карти, полета, hr линии) */
+
+  /* ===== Текст ===== */
+  --color-text: #eef1f4;            /* Основен текст (заглавия, важно съдържание) */
+  --color-text-muted: #93a1ae;      /* Второстепенен текст (описания, labels, дати) */
+
+  /* ===== Акцентни цветове ===== */
+  --color-gold: #d4a24c;            /* Gold статус/абонамент — рамки, badge-ове, бутон "Gold" */
+  --color-gold-soft: rgba(212, 162, 76, 0.15);  /* Полупрозрачен златен фон зад badge/tag за заплата */
+  --color-teal: #4fb8ae;            /* Company/бизнес акцент — линкове, action-tile hover, бутон "Виж подробности" */
+  --color-teal-soft: rgba(79, 184, 174, 0.15);  /* Полупрозрачен тюркоазен фон зад иконки/tag-ове */
+  --color-danger: #e2725b;          /* Грешки, "Отмени абонамент" бутон, статус "изтекъл" пръстен */
+  --color-success: #6fcf97;         /* Успешни съобщения, badge "Активен абонамент" */
+
+  /* ===== Шрифтове ===== */
+  --font-display: 'Sora', sans-serif;      /* Заглавия (h1/h2, dashboard-title, cv-name) */
+  --font-body: 'Inter', sans-serif;        /* Основен текст навсякъде (по подразбиране на body) */
+  --font-mono: 'IBM Plex Mono', monospace; /* Числа/данни — заплата, дни оставащи, eyebrow надписи */
+
+  /* ===== Радиуси на заобляне ===== */
+  --radius-lg: 20px;   /* Големи карти/панели (status-card, cv-paper, company-details) */
+  --radius-md: 12px;   /* Средни елементи (action-tile, avatar placeholder, лого) */
+  --radius-sm: 8px;    /* Малки елементи (бутони, инпути, badge вътрешни ъгли) */
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+button {
+  font-family: var(--font-body);
+}
+
+.btn-primary {
+  background: var(--color-gold);
+  color: #201608;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+}
+.btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.btn-primary--teal {
+  background: var(--color-teal);
+  color: #06211f;
+}
+
+.btn-text-danger {
+  background: none;
+  border: none;
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}

@@ -44,7 +44,7 @@ export function Register() {
 
     // Стъпка 3: ако е кандидат, създаваме празен candidates ред
     if (role === 'candidate') {
-      await supabase.from('candidates').insert({ id: userId })
+      await supabase.from('candidates').insert({ id: userId, contact_email: email })
     } else {
       await supabase.from('companies').insert({ id: userId, company_name: '' })
     }

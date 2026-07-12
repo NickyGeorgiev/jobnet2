@@ -46,7 +46,7 @@ export function MyCv() {
   const [formData, setFormData] = useState({
     fname: '', lname: '', phone: '', birth_date: '', gender: '',
     current_city: '', description: '', skills: '', computer_skills: '',
-    driver_license: '', target_salary: '', target_sector: [], target_cities: [],
+    driver_license: '', contact_email: '', target_salary: '', target_sector: [], target_cities: [],
     target_level: [], target_duration: [], avatar_url: '',
   })
   const [workExperience, setWorkExperience] = useState([])
@@ -78,6 +78,7 @@ export function MyCv() {
           skills: data.skills || '',
           computer_skills: data.computer_skills || '',
           driver_license: data.driver_license || '',
+          contact_email: data.contact_email || '',
           target_salary: data.target_salary || '',
           target_sector: data.target_sector || [],
           target_cities: data.target_cities || [],
@@ -198,6 +199,7 @@ export function MyCv() {
         skills: formData.skills,
         computer_skills: formData.computer_skills,
         driver_license: formData.driver_license,
+        contact_email: formData.contact_email,
         avatar_url: formData.avatar_url,
         target_salary: formData.target_salary ? parseInt(formData.target_salary) : null,
         target_sector: formData.target_sector,
@@ -268,6 +270,12 @@ export function MyCv() {
             <input type="radio" name="gender" value="Жена"
               checked={formData.gender === 'Жена'} onChange={handleChange} /> Жена
           </label>
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Имейл за връзка</label>
+          <input type="email" name="contact_email" value={formData.contact_email} onChange={handleChange}
+            style={{ width: '100%', padding: '0.5rem' }} />
         </div>
 
         <div style={{ marginBottom: '1rem' }}>

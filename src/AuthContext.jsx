@@ -45,8 +45,10 @@ export function AuthProvider({ children }) {
   // презареждане на профила веднага след като знаят, че редът вече съществува —
   // вместо да чакат следващо auth събитие да го "хване" случайно.
   async function refreshProfile() {
-    if (session) {
-      await loadProfile(session.user.id)
+    const { data: { session: currentSession } } = await supabase.auth.getSession()
+    if (currentSession) {
+      setSession(currentSession)
+      await loadProfile(currentSession.user.id)
     }
   }
 

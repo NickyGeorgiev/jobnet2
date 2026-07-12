@@ -1,0 +1,231 @@
+.dashboard-grid-candidate {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .dashboard-grid-candidate { grid-template-columns: 1fr; }
+}
+
+/* --- CV "paper" preview --- */
+
+.cv-paper {
+  background: #f7f3ea;
+  color: #2a2a28;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 600px) {
+  .cv-paper { grid-template-columns: 1fr; }
+}
+
+.cv-sidebar {
+  background: #1b2430;
+  color: #e4e7eb;
+  padding: 2rem 1.5rem;
+}
+
+.cv-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-bottom: 1.5rem;
+}
+
+.cv-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-md);
+  background: rgba(212, 162, 76, 0.15);
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-sidebar-section {
+  margin-bottom: 1.5rem;
+}
+
+.cv-sidebar-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-gold);
+  border-bottom: 1px solid rgba(212, 162, 76, 0.3);
+  padding-bottom: 0.4rem;
+  margin: 0 0 0.7rem;
+}
+
+.cv-sidebar-item {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+  color: #c7cdd4;
+}
+
+.cv-sidebar-item strong {
+  display: block;
+  color: #f0f2f4;
+  font-weight: 500;
+}
+
+.cv-sidebar-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: #c7cdd4;
+  line-height: 1.7;
+}
+
+.cv-main {
+  padding: 2.2rem 2.4rem;
+}
+
+.cv-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  margin: 0 0 0.75rem;
+  color: #1c1c1a;
+}
+
+.cv-bio {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #4a463f;
+  margin: 0 0 2rem;
+}
+
+.cv-section-heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1c1c1a;
+  margin: 0 0 1rem;
+}
+
+.cv-timeline {
+  position: relative;
+  padding-left: 1.3rem;
+  border-left: 2px solid #e3ddcc;
+  margin-bottom: 2rem;
+}
+
+.cv-timeline-entry {
+  position: relative;
+  margin-bottom: 1.4rem;
+}
+
+.cv-timeline-entry:last-child { margin-bottom: 0; }
+
+.cv-timeline-entry::before {
+  content: '';
+  position: absolute;
+  left: -1.62rem;
+  top: 0.3rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-gold);
+}
+
+.cv-timeline-date {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #8a8474;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.cv-timeline-role {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1c1c1a;
+  margin: 0.2rem 0;
+}
+
+.cv-timeline-company {
+  font-size: 0.85rem;
+  color: #5a5648;
+  margin: 0 0 0.4rem;
+}
+
+.cv-timeline-desc {
+  font-size: 0.85rem;
+  color: #4a463f;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.cv-empty-note {
+  font-size: 0.85rem;
+  color: #8a8474;
+  font-style: italic;
+}
+
+/* --- Match criteria strip (not part of "paper", app UI) --- */
+
+.match-strip {
+  margin-top: 1.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+}
+
+.match-strip-heading {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+.match-group {
+  margin-bottom: 1.1rem;
+}
+.match-group:last-child { margin-bottom: 0; }
+
+.match-group-label {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem;
+}
+
+.tag--salary {
+  background: var(--color-gold-soft);
+  color: var(--color-gold);
+  border-color: rgba(212, 162, 76, 0.35);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
