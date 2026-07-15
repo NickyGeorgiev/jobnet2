@@ -361,7 +361,7 @@ export function MyCv() {
         <h3>Критерии за търсене на работа</h3>
 
         <div style={{ marginBottom: '1rem' }}>
-          <label>Желана нетна заплата (лв) *</label>
+          <label>Желана нетна заплата (€) *</label>
           <input type="number" name="target_salary" value={formData.target_salary} onChange={handleChange} required
             style={{ width: '100%', padding: '0.5rem' }} />
         </div>

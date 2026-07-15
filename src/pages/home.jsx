@@ -12,13 +12,13 @@ function HeroArt() {
       <rect x="60" y="106" width="100" height="8" rx="4" fill="var(--color-surface-raised)" />
       <rect x="60" y="122" width="60" height="8" rx="4" fill="var(--color-surface-raised)" />
 
-      <rect x="130" y="60" width="150" height="190" rx="16" fill="var(--color-surface-raised)" stroke="var(--color-gold)" strokeWidth="1.5" />
-      <circle cx="165" cy="100" r="18" fill="var(--color-gold-soft)" stroke="var(--color-gold)" strokeWidth="1.5" />
-      <path d="M158 100l5 5 10-11" stroke="var(--color-gold)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="130" y="60" width="150" height="190" rx="16" fill="var(--color-surface-raised)" stroke="var(--color-gold-soft)" strokeWidth="1.5" />
+      <circle cx="165" cy="100" r="18" fill="var(--color-gold-soft)" stroke="var(--color-gold-soft)" strokeWidth="1.5" />
+      <path d="M158 100l5 5 10-11" stroke="var(--color-text-muted)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       <rect x="150" y="135" width="110" height="8" rx="4" fill="rgba(212,162,76,0.25)" />
       <rect x="150" y="151" width="80" height="8" rx="4" fill="var(--color-border)" />
       <rect x="150" y="175" width="110" height="34" rx="8" fill="var(--color-gold-soft)" />
-      <text x="205" y="196" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="var(--color-gold)">match</text>
+      <text x="205" y="196" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="var(--color-text-muted)">MATCH</text>
     </svg>
   )
 }
@@ -38,10 +38,10 @@ export function Home() {
     <div>
       <section className="hero">
         <div>
-          <p className="hero-eyebrow">Обратна платформа за работа</p>
-          <h1 className="hero-title">Кандидатите казват <span>каква заплата</span> търсят.</h1>
+          <p className="hero-eyebrow">Платформа, в която работодателите намират служители</p>
+          <h1 className="hero-title">Кандидатите казват <span>каква заплата</span> искат</h1>
           <p className="hero-sub">
-            Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако плащат това, което искаш.
+            Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако изискванията ви съвпадат.
           </p>
           <div className="hero-ctas">
             <Link to="/register?role=candidate" className="btn-primary" style={{ textDecoration: 'none' }}>Регистрирай се като кандидат</Link>
@@ -54,7 +54,7 @@ export function Home() {
       </section>
 
       <section className="partners-section">
-        <p className="partners-heading">Доверени партньори</p>
+        <p className="partners-heading">Нашите доверени партньори</p>
 
         {logos.length === 0 && (
           <p className="partners-empty">Скоро тук ще виждате фирмите, които вече ползват Jobnet.</p>

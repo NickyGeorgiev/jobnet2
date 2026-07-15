@@ -180,7 +180,7 @@ export function CompanySearch() {
                 {c.contact_email && <p className="candidate-card-detail">{c.contact_email}</p>}
                 {c.phone && <p className="candidate-card-detail">{c.phone}</p>}
 
-                <p className="candidate-card-salary">от {c.target_salary} лв</p>
+                <p className="candidate-card-salary">от {c.target_salary} €</p>
 
                 <button className="candidate-card-btn" onClick={() => setSelectedCandidate(c)}>
                   Виж подробности
@@ -217,21 +217,21 @@ export function CompanySearch() {
           </div>
 
           <CheckboxMultiSelect
-            label="Сектор"
+            label="В кой сектор/и търсите служител?"
             options={sectors}
             selected={selectedSectors}
             onChange={setSelectedSectors}
           />
 
           <CheckboxMultiSelect
-            label="Град"
+            label="За кой град/ове търсите служител?"
             options={allCities}
             selected={selectedCities}
             onChange={setSelectedCities}
           />
 
           <div className="checkbox-group">
-            <label className="checkbox-group-label">Ниво</label>
+            <label className="checkbox-group-label">За какво ниво/а в йерархията търсите служител?</label>
             {LEVEL_OPTIONS.map((level) => (
               <label key={level} className="checkbox-item">
                 <input
@@ -245,7 +245,7 @@ export function CompanySearch() {
           </div>
 
           <div className="checkbox-group">
-            <label className="checkbox-group-label">Заетост</label>
+            <label className="checkbox-group-label">За какъв вид заетост търсите служител?</label>
             {DURATION_OPTIONS.map((duration) => (
               <label key={duration} className="checkbox-item">
                 <input
@@ -261,7 +261,7 @@ export function CompanySearch() {
           {error && <p style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</p>}
 
           <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Търся...' : 'Търси'}
+            {loading ? 'Търся...' : 'Търси съвпадения'}
           </button>
         </form>
       </div>

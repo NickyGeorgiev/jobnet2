@@ -73,12 +73,12 @@ export function CandidateDashboard() {
 
       {!isCvComplete && (
         <div className="status-card" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-gold)' }}>
-          <p className="status-title" style={{ marginBottom: '0.4rem' }}>CV-то ти не е напълно попълнено</p>
+          <p className="status-title" style={{ marginBottom: '0.4rem' }}>CV-то ти не е попълнено</p>
           <p className="status-sub" style={{ marginBottom: '1rem' }}>
             Липсват задължителни данни (снимка, заплата, сектори или градове) — фирмите няма да те виждат в търсенето, докато не ги допълниш.
           </p>
           <Link to="/my-cv" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-            Довърши CV-то
+            Направи си CV-то
           </Link>
         </div>
       )}
