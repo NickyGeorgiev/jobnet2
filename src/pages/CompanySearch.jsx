@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
-import { CvPaper } from './CvPaper'
+import { CvModal } from './CvModal'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -191,12 +191,7 @@ export function CompanySearch() {
         </div>
 
         {selectedCandidate && (
-          <div className="cv-modal-backdrop" onClick={() => setSelectedCandidate(null)}>
-            <div className="cv-modal-inner" onClick={(e) => e.stopPropagation()}>
-              <button className="cv-modal-close" onClick={() => setSelectedCandidate(null)}>✕</button>
-              <CvPaper cv={selectedCandidate} />
-            </div>
-          </div>
+          <CvModal cv={selectedCandidate} onClose={() => setSelectedCandidate(null)} showDownload={false} />
         )}
       </div>
     )

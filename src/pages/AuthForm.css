@@ -1,0 +1,84 @@
+.auth-shell {
+  max-width: 420px;
+  margin: 3.5rem auto;
+  padding: 0 1.5rem;
+}
+
+.auth-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.7rem;
+  margin: 0 0 1.75rem;
+}
+
+.auth-field {
+  margin-bottom: 1.1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--color-teal);
+}
+
+.auth-role-picker {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-role-option {
+  flex: 1;
+  padding: 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.88rem;
+  transition: border-color 0.15s;
+}
+
+.auth-role-option:hover { border-color: var(--color-teal); }
+
+.auth-role-option--active {
+  border-color: var(--color-gold);
+  background: var(--color-gold-soft);
+  color: var(--color-gold);
+}
+
+.auth-role-option input { display: none; }
+
+.auth-error {
+  color: var(--color-danger);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.auth-footer-link {
+  margin-top: 1.25rem;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.auth-footer-link a {
+  color: var(--color-teal);
+  text-decoration: none;
+}

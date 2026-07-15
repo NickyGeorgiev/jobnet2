@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
+import './AuthForm.css'
 
 export function Register() {
   const { refreshProfile } = useAuth()
   const navigate = useNavigate()
-  const [role, setRole] = useState('candidate')
+  const [searchParams] = useSearchParams()
+  const initialRole = searchParams.get('role') === 'company' ? 'company' : 'candidate'
+  const [role, setRole] = useState(initialRole)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -17,11 +20,7 @@ export function Register() {
     setError('')
     setLoading(true)
 
-    // Стъпка 1: създаваме auth потребител в Supabase
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
 
     if (authError) {
       setError(authError.message)
@@ -31,7 +30,6 @@ export function Register() {
 
     const userId = authData.user.id
 
-    // Стъпка 2: създаваме ред в profiles с избраната роля
     const { error: profileError } = await supabase
       .from('profiles')
       .insert({ id: userId, role: role })
@@ -42,77 +40,53 @@ export function Register() {
       return
     }
 
-    // Стъпка 3: ако е кандидат, създаваме празен candidates ред
     if (role === 'candidate') {
       await supabase.from('candidates').insert({ id: userId, contact_email: email })
     } else {
       await supabase.from('companies').insert({ id: userId, company_name: '' })
     }
 
-    // Гарантираме, че AuthContext знае за новосъздадения профил
-    // ПРЕДИ да пренасочим — иначе навигацията за момент показва грешна/празна роля
     await refreshProfile()
-
     setLoading(false)
     navigate('/')
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px' }}>
-      <h2>Регистрация</h2>
+    <div className="auth-shell">
+      <h2 className="auth-title">Регистрация</h2>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>
-            <input
-              type="radio"
-              value="candidate"
-              checked={role === 'candidate'}
-              onChange={(e) => setRole(e.target.value)}
-            />
-            Аз съм кандидат
+        <div className="auth-role-picker">
+          <label className={`auth-role-option ${role === 'candidate' ? 'auth-role-option--active' : ''}`}>
+            <input type="radio" value="candidate" checked={role === 'candidate'} onChange={(e) => setRole(e.target.value)} />
+            👤 Кандидат
           </label>
-          <br />
-          <label>
-            <input
-              type="radio"
-              value="company"
-              checked={role === 'company'}
-              onChange={(e) => setRole(e.target.value)}
-            />
-            Аз съм фирма
+          <label className={`auth-role-option ${role === 'company' ? 'auth-role-option--active' : ''}`}>
+            <input type="radio" value="company" checked={role === 'company'} onChange={(e) => setRole(e.target.value)} />
+            🏢 Фирма
           </label>
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Имейл</label>
+          <input type="email" className="auth-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="password"
-            placeholder="Парола"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Парола</label>
+          <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
           {loading ? 'Регистрирам...' : 'Регистрирай се'}
         </button>
       </form>
+
+      <p className="auth-footer-link">
+        Вече имаш акаунт? <Link to="/login">Влез</Link>
+      </p>
     </div>
   )
 }

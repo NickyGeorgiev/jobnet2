@@ -1,37 +1,115 @@
-.home {
-    min-height: 100vh;
-}
-
 .hero {
-    text-align: center;
-
-    padding: 120px 0;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3.5rem;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 2.5rem;
+  align-items: center;
 }
 
-.hero h1 {
-    font-size: 3.4rem;
-    font-weight: 700;
-    line-height: 1.2;
-
-    margin-bottom: 20px;
-
-    color: var(--secondary);
+@media (max-width: 800px) {
+  .hero { grid-template-columns: 1fr; padding-top: 3rem; }
 }
 
-.hero p {
-    font-size: 1.25rem;
-
-    color: var(--text-light);
-
-    margin-bottom: 40px;
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: var(--color-teal);
+  margin: 0 0 1rem;
 }
 
-.hero-buttons {
-    display: flex;
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.6rem;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+}
 
-    justify-content: center;
+.hero-title span { color: var(--color-gold); }
 
-    gap: 20px;
+.hero-sub {
+  color: var(--color-text-muted);
+  font-size: 1.02rem;
+  line-height: 1.65;
+  margin: 0 0 2rem;
+  max-width: 480px;
+}
 
-    flex-wrap: wrap;
+.hero-ctas {
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.hero-art {
+  display: flex;
+  justify-content: center;
+}
+
+/* --- Partner logos carousel --- */
+
+.partners-section {
+  max-width: 1100px;
+  margin: 2rem auto 4rem;
+  padding: 0 1.5rem;
+  text-align: center;
+}
+
+.partners-heading {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: 0 0 1.75rem;
+}
+
+.carousel-track-wrap {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+.carousel-track {
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+  width: max-content;
+  animation: carousel-scroll 28s linear infinite;
+}
+
+.carousel-track:hover { animation-play-state: paused; }
+
+@keyframes carousel-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.carousel-logo {
+  height: 42px;
+  max-width: 140px;
+  object-fit: contain;
+  opacity: 0.75;
+  filter: grayscale(1);
+  transition: opacity 0.2s, filter 0.2s;
+}
+
+.carousel-logo:hover {
+  opacity: 1;
+  filter: grayscale(0);
+}
+
+.partners-empty {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+.carousel-static {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3rem;
 }

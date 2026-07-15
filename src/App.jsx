@@ -13,10 +13,30 @@ import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { ResetPassword } from './pages/ResetPassword'
+import { Footer } from './pages/Footer'
+import { AboutUs } from './pages/AboutUs'
+import { ContactUs } from './pages/ContactUs'
+import { TermsOfService } from './pages/TermsOfService'
+import { PrivacyPolicy } from './pages/PrivacyPolicy'
+import { useState } from 'react'
+import { CvModal } from './pages/CvModal'
+import './App.css'
 
 function App() {
   const { session, profile, loading } = useAuth()
   const navigate = useNavigate()
+  const [showMyCv, setShowMyCv] = useState(false)
+  const [myCvData, setMyCvData] = useState(null)
+
+  async function handleViewMyCv() {
+    const { data } = await supabase
+      .from('candidates')
+      .select('*')
+      .eq('id', session.user.id)
+      .single()
+    setMyCvData(data)
+    setShowMyCv(true)
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -34,35 +54,46 @@ function App() {
 
   return (
     <div>
-      <nav style={{ padding: '1rem', borderBottom: '1px solid #ccc' }}>
-        <Link to="/" style={{ marginRight: '1rem' }}>Начало</Link>
+      <nav className="navbar">
+        <div className="navbar-links">
+          <Link to="/" className="navbar-brand">Начало</Link>
+          <Link to="/about">За нас</Link>
+          <Link to="/contact">Контакти</Link>
 
-        {!session && (
-          <>
-            <Link to="/register" style={{ marginRight: '1rem' }}>Регистрация</Link>
-            <Link to="/login">Вход</Link>
-          </>
-        )}
+          {session && profile?.role === 'candidate' && (
+            <>
+              <Link to="/my-cv">Моето CV</Link>
+              <button onClick={handleViewMyCv} className="btn-logout" style={{ borderColor: 'var(--color-teal)', color: 'var(--color-teal)' }}>
+                Виж CV
+              </button>
+            </>
+          )}
 
-        {session && profile?.role === 'candidate' && (
-          <Link to="/my-cv" style={{ marginRight: '1rem' }}>Моето CV</Link>
-        )}
+          {session && profile?.role === 'company' && (
+            <>
+              <Link to="/company-profile">Редактирай профила</Link>
+              <Link to="/search">Търсене на кандидати</Link>
+            </>
+          )}
+        </div>
 
-        {session && profile?.role === 'company' && (
-          <>
-            <Link to="/company-profile" style={{ marginRight: '1rem' }}>Профил на фирмата</Link>
-            <Link to="/search" style={{ marginRight: '1rem' }}>Търсене на кандидати</Link>
-          </>
-        )}
+        <div className="navbar-right">
+          {!session && (
+            <>
+              <Link to="/login">Вход</Link>
+              <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+                Регистрация
+              </Link>
+            </>
+          )}
 
-        {session && (
-          <>
-            <span style={{ marginRight: '1rem' }}>
-              Влязъл като: {session.user.email} ({profile?.role})
-            </span>
-            <button onClick={handleLogout}>Изход</button>
-          </>
-        )}
+          {session && (
+            <>
+              <span className="navbar-user">{session.user.email}</span>
+              <button onClick={handleLogout} className="btn-logout">Изход</button>
+            </>
+          )}
+        </div>
       </nav>
 
       <Routes>
@@ -76,7 +107,15 @@ function App() {
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
+      <Footer />
+      {showMyCv && myCvData && (
+        <CvModal cv={myCvData} onClose={() => setShowMyCv(false)} showDownload={true} />
+      )}
     </div>
   )
 }

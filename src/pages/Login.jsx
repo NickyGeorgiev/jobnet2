@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { Link } from 'react-router-dom'
+import './AuthForm.css'
 
 export function Login() {
   const navigate = useNavigate()
@@ -15,10 +15,7 @@ export function Login() {
     setError('')
     setLoading(true)
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (loginError) {
       setError(loginError.message)
@@ -31,41 +28,32 @@ export function Login() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px' }}>
-      <h2>Вход</h2>
+    <div className="auth-shell">
+      <h2 className="auth-title">Вход</h2>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Имейл</label>
+          <input type="email" className="auth-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="password"
-            placeholder="Парола"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Парола</label>
+          <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
           {loading ? 'Влизам...' : 'Влез'}
         </button>
       </form>
 
-      <p style={{ marginTop: '1rem' }}>
+      <p className="auth-footer-link">
         <Link to="/forgot-password">Забравена парола?</Link>
+      </p>
+      <p className="auth-footer-link">
+        Нямаш акаунт? <Link to="/register">Регистрирай се</Link>
       </p>
     </div>
   )
