@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export function CheckoutButton({ priceId, trialDays, label }) {
+export function CheckoutButton({ priceId, label }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -11,7 +11,7 @@ export function CheckoutButton({ priceId, trialDays, label }) {
 
     const { data, error: invokeError } = await supabase.functions.invoke(
       'create-checkout-session',
-      { body: { priceId, trialDays } }
+      { body: { priceId } }
     )
 
     if (invokeError) {
@@ -20,16 +20,15 @@ export function CheckoutButton({ priceId, trialDays, label }) {
       return
     }
 
-    // Пренасочваме към Stripe Checkout страницата
     window.location.href = data.url
   }
 
   return (
     <div>
-      <button onClick={handleClick} disabled={loading}>
+      <button onClick={handleClick} disabled={loading} className="btn-primary">
         {loading ? 'Зареждам...' : label}
       </button>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: 'var(--color-danger)', fontSize: '0.85rem', marginTop: '0.5rem' }}>{error}</p>}
     </div>
   )
 }

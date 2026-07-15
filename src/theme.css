@@ -123,3 +123,54 @@ button {
   }
   .cv-modal-actions { display: none !important; }
 }
+
+/* --- Общи form елементи (преизползваеми навсякъде) --- */
+
+.field { margin-bottom: 1.1rem; }
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.input, select.input, textarea.input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-teal);
+}
+
+.checkbox-group { margin-bottom: 1.25rem; }
+
+.checkbox-group-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+.checkbox-item input {
+  accent-color: var(--color-teal);
+  width: 16px;
+  height: 16px;
+}

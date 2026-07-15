@@ -31,7 +31,7 @@ function shuffleNonGold(data) {
   const others = data.filter((c) => !c.is_gold)
   for (let i = others.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[others[i], others[j]] = [others[j], others[i]]
+      ;[others[i], others[j]] = [others[j], others[i]]
   }
   return [...goldOnes, ...others]
 }
@@ -159,7 +159,7 @@ export function CompanySearch() {
         {results.length === 0 && (
           <div className="no-results">
             <p>Няма кандидати, отговарящи на тези критерии.</p>
-            <p>Опитайте с по-висока заплата или по-малко филтри.</p>
+            <p>Опитайте с по-висока заплата или други филтри.</p>
           </div>
         )}
 
@@ -202,71 +202,69 @@ export function CompanySearch() {
     <div className="search-shell" style={{ maxWidth: '700px' }}>
       <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '1.5rem' }}>Търсене на кандидати</h2>
 
-      <form onSubmit={handleSearch}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Предлагана нетна заплата (лв) *</label>
-          <input
-            type="number"
-            value={offeredSalary}
-            onChange={(e) => setOfferedSalary(e.target.value)}
-            placeholder="напр. 2000"
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
+      <div className="search-form-card">
+        <form onSubmit={handleSearch}>
+          <div className="field">
+            <label>Предлагана нетна заплата (€) *</label>
+            <input
+              type="number"
+              className="input"
+              value={offeredSalary}
+              onChange={(e) => setOfferedSalary(e.target.value)}
+              placeholder="напр. 2000"
+              required
+            />
+          </div>
+
+          <CheckboxMultiSelect
+            label="Сектор"
+            options={sectors}
+            selected={selectedSectors}
+            onChange={setSelectedSectors}
           />
-        </div>
 
-        <CheckboxMultiSelect
-          label="Сектор"
-          options={sectors}
-          selected={selectedSectors}
-          onChange={setSelectedSectors}
-        />
+          <CheckboxMultiSelect
+            label="Град"
+            options={allCities}
+            selected={selectedCities}
+            onChange={setSelectedCities}
+          />
 
-        <CheckboxMultiSelect
-          label="Град"
-          options={allCities}
-          selected={selectedCities}
-          onChange={setSelectedCities}
-        />
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Ниво</label>
-          {LEVEL_OPTIONS.map((level) => (
-            <div key={level}>
-              <label>
+          <div className="checkbox-group">
+            <label className="checkbox-group-label">Ниво</label>
+            {LEVEL_OPTIONS.map((level) => (
+              <label key={level} className="checkbox-item">
                 <input
                   type="checkbox"
                   checked={selectedLevels.includes(level)}
                   onChange={(e) => handleCheckboxGroup(setSelectedLevels, selectedLevels, level, e.target.checked)}
                 />
-                {' '}{level}
+                {level}
               </label>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div style={{ marginBottom: '1.5rem' }}>
-          <label>Заетост</label>
-          {DURATION_OPTIONS.map((duration) => (
-            <div key={duration}>
-              <label>
+          <div className="checkbox-group">
+            <label className="checkbox-group-label">Заетост</label>
+            {DURATION_OPTIONS.map((duration) => (
+              <label key={duration} className="checkbox-item">
                 <input
                   type="checkbox"
                   checked={selectedDurations.includes(duration)}
                   onChange={(e) => handleCheckboxGroup(setSelectedDurations, selectedDurations, duration, e.target.checked)}
                 />
-                {' '}{duration}
+                {duration}
               </label>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        {error && <p style={{ color: 'var(--color-danger)' }}>{error}</p>}
+          {error && <p style={{ color: 'var(--color-danger)', marginBottom: '1rem' }}>{error}</p>}
 
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? 'Търся...' : 'Търси'}
-        </button>
-      </form>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Търся...' : 'Търси'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
