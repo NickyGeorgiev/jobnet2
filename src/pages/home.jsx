@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
+import bannerImg from '../assets/background.jpg'
 import './Home.css'
 
 function HeroArt() {
@@ -36,6 +37,16 @@ export function Home() {
 
   return (
     <div>
+      <div className="hero-banner">
+        <img src={bannerImg} alt="Jobnet" />
+        <div className="hero-banner-overlay">
+          <div className="hero-banner-text">
+            <p className="hero-banner-eyebrow">Jobnet</p>
+            <h2 className="hero-banner-title">Работата те намира, не обратното.</h2>
+          </div>
+        </div>
+      </div>
+
       <section className="hero">
         <div>
           <p className="hero-eyebrow">Платформа, в която работодателите намират служители</p>

@@ -1,0 +1,158 @@
+.cv-form-shell {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.cv-form-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.7rem;
+  margin: 0 0 0.4rem;
+}
+
+.cv-form-hint {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin: 0 0 2rem;
+}
+
+.cv-form-section {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-form-section-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0 0 1.25rem;
+}
+
+.cv-avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.cv-avatar-preview-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.file-input-wrap input[type="file"] {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.gender-row {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.gender-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.gender-option input { accent-color: var(--color-teal); width: 16px; height: 16px; }
+
+/* --- Динамични записи (работен опит / образование / езици) --- */
+
+.cv-entry-card {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.cv-entry-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.cv-entry-row > div { flex: 1; }
+
+.cv-entry-remove {
+  color: var(--color-danger);
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.4rem;
+}
+
+.cv-add-btn {
+  background: var(--color-teal-soft);
+  color: var(--color-teal);
+  border: 1px solid transparent;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+.cv-add-btn:hover { border-color: var(--color-teal); }
+
+.cv-current-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  margin-bottom: 0.9rem;
+  cursor: pointer;
+}
+.cv-current-checkbox input { accent-color: var(--color-teal); width: 16px; height: 16px; }
+
+.cv-course-row {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.cv-course-row .input { flex: 1; }
+
+.cv-language-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.cv-language-row .input:first-child { flex: 1; }
+.cv-language-row select.input { width: 140px; }
+
+.cv-form-message {
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  margin-bottom: 1rem;
+}
+.cv-form-message--error { background: rgba(226, 114, 91, 0.12); color: var(--color-danger); }
+.cv-form-message--success { background: rgba(111, 207, 151, 0.12); color: var(--color-success); }

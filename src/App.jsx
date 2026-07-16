@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { Register } from './pages/Register'
@@ -7,10 +8,9 @@ import { CompanySearch } from './pages/CompanySearch'
 import { CompanyProfile } from './pages/CompanyProfile'
 import { CandidateDashboard } from './pages/CandidateDashboard'
 import { CompanyDashboard } from './pages/CompanyDashboard'
+import { AdminDashboard } from './pages/AdminDashboard'
 import { PaymentSuccess } from './pages/PaymentSuccess'
 import { PaymentCancelled } from './pages/PaymentCancelled'
-import { useAuth } from './AuthContext'
-import { supabase } from './supabaseClient'
 import { ForgotPassword } from './pages/ForgotPassword'
 import { ResetPassword } from './pages/ResetPassword'
 import { Footer } from './pages/Footer'
@@ -18,8 +18,10 @@ import { AboutUs } from './pages/AboutUs'
 import { ContactUs } from './pages/ContactUs'
 import { TermsOfService } from './pages/TermsOfService'
 import { PrivacyPolicy } from './pages/PrivacyPolicy'
-import { useState } from 'react'
 import { CvModal } from './pages/CvModal'
+import { useAuth } from './AuthContext'
+import { supabase } from './supabaseClient'
+import logo from './assets/logo.png'
 import './App.css'
 
 function App() {
@@ -27,6 +29,11 @@ function App() {
   const navigate = useNavigate()
   const [showMyCv, setShowMyCv] = useState(false)
   const [myCvData, setMyCvData] = useState(null)
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/')
+  }
 
   async function handleViewMyCv() {
     const { data } = await supabase
@@ -38,11 +45,6 @@ function App() {
     setShowMyCv(true)
   }
 
-  async function handleLogout() {
-    await supabase.auth.signOut()
-    navigate('/')
-  }
-
   if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   let homeElement = <Home />
@@ -50,48 +52,57 @@ function App() {
     homeElement = <CandidateDashboard />
   } else if (session && profile?.role === 'company') {
     homeElement = <CompanyDashboard />
+  } else if (session && profile?.role === 'admin') {
+    homeElement = <AdminDashboard />
   }
 
   return (
     <div>
       <nav className="navbar">
-        <div className="navbar-links">
-          <Link to="/" className="navbar-brand">Начало</Link>
-          <Link to="/about">За нас</Link>
-          <Link to="/contact">Контакти</Link>
-
-          {session && profile?.role === 'candidate' && (
-            <>
-              <Link to="/my-cv">Моето CV</Link>
-              <button onClick={handleViewMyCv} className="btn-logout" style={{ borderColor: 'var(--color-teal)', color: 'var(--color-teal)' }}>
-                Виж CV
-              </button>
-            </>
-          )}
-
-          {session && profile?.role === 'company' && (
-            <>
-              <Link to="/company-profile">Редактирай профила</Link>
-              <Link to="/search">Търсене на кандидати</Link>
-            </>
-          )}
-        </div>
+        <Link to="/">
+          <img src={logo} alt="Jobnet" className="navbar-logo-img" />
+        </Link>
 
         <div className="navbar-right">
+          <div className="navbar-links">
+            <Link to="/about" className="nav-link">За нас</Link>
+            <Link to="/contact" className="nav-link">Контакти</Link>
+
+            {session && profile?.role === 'candidate' && (
+              <>
+                <Link to="/my-cv" className="nav-link">Моето CV</Link>
+                <button onClick={handleViewMyCv} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Виж CV
+                </button>
+              </>
+            )}
+
+            {session && profile?.role === 'company' && (
+              <>
+                <Link to="/company-profile" className="nav-link">Профил на фирмата</Link>
+                <Link to="/search" className="nav-link">Търсене на кандидати</Link>
+              </>
+            )}
+
+            {session && profile?.role === 'admin' && (
+              <Link to="/" className="nav-link">Admin панел</Link>
+            )}
+          </div>
+
           {!session && (
-            <>
-              <Link to="/login">Вход</Link>
+            <div className="navbar-links">
+              <Link to="/login" className="nav-link">Вход</Link>
               <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
                 Регистрация
               </Link>
-            </>
+            </div>
           )}
 
           {session && (
-            <>
+            <div className="navbar-links">
               <span className="navbar-user">{session.user.email}</span>
               <button onClick={handleLogout} className="btn-logout">Изход</button>
-            </>
+            </div>
           )}
         </div>
       </nav>

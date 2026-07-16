@@ -6,31 +6,51 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.navbar-logo-img {
+  height: 30px;
+  display: block;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .navbar-links {
   display: flex;
   align-items: center;
   gap: 1.5rem;
 }
 
-.navbar-links a {
+/* Анимиран underline hover ефект за навигационните връзки */
+.nav-link {
+  position: relative;
   color: var(--color-text-muted);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: color 0.15s;
+  padding-bottom: 3px;
+  transition: color 0.2s;
 }
 
-.navbar-links a:hover { color: var(--color-text); }
-
-.navbar-brand {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--color-text) !important;
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-teal);
+  border-radius: 2px;
+  transition: width 0.25s ease;
 }
 
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.nav-link:hover {
+  color: var(--color-text);
+}
+
+.nav-link:hover::after {
+  width: 100%;
 }
 
 .navbar-user {

@@ -11,6 +11,7 @@ import './CandidateDashboard.css'
 export function CandidateDashboard() {
   const { session } = useAuth()
   const [cv, setCv] = useState(null)
+  const [togglingActive, setTogglingActive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [message, setMessage] = useState('')
@@ -47,6 +48,21 @@ export function CandidateDashboard() {
     setCancelling(false)
   }
 
+  async function handleToggleActive() {
+    setTogglingActive(true)
+    const newActiveState = !cv.active
+
+    const { error } = await supabase
+      .from('candidates')
+      .update({ active: newActiveState })
+      .eq('id', session.user.id)
+
+    if (!error) {
+      setCv((prev) => ({ ...prev, active: newActiveState }))
+    }
+    setTogglingActive(false)
+  }
+
   if (loading || !cv) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Твоето име'
@@ -68,6 +84,25 @@ export function CandidateDashboard() {
           <p className="dashboard-eyebrow">Кандидатски профил</p>
           <h1 className="dashboard-title">{fullName}</h1>
           <p className="dashboard-meta">{session?.user?.email}</p>
+        </div>
+      </div>
+
+      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+        <div className="toggle-row">
+          <div>
+            <p className="status-title" style={{ marginBottom: '0.2rem' }}>
+              {cv.active ? '👁 Профилът е видим за фирмите' : '🙈 Профилът е скрит'}
+            </p>
+            <p className="status-sub">
+              {cv.active
+                ? 'Излизаш в резултатите на фирмите, търсещи по твоите критерии.'
+                : 'Не се показваш никъде в търсенето — полезно, ако вече не търсиш работа.'}
+            </p>
+          </div>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={cv.active} onChange={handleToggleActive} disabled={togglingActive} />
+            <span className="toggle-slider"></span>
+          </label>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { WorkExperienceSection } from './WorkExperienceSection'
 import { EducationSection } from './EducationSection'
 import { LanguagesSection } from './LanguagesSection'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
+import './MyCv.css'
 
 const LEVEL_OPTIONS = [
   'Ниво работници',
@@ -158,7 +159,6 @@ export function MyCv() {
     setMoreCourses(moreCourses.filter((_, i) => i !== index))
   }
 
-  // Проверява задължителните полета и връща списък с липсващи (на български, за показване)
   function validate() {
     const missing = []
     if (!formData.fname.trim()) missing.push('Име')
@@ -224,112 +224,109 @@ export function MyCv() {
 
   if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
+  const isError = message.startsWith('Грешка') || message.startsWith('Моля')
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px' }}>
-      <h2>Моето CV</h2>
-      <p style={{ color: '#888', fontSize: '0.9rem' }}>Полетата, отбелязани с * , са задължителни.</p>
+    <div className="cv-form-shell">
+      <h2 className="cv-form-title">Моето CV</h2>
+      <p className="cv-form-hint">Полетата, отбелязани с * , са задължителни.</p>
 
       <form onSubmit={handleSubmit}>
-        <h3>Основна информация</h3>
+        <div className="cv-form-section">
+          <h3 className="cv-form-section-title">Основна информация</h3>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Снимка на профила *</label><br />
-          {formData.avatar_url && (
-            <img src={formData.avatar_url} alt="avatar"
-              style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '50%', display: 'block', marginBottom: '0.5rem' }} />
-          )}
-          <input type="file" accept="image/*" onChange={handleAvatarUpload} />
-          {uploadingAvatar && <p>Качвам...</p>}
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Име *</label>
-          <input name="fname" value={formData.fname} onChange={handleChange} required
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Фамилия *</label>
-          <input name="lname" value={formData.lname} onChange={handleChange} required
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Дата на раждане</label>
-          <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange}
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Пол</label><br />
-          <label style={{ marginRight: '1rem' }}>
-            <input type="radio" name="gender" value="Мъж"
-              checked={formData.gender === 'Мъж'} onChange={handleChange} /> Мъж
-          </label>
-          <label>
-            <input type="radio" name="gender" value="Жена"
-              checked={formData.gender === 'Жена'} onChange={handleChange} /> Жена
-          </label>
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Имейл за връзка</label>
-          <input type="email" name="contact_email" value={formData.contact_email} onChange={handleChange}
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Телефон *</label>
-          <input name="phone" value={formData.phone} onChange={handleChange} required
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Настоящ град *</label>
-          <select name="current_city" value={formData.current_city} onChange={handleChange} required
-            style={{ width: '100%', padding: '0.5rem' }}>
-            <option value="">-- Избери град --</option>
-            {allCities.map(city => <option key={city} value={city}>{city}</option>)}
-          </select>
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Описание / За мен</label>
-          <textarea name="description" value={formData.description} onChange={handleChange}
-            style={{ width: '100%', padding: '0.5rem' }} rows={4} />
-        </div>
-
-        <hr style={{ margin: '2rem 0' }} />
-        <h3>Допълнителна информация</h3>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Умения</label>
-          <input name="skills" value={formData.skills} onChange={handleChange}
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Компютърни умения</label>
-          <input name="computer_skills" value={formData.computer_skills} onChange={handleChange}
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Шофьорска книжка</label>
-          <input name="driver_license" value={formData.driver_license} onChange={handleChange}
-            placeholder="напр. Категория B" style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Допълнителни курсове/сертификати</label>
-          {moreCourses.map((course, index) => (
-            <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <input value={course} onChange={(e) => handleCourseChange(index, e.target.value)}
-                style={{ flex: 1, padding: '0.5rem' }} />
-              <button type="button" onClick={() => removeCourse(index)} style={{ color: 'red' }}>✕</button>
+          <div className="cv-avatar-upload-row">
+            {formData.avatar_url ? (
+              <img src={formData.avatar_url} alt="avatar" className="cv-avatar-preview" />
+            ) : (
+              <div className="cv-avatar-preview-placeholder">👤</div>
+            )}
+            <div className="file-input-wrap">
+              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.4rem' }}>Снимка на профила *</label>
+              <input type="file" accept="image/*" onChange={handleAvatarUpload} />
+              {uploadingAvatar && <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Качвам...</p>}
             </div>
-          ))}
-          <button type="button" onClick={addCourse}>+ Добави курс</button>
+          </div>
+
+          <div className="field">
+            <label>Име *</label>
+            <input className="input" name="fname" value={formData.fname} onChange={handleChange} required />
+          </div>
+
+          <div className="field">
+            <label>Фамилия *</label>
+            <input className="input" name="lname" value={formData.lname} onChange={handleChange} required />
+          </div>
+
+          <div className="field">
+            <label>Дата на раждане</label>
+            <input type="date" className="input" name="birth_date" value={formData.birth_date} onChange={handleChange} />
+          </div>
+
+          <div className="field">
+            <label>Пол</label>
+            <div className="gender-row">
+              <label className="gender-option">
+                <input type="radio" name="gender" value="Мъж" checked={formData.gender === 'Мъж'} onChange={handleChange} /> Мъж
+              </label>
+              <label className="gender-option">
+                <input type="radio" name="gender" value="Жена" checked={formData.gender === 'Жена'} onChange={handleChange} /> Жена
+              </label>
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Имейл за връзка</label>
+            <input type="email" className="input" name="contact_email" value={formData.contact_email} onChange={handleChange} />
+          </div>
+
+          <div className="field">
+            <label>Телефон *</label>
+            <input className="input" name="phone" value={formData.phone} onChange={handleChange} required />
+          </div>
+
+          <div className="field">
+            <label>Настоящ град *</label>
+            <select className="input" name="current_city" value={formData.current_city} onChange={handleChange} required>
+              <option value="">-- Избери град --</option>
+              {allCities.map(city => <option key={city} value={city}>{city}</option>)}
+            </select>
+          </div>
+
+          <div className="field">
+            <label>Описание / За мен</label>
+            <textarea className="input" name="description" value={formData.description} onChange={handleChange} rows={4} />
+          </div>
+        </div>
+
+        <div className="cv-form-section">
+          <h3 className="cv-form-section-title">Допълнителна информация</h3>
+
+          <div className="field">
+            <label>Умения</label>
+            <input className="input" name="skills" value={formData.skills} onChange={handleChange} />
+          </div>
+
+          <div className="field">
+            <label>Компютърни умения</label>
+            <input className="input" name="computer_skills" value={formData.computer_skills} onChange={handleChange} />
+          </div>
+
+          <div className="field">
+            <label>Шофьорска книжка</label>
+            <input className="input" name="driver_license" value={formData.driver_license} onChange={handleChange} placeholder="напр. Категория B" />
+          </div>
+
+          <div className="field">
+            <label>Допълнителни курсове/сертификати</label>
+            {moreCourses.map((course, index) => (
+              <div key={index} className="cv-course-row">
+                <input className="input" value={course} onChange={(e) => handleCourseChange(index, e.target.value)} />
+                <button type="button" className="cv-entry-remove" onClick={() => removeCourse(index)}>✕</button>
+              </div>
+            ))}
+            <button type="button" className="cv-add-btn" onClick={addCourse}>+ Добави курс</button>
+          </div>
         </div>
 
         <LanguagesSection
@@ -339,16 +336,12 @@ export function MyCv() {
           onRemove={removeLanguage}
         />
 
-        <hr style={{ margin: '2rem 0' }} />
-
         <WorkExperienceSection
           workExperience={workExperience}
           onChange={handleWorkExperienceChange}
           onAdd={addWorkExperience}
           onRemove={removeWorkExperience}
         />
-
-        <hr style={{ margin: '2rem 0' }} />
 
         <EducationSection
           education={education}
@@ -357,68 +350,64 @@ export function MyCv() {
           onRemove={removeEducation}
         />
 
-        <hr style={{ margin: '2rem 0' }} />
-        <h3>Критерии за търсене на работа</h3>
+        <div className="cv-form-section">
+          <h3 className="cv-form-section-title">Критерии за търсене на работа</h3>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Желана нетна заплата (€) *</label>
-          <input type="number" name="target_salary" value={formData.target_salary} onChange={handleChange} required
-            style={{ width: '100%', padding: '0.5rem' }} />
-        </div>
+          <div className="field">
+            <label>Желана нетна заплата (лв) *</label>
+            <input type="number" className="input" name="target_salary" value={formData.target_salary} onChange={handleChange} required />
+          </div>
 
-        <CheckboxMultiSelect
-          label="Желани сектори *"
-          options={sectors}
-          selected={formData.target_sector}
-          onChange={(values) => setFormData({ ...formData, target_sector: values })}
-        />
+          <CheckboxMultiSelect
+            label="Желани сектори *"
+            options={sectors}
+            selected={formData.target_sector}
+            onChange={(values) => setFormData({ ...formData, target_sector: values })}
+          />
 
-        <CheckboxMultiSelect
-          label="Желани градове *"
-          options={allCities}
-          selected={formData.target_cities}
-          onChange={(values) => setFormData({ ...formData, target_cities: values })}
-        />
+          <CheckboxMultiSelect
+            label="Желани градове *"
+            options={allCities}
+            selected={formData.target_cities}
+            onChange={(values) => setFormData({ ...formData, target_cities: values })}
+          />
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>На какво ниво искате да се реализирате? *</label>
-          {LEVEL_OPTIONS.map((level) => (
-            <div key={level}>
-              <label>
+          <div className="checkbox-group">
+            <label className="checkbox-group-label">На какво ниво искате да се реализирате? *</label>
+            {LEVEL_OPTIONS.map((level) => (
+              <label key={level} className="checkbox-item">
                 <input
                   type="checkbox"
                   checked={formData.target_level.includes(level)}
                   onChange={(e) => handleCheckboxGroupChange('target_level', level, e.target.checked)}
                 />
-                {' '}{level}
+                {level}
               </label>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Каква заетост предпочитате? *</label>
-          {DURATION_OPTIONS.map((duration) => (
-            <div key={duration}>
-              <label>
+          <div className="checkbox-group">
+            <label className="checkbox-group-label">Каква заетост предпочитате? *</label>
+            {DURATION_OPTIONS.map((duration) => (
+              <label key={duration} className="checkbox-item">
                 <input
                   type="checkbox"
                   checked={formData.target_duration.includes(duration)}
                   onChange={(e) => handleCheckboxGroupChange('target_duration', duration, e.target.checked)}
                 />
-                {' '}{duration}
+                {duration}
               </label>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {message && (
-          <p style={{ color: message.startsWith('Грешка') || message.startsWith('Моля') ? 'red' : 'green' }}>
+          <div className={`cv-form-message ${isError ? 'cv-form-message--error' : 'cv-form-message--success'}`}>
             {message}
-          </p>
+          </div>
         )}
 
-        <button type="submit" disabled={saving}>
+        <button type="submit" className="btn-primary" disabled={saving}>
           {saving ? 'Записвам...' : 'Запази CV'}
         </button>
       </form>
