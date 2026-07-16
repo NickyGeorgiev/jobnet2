@@ -18,14 +18,22 @@
   inset: 0;
   background: linear-gradient(90deg, rgba(16,22,29,0.75) 0%, rgba(16,22,29,0.25) 55%, rgba(16,22,29,0.75) 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0 3rem;
+  justify-content: space-between;
+  gap: 1.1rem;
+  padding: 2rem 3rem;
+}
+
+.hero-banner-ctas {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
 }
 
 .hero-banner-text {
   max-width: 480px;
-  text-align: right;
+  text-align: left;
 }
 
 .hero-banner-eyebrow {
@@ -47,10 +55,12 @@
 }
 
 @media (max-width: 700px) {
-  .hero-banner { height: 240px; }
-  .hero-banner-overlay { justify-content: center; padding: 0 1.5rem; }
-  .hero-banner-text { text-align: center; }
-  .hero-banner-title { font-size: 1.4rem; }
+  .hero-banner { height: 300px; }
+  .hero-banner-overlay { align-items: center; padding: 1.5rem; }
+  .hero-banner-text { text-align: center; max-width: 100%; }
+  .hero-banner-title { font-size: 1.3rem; }
+  .hero-banner-ctas { justify-content: center; flex-wrap: wrap; }
+  .hero-banner-ctas a { flex: 1 1 auto; text-align: center; }
 }
 
 .hero {
@@ -64,7 +74,10 @@
 }
 
 @media (max-width: 800px) {
-  .hero { grid-template-columns: 1fr; padding-top: 3rem; }
+  .hero { grid-template-columns: 1fr; padding-top: 3rem; text-align: center; }
+  .hero-sub { max-width: 100%; margin-left: auto; margin-right: auto; }
+  .hero-ctas { justify-content: center; }
+  .hero-art { order: -1; }
 }
 
 .hero-eyebrow {
@@ -167,4 +180,9 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: 3rem;
+}
+
+@media (max-width: 600px) {
+  .carousel-static { gap: 1.75rem; }
+  .carousel-logo { height: 32px; max-width: 100px; }
 }

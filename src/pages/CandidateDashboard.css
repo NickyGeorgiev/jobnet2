@@ -23,6 +23,9 @@
 
 @media (max-width: 600px) {
   .cv-paper { grid-template-columns: 1fr; }
+  .cv-sidebar { border-bottom: 1px solid rgba(212, 162, 76, 0.2); }
+  .cv-main { padding: 1.5rem; }
+  .cv-name { font-size: 1.6rem; }
 }
 
 .cv-sidebar {

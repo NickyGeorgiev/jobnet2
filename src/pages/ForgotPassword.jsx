@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import './AuthForm.css'
 
 export function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -27,36 +28,38 @@ export function ForgotPassword() {
 
   if (sent) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '400px' }}>
-        <h2>Проверете имейла си</h2>
-        <p>Изпратихме линк за смяна на паролата на {email}.</p>
-        <Link to="/login">Обратно към вход</Link>
+      <div className="auth-shell">
+        <h2 className="auth-title">Проверете имейла си</h2>
+        <p style={{ color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>
+          Изпратихме линк за смяна на паролата на <strong style={{ color: 'var(--color-text)' }}>{email}</strong>.
+        </p>
+        <p className="auth-footer-link" style={{ marginTop: 0 }}>
+          <Link to="/login">Обратно към вход</Link>
+        </p>
       </div>
     )
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px' }}>
-      <h2>Забравена парола</h2>
+    <div className="auth-shell">
+      <h2 className="auth-title">Забравена парола</h2>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Имейл</label>
+          <input type="email" className="auth-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
           {loading ? 'Изпращам...' : 'Изпрати линк за смяна'}
         </button>
       </form>
+
+      <p className="auth-footer-link">
+        <Link to="/login">Обратно към вход</Link>
+      </p>
     </div>
   )
 }

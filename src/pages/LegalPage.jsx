@@ -1,7 +1,7 @@
 export function LegalPage({ title, isPlaceholder, children }) {
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '3rem 1.5rem' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)' }}>{title}</h1>
+    <div style={{ maxWidth: '700px', margin: '0 auto', padding: '3rem 1.5rem 4rem' }}>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.9rem', marginBottom: '1.75rem' }}>{title}</h1>
 
       {isPlaceholder && (
         <div style={{
@@ -13,7 +13,11 @@ export function LegalPage({ title, isPlaceholder, children }) {
         </div>
       )}
 
-      <div style={{ color: 'var(--color-text-muted)', lineHeight: 1.7, fontSize: '0.95rem' }}>
+      <div style={{
+        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-lg)', padding: '2rem',
+        color: 'var(--color-text-muted)', lineHeight: 1.75, fontSize: '0.95rem'
+      }}>
         {children}
       </div>
     </div>

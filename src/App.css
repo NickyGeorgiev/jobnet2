@@ -26,7 +26,7 @@
 /* Анимиран underline hover ефект за навигационните връзки */
 .nav-link {
   position: relative;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   text-decoration: none;
   font-size: 0.9rem;
   padding-bottom: 3px;
@@ -46,7 +46,7 @@
 }
 
 .nav-link:hover {
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 
 .nav-link:hover::after {
@@ -73,4 +73,61 @@
 .btn-logout:hover {
   border-color: var(--color-danger);
   color: var(--color-danger);
+}
+
+.navbar-mobile-toggle {
+  display: none;
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  .navbar-mobile-toggle { display: block; }
+
+  .navbar-right {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--color-border);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0.5rem 0;
+    z-index: 40;
+  }
+
+  .navbar-right.navbar-right--open {
+    display: flex;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+  }
+
+  .nav-link, .navbar-user {
+    padding: 0.9rem 1.5rem;
+    width: 100%;
+  }
+
+  .nav-link::after { display: none; }
+
+  .btn-logout {
+    margin: 0.5rem 1.5rem;
+  }
+
+  .navbar {
+    position: relative;
+  }
 }

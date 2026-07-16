@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import './AuthForm.css'
 
 export function ResetPassword() {
   const navigate = useNavigate()
@@ -37,36 +38,23 @@ export function ResetPassword() {
   }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '400px' }}>
-      <h2>Нова парола</h2>
+    <div className="auth-shell">
+      <h2 className="auth-title">Нова парола</h2>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="password"
-            placeholder="Нова парола"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={6}
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Нова парола</label>
+          <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
         </div>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <input
-            type="password"
-            placeholder="Повтори паролата"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem' }}
-          />
+        <div className="auth-field">
+          <label>Повтори паролата</label>
+          <input type="password" className="auth-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         </div>
 
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" disabled={loading}>
+        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
           {loading ? 'Запазвам...' : 'Запази новата парола'}
         </button>
       </form>

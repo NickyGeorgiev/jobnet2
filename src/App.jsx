@@ -29,6 +29,7 @@ function App() {
   const navigate = useNavigate()
   const [showMyCv, setShowMyCv] = useState(false)
   const [myCvData, setMyCvData] = useState(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -63,15 +64,19 @@ function App() {
           <img src={logo} alt="Jobnet" className="navbar-logo-img" />
         </Link>
 
-        <div className="navbar-right">
+        <button className="navbar-mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <div className={`navbar-right ${mobileMenuOpen ? 'navbar-right--open' : ''}`}>
           <div className="navbar-links">
-            <Link to="/about" className="nav-link">За нас</Link>
-            <Link to="/contact" className="nav-link">Контакти</Link>
+            <Link to="/about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>За нас</Link>
+            <Link to="/contact" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Контакти</Link>
 
             {session && profile?.role === 'candidate' && (
               <>
-                <Link to="/my-cv" className="nav-link">Моето CV</Link>
-                <button onClick={handleViewMyCv} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Моето CV</Link>
+                <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
                   Виж CV
                 </button>
               </>
@@ -79,20 +84,20 @@ function App() {
 
             {session && profile?.role === 'company' && (
               <>
-                <Link to="/company-profile" className="nav-link">Профил на фирмата</Link>
-                <Link to="/search" className="nav-link">Търсене на кандидати</Link>
+                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Профил на фирмата</Link>
+                <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
               </>
             )}
 
             {session && profile?.role === 'admin' && (
-              <Link to="/" className="nav-link">Admin панел</Link>
+              <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Admin панел</Link>
             )}
           </div>
 
           {!session && (
             <div className="navbar-links">
-              <Link to="/login" className="nav-link">Вход</Link>
-              <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem' }}>
+              <Link to="/login" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Вход</Link>
+              <Link to="/register" className="btn-primary" style={{ textDecoration: 'none', padding: '0.5rem 1rem', fontSize: '0.85rem', margin: '0.5rem 1.5rem', textAlign: 'center' }} onClick={() => setMobileMenuOpen(false)}>
                 Регистрация
               </Link>
             </div>
@@ -100,7 +105,7 @@ function App() {
 
           {session && (
             <div className="navbar-links">
-              <span className="navbar-user">{session.user.email}</span>
+              <span className="navbar-user" style={{ padding: '0.9rem 1.5rem' }}>{session.user.email}</span>
               <button onClick={handleLogout} className="btn-logout">Изход</button>
             </div>
           )}

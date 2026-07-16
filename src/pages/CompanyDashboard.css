@@ -13,6 +13,15 @@
   margin-bottom: 2rem;
 }
 
+@media (max-width: 600px) {
+  .dashboard-shell { padding: 1.5rem 1rem 3rem; }
+  .dashboard-header { flex-direction: column; align-items: flex-start; text-align: left; gap: 1rem; }
+  .dashboard-title { font-size: 1.5rem; }
+  .status-card-top { flex-direction: column; align-items: flex-start; }
+  .facts-row { gap: 1.1rem; }
+  .action-grid { gap: 0.65rem; }
+}
+
 .dashboard-logo {
   width: 76px;
   height: 76px;

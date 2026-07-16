@@ -63,6 +63,18 @@ button {
   color: #06211f;
 }
 
+.btn-secondary {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.btn-secondary:hover { border-color: var(--color-teal); }
+
 .btn-text-danger {
   background: none;
   border: none;
@@ -84,6 +96,10 @@ button {
   padding: 3rem 1.25rem;
   overflow-y: auto;
   z-index: 50;
+}
+
+@media (max-width: 600px) {
+  .cv-modal-backdrop { padding: 1.25rem 0.75rem; }
 }
 
 .cv-modal-inner {

@@ -5,16 +5,17 @@ import { supabase } from '../supabaseClient'
 import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
+import { CvModal } from './CvModal'
 import './CandidateDashboard.css'
-
 
 export function CandidateDashboard() {
   const { session } = useAuth()
   const [cv, setCv] = useState(null)
-  const [togglingActive, setTogglingActive] = useState(false)
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState(false)
   const [message, setMessage] = useState('')
+  const [showCvModal, setShowCvModal] = useState(false)
+  const [togglingActive, setTogglingActive] = useState(false)
 
   useEffect(() => {
     loadCv()
@@ -106,14 +107,35 @@ export function CandidateDashboard() {
         </div>
       </div>
 
+      <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
+        <Link to="/my-cv" className="action-tile">
+          <span className="action-tile-icon">✎</span>
+          <div>
+            <p className="action-tile-title">Редактирай CV</p>
+            <p className="action-tile-sub">Обнови данни, опит, критерии</p>
+          </div>
+        </Link>
+        <button
+          onClick={() => setShowCvModal(true)}
+          className="action-tile"
+          style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit' }}
+        >
+          <span className="action-tile-icon">👁</span>
+          <div>
+            <p className="action-tile-title">Виж CV</p>
+            <p className="action-tile-sub">Как изглежда за фирмите</p>
+          </div>
+        </button>
+      </div>
+
       {!isCvComplete && (
         <div className="status-card" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-gold)' }}>
-          <p className="status-title" style={{ marginBottom: '0.4rem' }}>CV-то ти не е попълнено</p>
+          <p className="status-title" style={{ marginBottom: '0.4rem' }}>CV-то ти не е напълно попълнено</p>
           <p className="status-sub" style={{ marginBottom: '1rem' }}>
             Липсват задължителни данни (снимка, заплата, сектори или градове) — фирмите няма да те виждат в търсенето, докато не ги допълниш.
           </p>
           <Link to="/my-cv" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-            Направи си CV-то
+            Довърши CV-то
           </Link>
         </div>
       )}
@@ -173,16 +195,6 @@ export function CandidateDashboard() {
         </div>
 
         <div>
-          <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
-            <Link to="/my-cv" className="action-tile">
-              <span className="action-tile-icon">✎</span>
-              <div>
-                <p className="action-tile-title">Редактирай CV</p>
-                <p className="action-tile-sub">Обнови данни, опит, критерии</p>
-              </div>
-            </Link>
-          </div>
-
           <div className="status-card">
             <div className="status-card-top">
               <StatusRing state={cv.is_gold ? 'gold' : 'expired'} daysLeft={0} />
@@ -219,6 +231,10 @@ export function CandidateDashboard() {
           </div>
         </div>
       </div>
+
+      {showCvModal && (
+        <CvModal cv={cv} onClose={() => setShowCvModal(false)} showDownload={true} />
+      )}
     </div>
   )
 }

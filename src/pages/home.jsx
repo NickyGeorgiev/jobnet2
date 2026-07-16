@@ -44,20 +44,20 @@ export function Home() {
             <p className="hero-banner-eyebrow">Jobnet</p>
             <h2 className="hero-banner-title">Работата те намира, не обратното.</h2>
           </div>
+          <div className="hero-banner-ctas">
+            <Link to="/register?role=candidate" className="btn-primary" style={{ textDecoration: 'none' }}>Регистрирай се като кандидат</Link>
+            <Link to="/register?role=company" className="btn-secondary" style={{ textDecoration: 'none' }}>Регистрирай се като фирма</Link>
+          </div>
         </div>
       </div>
 
       <section className="hero">
         <div>
-          <p className="hero-eyebrow">Платформа, в която работодателите намират служители</p>
-          <h1 className="hero-title">Кандидатите казват <span>каква заплата</span> искат</h1>
+          <p className="hero-eyebrow">Обратна платформа за работа</p>
+          <h1 className="hero-title">Кандидатите казват <span>каква заплата</span> търсят.</h1>
           <p className="hero-sub">
-            Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако изискванията ви съвпадат.
+            Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако плащат това, което искаш.
           </p>
-          <div className="hero-ctas">
-            <Link to="/register?role=candidate" className="btn-primary" style={{ textDecoration: 'none' }}>Регистрирай се като кандидат</Link>
-            <Link to="/register?role=company" className="btn-secondary" style={{ textDecoration: 'none' }}>Регистрирай се като фирма</Link>
-          </div>
         </div>
         <div className="hero-art">
           <HeroArt />
