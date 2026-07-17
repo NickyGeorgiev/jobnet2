@@ -98,6 +98,14 @@
   margin-bottom: 0.9rem;
 }
 
+@media (max-width: 550px) {
+  .cv-entry-row { flex-direction: column; gap: 0; }
+  .cv-form-shell { padding: 1.5rem 1rem 3rem; }
+  .cv-avatar-upload-row { flex-direction: column; align-items: flex-start; }
+  .cv-language-row { flex-wrap: wrap; }
+  .cv-language-row select.input { width: 100%; }
+}
+
 .cv-entry-row > div { flex: 1; }
 
 .cv-entry-remove {

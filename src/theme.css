@@ -102,9 +102,40 @@ button {
   .cv-modal-backdrop { padding: 1.25rem 0.75rem; }
 }
 
+/* На мобилен, показваме CV "хартията" в нейния естествен desktop размер,
+   но visually smalena (scale) — по-добре четимо чрез pinch-zoom,
+   отколкото насилствено пренареждане на 2-колонния дизайн */
+@media (max-width: 700px) {
+  .cv-paper-scale-wrap {
+    width: 620px;
+    transform: scale(var(--cv-scale, 0.58));
+    transform-origin: top center;
+    margin: 0 auto;
+    margin-left: calc(50% - 310px);
+  }
+
+  .cv-modal-inner {
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 500px) {
+  .cv-paper-scale-wrap { --cv-scale: 0.5; }
+}
+
+@media (max-width: 380px) {
+  .cv-paper-scale-wrap { --cv-scale: 0.42; }
+}
+
 .cv-modal-inner {
   width: 100%;
   max-width: 760px;
+}
+
+@media (max-width: 700px) {
+  .cv-modal-inner {
+    max-height: calc(var(--cv-scale, 0.58) * 900px + 100px);
+  }
 }
 
 .cv-modal-actions {

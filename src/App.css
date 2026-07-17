@@ -119,12 +119,15 @@
   .nav-link, .navbar-user {
     padding: 0.9rem 1.5rem;
     width: 100%;
+    text-align: right;
   }
 
   .nav-link::after { display: none; }
 
   .btn-logout {
     margin: 0.5rem 1.5rem;
+    width: calc(100% - 3rem);
+    text-align: center;
   }
 
   .navbar {

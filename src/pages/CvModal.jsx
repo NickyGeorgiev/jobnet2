@@ -40,7 +40,9 @@ export function CvModal({ cv, onClose, showDownload }) {
           <button className="cv-modal-close" onClick={onClose}>✕</button>
         </div>
         <div ref={paperRef} className="cv-print-area">
-          <CvPaper cv={cv} />
+          <div className="cv-paper-scale-wrap">
+            <CvPaper cv={cv} />
+          </div>
         </div>
       </div>
     </div>

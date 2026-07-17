@@ -22,6 +22,12 @@
   .action-grid { gap: 0.65rem; }
 }
 
+@media (max-width: 600px) {
+  .status-actions { width: 100%; }
+  .status-actions .btn-primary,
+  .status-actions button { width: 100%; }
+}
+
 .dashboard-logo {
   width: 76px;
   height: 76px;

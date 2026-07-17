@@ -232,3 +232,9 @@
   font-family: var(--font-mono);
   font-weight: 500;
 }
+
+/* Вътре в модала винаги пазим 2-колонния desktop layout —
+   scale() трансформацията се грижи визуално да се събере в екрана */
+.cv-paper-scale-wrap .cv-paper {
+  grid-template-columns: 240px 1fr;
+}

@@ -82,3 +82,8 @@
   color: var(--color-teal);
   text-decoration: none;
 }
+
+@media (max-width: 480px) {
+  .auth-shell { margin: 2rem auto; }
+  .auth-role-picker { flex-direction: column; }
+}

@@ -76,7 +76,7 @@ function App() {
             {session && profile?.role === 'candidate' && (
               <>
                 <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Моето CV</Link>
-                <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
+                <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right' }}>
                   Виж CV
                 </button>
               </>
