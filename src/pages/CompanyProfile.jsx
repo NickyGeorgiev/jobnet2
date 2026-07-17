@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
+import { Spinner } from './Spinner'
+import { useToast } from './Toast'
 import './CompanyProfile.css'
 
 const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
 
 export function CompanyProfile() {
+  const { showToast } = useToast()
   const { session } = useAuth()
   const [formData, setFormData] = useState({
     company_name: '', bulstat: '', sector: '', founded_year: '',
@@ -97,14 +100,14 @@ export function CompanyProfile() {
       .eq('id', session.user.id)
 
     if (error) {
-      setMessage('Грешка: ' + error.message)
+      showToast('Грешка: ' + error.message, 'error')
     } else {
-      setMessage('Записано успешно!')
+      showToast('Профилът е записан успешно!', 'success')
     }
     setSaving(false)
   }
 
-  if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  if (loading) return <Spinner label="Зареждам профила..." />
 
   const isError = message.startsWith('Грешка')
 

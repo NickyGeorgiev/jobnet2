@@ -12,6 +12,7 @@ export function CheckboxMultiSelect({ options, selected, onChange, label }) {
       onChange(selected.filter((v) => v !== option))
     } else {
       onChange([...selected, option])
+      setSearch('') // изчистваме търсачката само при ДОБАВЯНЕ, за да можеш веднага да пишеш следващото
     }
   }
 

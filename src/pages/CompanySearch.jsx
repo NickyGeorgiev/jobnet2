@@ -6,6 +6,7 @@ import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { CvModal } from './CvModal'
+import { Spinner } from './Spinner'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -125,7 +126,7 @@ export function CompanySearch() {
   }
 
   if (hasAccess === null) {
-    return <div style={{ padding: '2rem' }}>Зареждане...</div>
+    return <Spinner label="Проверявам достъпа..." />
   }
 
   if (!hasAccess) {
@@ -200,7 +201,10 @@ export function CompanySearch() {
   // --- Изгледът с формата за търсене ---
   return (
     <div className="search-shell" style={{ maxWidth: '700px' }}>
-      <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '1.5rem' }}>Търсене на кандидати</h2>
+      <h2 style={{ fontFamily: 'var(--font-display)', marginBottom: '0.5rem' }}>Търсене на кандидати</h2>
+      <p className="search-welcome">
+        Задай критерии — заплатата е задължителна, останалите стесняват резултата.
+      </p>
 
       <div className="search-form-card">
         <form onSubmit={handleSearch}>

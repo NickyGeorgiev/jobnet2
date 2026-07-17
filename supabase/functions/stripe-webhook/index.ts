@@ -32,7 +32,9 @@ Deno.serve(async (req) => {
   }
 
   const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
-  const companyPriceId = Deno.env.get("STRIPE_COMPANY_PRICE_ID")
+  const companyMonthlyPriceId = Deno.env.get("STRIPE_COMPANY_MONTHLY_PRICE_ID")
+  const companyYearlyPriceId = Deno.env.get("STRIPE_COMPANY_YEARLY_PRICE_ID")
+  const companyPriceIds = [companyMonthlyPriceId, companyYearlyPriceId]
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object
@@ -48,7 +50,7 @@ Deno.serve(async (req) => {
         .from("candidates")
         .update({ is_gold: true, stripe_customer_id: customerId })
         .eq("id", userId)
-    } else if (priceId === companyPriceId) {
+    } else if (companyPriceIds.includes(priceId)) {
       const { error: upsertError } = await supabaseAdmin
         .from("subscriptions")
         .upsert({

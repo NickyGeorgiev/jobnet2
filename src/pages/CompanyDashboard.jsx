@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
+import { Spinner } from './Spinner'
 import './CompanyDashboard.css'
 
 export function CompanyDashboard() {
@@ -54,7 +55,7 @@ export function CompanyDashboard() {
     setCancelling(false)
   }
 
-  if (loading || !company) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  if (loading || !company) return <Spinner label="Зареждам профила на фирмата..." />
 
   const hasActiveSubscription = subscription && subscription.status === 'active'
   const isInTrial = company.trial_ends_at && new Date(company.trial_ends_at) > new Date()

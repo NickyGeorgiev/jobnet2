@@ -7,6 +7,8 @@ import { WorkExperienceSection } from './WorkExperienceSection'
 import { EducationSection } from './EducationSection'
 import { LanguagesSection } from './LanguagesSection'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
+import { Spinner } from './Spinner'
+import { useToast } from './Toast'
 import './MyCv.css'
 
 const LEVEL_OPTIONS = [
@@ -44,6 +46,7 @@ function emptyLanguage() {
 
 export function MyCv() {
   const { session } = useAuth()
+  const { showToast } = useToast()
   const [formData, setFormData] = useState({
     fname: '', lname: '', phone: '', birth_date: '', gender: '',
     current_city: '', description: '', skills: '', computer_skills: '',
@@ -215,14 +218,14 @@ export function MyCv() {
       .eq('id', session.user.id)
 
     if (error) {
-      setMessage('Грешка: ' + error.message)
+      showToast('Грешка: ' + error.message, 'error')
     } else {
-      setMessage('Записано успешно!')
+      showToast('CV-то е записано успешно!', 'success')
     }
     setSaving(false)
   }
 
-  if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  if (loading) return <Spinner label="Зареждам CV-то..." />
 
   const isError = message.startsWith('Грешка') || message.startsWith('Моля')
 

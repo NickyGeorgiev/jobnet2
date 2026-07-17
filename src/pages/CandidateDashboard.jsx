@@ -6,6 +6,7 @@ import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
+import { Spinner } from './Spinner'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
@@ -64,7 +65,7 @@ export function CandidateDashboard() {
     setTogglingActive(false)
   }
 
-  if (loading || !cv) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  if (loading || !cv) return <Spinner label="Зареждам твоя профил..." />
 
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Твоето име'
 

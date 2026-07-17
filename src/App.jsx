@@ -22,6 +22,9 @@ import { CvModal } from './pages/CvModal'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabaseClient'
 import logo from './assets/logo.png'
+import { ScrollToTop } from './pages/ScrollToTop'
+import { NotFound } from './pages/NotFound'
+import { Spinner } from './pages/Spinner'
 import './App.css'
 
 function App() {
@@ -46,7 +49,7 @@ function App() {
     setShowMyCv(true)
   }
 
-  if (loading) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+  if (loading) return <Spinner label="Зареждане..." />
 
   let homeElement = <Home />
   if (session && profile?.role === 'candidate') {
@@ -127,8 +130,10 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
+      <ScrollToTop />
       {showMyCv && myCvData && (
         <CvModal cv={myCvData} onClose={() => setShowMyCv(false)} showDownload={true} />
       )}
