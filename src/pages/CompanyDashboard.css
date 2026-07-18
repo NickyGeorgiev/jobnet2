@@ -263,3 +263,60 @@
   font-size: 0.88rem;
   color: var(--color-text-muted);
 }
+
+.plan-picker {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  background: var(--color-surface-raised);
+}
+
+.plan-picker select.input {
+  margin-bottom: 1.25rem;
+}
+
+.plan-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.plan-price-old {
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  font-size: 1.1rem;
+}
+
+.plan-price-new {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.4rem;
+  color: var(--color-text);
+}
+
+.plan-discount-badge {
+  background: rgba(111, 207, 151, 0.15);
+  color: var(--color-success);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+}
+
+.plan-price-sub {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.plan-savings-badge {
+  display: inline-block;
+  background: var(--color-teal-soft);
+  color: var(--color-teal);
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.25rem;
+}

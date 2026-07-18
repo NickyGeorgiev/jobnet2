@@ -40,31 +40,53 @@ Deno.serve(async (req) => {
     const session = event.data.object
     const userId = session.client_reference_id
     const customerId = session.customer
-    const subscriptionId = session.subscription
 
-    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-    const priceId = subscription.items.data[0].price.id
-
-    if (priceId === goldPriceId) {
-      await supabaseAdmin
-        .from("candidates")
-        .update({ is_gold: true, stripe_customer_id: customerId })
+    if (session.mode === "payment") {
+      // Еднократно плащане — месечен company план без обвързване
+      const { data: companyData } = await supabaseAdmin
+        .from("companies")
+        .select("paid_until")
         .eq("id", userId)
-    } else if (companyPriceIds.includes(priceId)) {
-      const { error: upsertError } = await supabaseAdmin
-        .from("subscriptions")
-        .upsert({
-          company_id: userId,
-          plan: "company_plan",
-          status: subscription.status,
-          stripe_customer_id: customerId,
-          stripe_subscription_id: subscriptionId,
-          current_period_end: getPeriodEnd(subscription),
-          cancel_at_period_end: false,
-        }, { onConflict: "company_id" })
+        .single()
 
-      if (upsertError) {
-        console.error("Грешка при запис на subscription:", upsertError.message)
+      const now = new Date()
+      const currentPaidUntil = companyData?.paid_until ? new Date(companyData.paid_until) : null
+      // Ако вече има бъдещо платено време, добавяме 30 дни ОТГОРЕ (stacking) —
+      // ако е изтекло/липсва, тръгваме от сега
+      const base = currentPaidUntil && currentPaidUntil > now ? currentPaidUntil : now
+      const newPaidUntil = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000)
+
+      await supabaseAdmin
+        .from("companies")
+        .update({ paid_until: newPaidUntil.toISOString() })
+        .eq("id", userId)
+    } else {
+      // Recurring — gold или годишен company план
+      const subscriptionId = session.subscription
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const priceId = subscription.items.data[0].price.id
+
+      if (priceId === goldPriceId) {
+        await supabaseAdmin
+          .from("candidates")
+          .update({ is_gold: true, stripe_customer_id: customerId })
+          .eq("id", userId)
+      } else if (companyPriceIds.includes(priceId)) {
+        const { error: upsertError } = await supabaseAdmin
+          .from("subscriptions")
+          .upsert({
+            company_id: userId,
+            plan: "company_plan",
+            status: subscription.status,
+            stripe_customer_id: customerId,
+            stripe_subscription_id: subscriptionId,
+            current_period_end: getPeriodEnd(subscription),
+            cancel_at_period_end: false,
+          }, { onConflict: "company_id" })
+
+        if (upsertError) {
+          console.error("Грешка при запис на subscription:", upsertError.message)
+        }
       }
     }
   }

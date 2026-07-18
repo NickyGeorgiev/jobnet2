@@ -50,17 +50,18 @@ export function CompanySearch() {
   const [error, setError] = useState('')
   const [selectedCandidate, setSelectedCandidate] = useState(null)
 
-  useEffect(() => {
+useEffect(() => {
     async function checkAccess() {
       if (!session) return
 
       const { data: companyData } = await supabase
         .from('companies')
-        .select('trial_ends_at')
+        .select('trial_ends_at, paid_until')
         .eq('id', session.user.id)
         .single()
 
       const isInTrial = companyData?.trial_ends_at && new Date(companyData.trial_ends_at) > new Date()
+      const hasPaidMonth = companyData?.paid_until && new Date(companyData.paid_until) > new Date()
 
       const { data: subData } = await supabase
         .from('subscriptions')
@@ -70,7 +71,7 @@ export function CompanySearch() {
 
       const hasActiveSub = subData?.status === 'active'
 
-      setHasAccess(isInTrial || hasActiveSub)
+      setHasAccess(isInTrial || hasActiveSub || hasPaidMonth)
     }
     checkAccess()
   }, [session])

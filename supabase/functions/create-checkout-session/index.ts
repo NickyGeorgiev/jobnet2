@@ -35,9 +35,12 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Никакъв trial тук вече — просто нормален checkout, таксуване веднага.
+    // Само месечният company план е one-time — всичко останало (gold, годишен) е recurring
+    const monthlyPriceId = Deno.env.get("STRIPE_COMPANY_MONTHLY_PRICE_ID")
+    const isOneTime = priceId === monthlyPriceId
+
     const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
+      mode: isOneTime ? "payment" : "subscription",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${req.headers.get("origin")}/payment-success`,

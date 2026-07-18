@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
-import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
-import { Spinner } from './Spinner'
+import { PlanPicker } from './PlanPicker'
 import './CompanyDashboard.css'
 
 export function CompanyDashboard() {
@@ -55,15 +54,17 @@ export function CompanyDashboard() {
     setCancelling(false)
   }
 
-  if (loading || !company) return <Spinner label="Зареждам профила на фирмата..." />
+  if (loading || !company) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   const hasActiveSubscription = subscription && subscription.status === 'active'
   const isInTrial = company.trial_ends_at && new Date(company.trial_ends_at) > new Date()
+  const hasPaidMonth = company.paid_until && new Date(company.paid_until) > new Date()
   const trialDaysLeft = isInTrial
     ? Math.round((new Date(company.trial_ends_at) - new Date()) / (1000 * 60 * 60 * 24))
     : 0
 
-  const ringState = hasActiveSubscription ? 'active' : isInTrial ? 'trial' : 'expired'
+  const ringState = (hasActiveSubscription || hasPaidMonth) ? 'active' : isInTrial ? 'trial' : 'expired'
+  const hasAnyAccess = hasActiveSubscription || isInTrial || hasPaidMonth
 
   const facts = [
     company.sector && { label: 'Сектор', value: company.sector },
@@ -97,7 +98,6 @@ export function CompanyDashboard() {
               {hasActiveSubscription && (
                 <>
                   <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Активен абонамент</span>
-                  <p className="status-title">30€ / месец</p>
                   {subscription.current_period_end && (
                     <p className="status-sub">
                       {subscription.cancel_at_period_end ? 'Ще спре на ' : 'Подновява се на '}
@@ -106,37 +106,51 @@ export function CompanyDashboard() {
                   )}
                 </>
               )}
-              {!hasActiveSubscription && isInTrial && (
-                <>
-                  <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Пробен период</span>
-                  <p className="status-title">Безплатен достъп</p>
-                  <p className="status-sub">Абонирайте се отсега, за да не се прекъсва достъпът след изтичане.</p>
-                </>
+              {!hasActiveSubscription && hasPaidMonth && (
+                <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Платен достъп</span>
               )}
-              {!hasActiveSubscription && !isInTrial && (
-                <>
-                  <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Няма достъп</span>
-                  <p className="status-title">Пробният период е изтекъл</p>
-                  <p className="status-sub">Абонирайте се, за да продължите да търсите кандидати.</p>
-                </>
+              {!hasActiveSubscription && !hasPaidMonth && isInTrial && (
+                <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Пробен период</span>
+              )}
+              {!hasAnyAccess && (
+                <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Няма достъп</span>
               )}
             </div>
           </div>
 
-          <div className="status-actions">
-            {hasActiveSubscription ? (
-              !subscription.cancel_at_period_end && (
+          {hasActiveSubscription && (
+            <div className="status-actions">
+              {!subscription.cancel_at_period_end && (
                 <button onClick={handleCancel} disabled={cancelling} className="btn-text-danger">
                   {cancelling ? 'Отменям...' : 'Отмени абонамент'}
                 </button>
-              )
-            ) : (
-              <CheckoutButton
-                priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
-                label={isInTrial ? 'Абонирай се сега — 30€/мес' : 'Абонирай се — 30€/мес'}
-              />
-            )}
-          </div>
+              )}
+            </div>
+          )}
+
+          {!hasActiveSubscription && hasPaidMonth && (
+            <>
+              <p className="status-sub" style={{ marginBottom: '1rem' }}>
+                Платено до {new Date(company.paid_until).toLocaleDateString('bg-BG')}. Месечният план не се подновява автоматично — плащаш пак, когато поискаш.
+              </p>
+              <PlanPicker />
+            </>
+          )}
+
+          {!hasActiveSubscription && !hasPaidMonth && isInTrial && (
+            <>
+              <h3 style={{ marginBottom: '1rem' }}>🎁 Пробен период — остават {trialDaysLeft} {trialDaysLeft === 1 ? 'ден' : 'дни'}</h3>
+              <PlanPicker />
+            </>
+          )}
+
+          {!hasAnyAccess && (
+            <>
+              <h3 style={{ marginBottom: '1rem' }}>Достъпът е изтекъл</h3>
+              <PlanPicker />
+            </>
+          )}
+
           {message && <p className="status-sub" style={{ marginTop: '0.75rem' }}>{message}</p>}
         </div>
 
