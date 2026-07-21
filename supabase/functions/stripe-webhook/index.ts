@@ -13,13 +13,6 @@ const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 )
 
-// Безопасно взима "current_period_end" — понякога е на горно ниво,
-// понякога живее вътре в items.data[0] (зависи от Stripe API версията на payload-а)
-function getPeriodEnd(subscription) {
-  const raw = subscription.current_period_end ?? subscription.items?.data?.[0]?.current_period_end
-  return raw ? new Date(raw * 1000).toISOString() : null
-}
-
 Deno.serve(async (req) => {
   const signature = req.headers.get("Stripe-Signature")!
   const body = await req.text()
@@ -31,97 +24,50 @@ Deno.serve(async (req) => {
     return new Response(`Webhook грешка: ${err.message}`, { status: 400 })
   }
 
-  const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
-  const companyMonthlyPriceId = Deno.env.get("STRIPE_COMPANY_MONTHLY_PRICE_ID")
-  const companyYearlyPriceId = Deno.env.get("STRIPE_COMPANY_YEARLY_PRICE_ID")
-  const companyPriceIds = [companyMonthlyPriceId, companyYearlyPriceId]
-
   if (event.type === "checkout.session.completed") {
     const session = event.data.object
     const userId = session.client_reference_id
-    const customerId = session.customer
+    const priceId = session.line_items?.data?.[0]?.price?.id
 
-    if (session.mode === "payment") {
-      // Еднократно плащане — месечен company план без обвързване
+    // line_items не идва по подразбиране в session обекта — трябва да го изтеглим отделно
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
+    const actualPriceId = lineItems.data[0]?.price?.id
+
+    const goldPriceId = Deno.env.get("STRIPE_GOLD_PRICE_ID")
+    const companyPriceId = Deno.env.get("STRIPE_COMPANY_PRICE_ID")
+
+    const now = new Date()
+
+    if (actualPriceId === goldPriceId) {
+      const { data: candidateData } = await supabaseAdmin
+        .from("candidates")
+        .select("gold_until")
+        .eq("id", userId)
+        .single()
+
+      const currentUntil = candidateData?.gold_until ? new Date(candidateData.gold_until) : null
+      const base = currentUntil && currentUntil > now ? currentUntil : now
+      const newUntil = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000)
+
+      await supabaseAdmin
+        .from("candidates")
+        .update({ is_gold: true, gold_until: newUntil.toISOString() })
+        .eq("id", userId)
+    } else if (actualPriceId === companyPriceId) {
       const { data: companyData } = await supabaseAdmin
         .from("companies")
         .select("paid_until")
         .eq("id", userId)
         .single()
 
-      const now = new Date()
-      const currentPaidUntil = companyData?.paid_until ? new Date(companyData.paid_until) : null
-      // Ако вече има бъдещо платено време, добавяме 30 дни ОТГОРЕ (stacking) —
-      // ако е изтекло/липсва, тръгваме от сега
-      const base = currentPaidUntil && currentPaidUntil > now ? currentPaidUntil : now
-      const newPaidUntil = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000)
+      const currentUntil = companyData?.paid_until ? new Date(companyData.paid_until) : null
+      const base = currentUntil && currentUntil > now ? currentUntil : now
+      const newUntil = new Date(base.getTime() + 30 * 24 * 60 * 60 * 1000)
 
       await supabaseAdmin
         .from("companies")
-        .update({ paid_until: newPaidUntil.toISOString() })
+        .update({ paid_until: newUntil.toISOString() })
         .eq("id", userId)
-    } else {
-      // Recurring — gold или годишен company план
-      const subscriptionId = session.subscription
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-      const priceId = subscription.items.data[0].price.id
-
-      if (priceId === goldPriceId) {
-        await supabaseAdmin
-          .from("candidates")
-          .update({ is_gold: true, stripe_customer_id: customerId })
-          .eq("id", userId)
-      } else if (companyPriceIds.includes(priceId)) {
-        const { error: upsertError } = await supabaseAdmin
-          .from("subscriptions")
-          .upsert({
-            company_id: userId,
-            plan: "company_plan",
-            status: subscription.status,
-            stripe_customer_id: customerId,
-            stripe_subscription_id: subscriptionId,
-            current_period_end: getPeriodEnd(subscription),
-            cancel_at_period_end: false,
-          }, { onConflict: "company_id" })
-
-        if (upsertError) {
-          console.error("Грешка при запис на subscription:", upsertError.message)
-        }
-      }
-    }
-  }
-
-  if (event.type === "customer.subscription.updated") {
-    const subscription = event.data.object
-
-    const { error: updateError } = await supabaseAdmin
-      .from("subscriptions")
-      .update({
-        status: subscription.status,
-        current_period_end: getPeriodEnd(subscription),
-        cancel_at_period_end: subscription.cancel_at_period_end,
-      })
-      .eq("stripe_subscription_id", subscription.id)
-
-    if (updateError) {
-      console.error("Грешка при update:", updateError.message)
-    }
-  }
-
-  if (event.type === "customer.subscription.deleted") {
-    const subscription = event.data.object
-    const priceId = subscription.items.data[0].price.id
-
-    if (priceId === goldPriceId) {
-      await supabaseAdmin
-        .from("candidates")
-        .update({ is_gold: false })
-        .eq("stripe_customer_id", subscription.customer)
-    } else {
-      await supabaseAdmin
-        .from("subscriptions")
-        .update({ status: "cancelled" })
-        .eq("stripe_subscription_id", subscription.id)
     }
   }
 

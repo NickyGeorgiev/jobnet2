@@ -38,10 +38,10 @@ export function Home() {
   return (
     <div>
       <div className="hero-banner">
-        <img src={bannerImg} alt="Jobnet" />
+        <img src={bannerImg} alt="Jobstate" />
         <div className="hero-banner-overlay">
           <div className="hero-banner-text">
-            <p className="hero-banner-eyebrow">Jobnet</p>
+            <p className="hero-banner-eyebrow">Jobstate</p>
             <h2 className="hero-banner-title">Работата те намира, не обратното.</h2>
           </div>
           <div className="hero-banner-ctas">
@@ -54,7 +54,7 @@ export function Home() {
       <section className="hero">
         <div>
           <p className="hero-eyebrow">Обратна платформа за работа</p>
-          <h1 className="hero-title">Кандидатите казват <span>каква заплата</span> търсят.</h1>
+          <h1 className="hero-title">Кандидатите казват каква заплата търсят.</h1>
           <p className="hero-sub">
             Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако плащат това, което искаш.
           </p>

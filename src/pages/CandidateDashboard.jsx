@@ -6,15 +6,12 @@ import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
-import { Spinner } from './Spinner'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
   const { session } = useAuth()
   const [cv, setCv] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [cancelling, setCancelling] = useState(false)
-  const [message, setMessage] = useState('')
   const [showCvModal, setShowCvModal] = useState(false)
   const [togglingActive, setTogglingActive] = useState(false)
 
@@ -32,24 +29,6 @@ export function CandidateDashboard() {
     setLoading(false)
   }
 
-  async function handleCancel() {
-    if (!confirm('Сигурни ли сте, че искате да отмените Gold абонамента?')) return
-    setCancelling(true)
-    setMessage('')
-
-    const { error } = await supabase.functions.invoke('cancel-subscription', {
-      body: { type: 'candidate' },
-    })
-
-    if (error) {
-      setMessage('Грешка: ' + error.message)
-    } else {
-      setMessage('Абонаментът е отменен.')
-      loadCv()
-    }
-    setCancelling(false)
-  }
-
   async function handleToggleActive() {
     setTogglingActive(true)
     const newActiveState = !cv.active
@@ -65,12 +44,17 @@ export function CandidateDashboard() {
     setTogglingActive(false)
   }
 
-  if (loading || !cv) return <Spinner label="Зареждам твоя профил..." />
+  if (loading || !cv) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Твоето име'
 
   const isCvComplete = cv.fname && cv.lname && cv.avatar_url && cv.target_salary &&
     cv.target_sector?.length > 0 && cv.target_cities?.length > 0
+
+  const isGoldActive = cv.gold_until && new Date(cv.gold_until) > new Date()
+  const goldDaysLeft = isGoldActive
+    ? Math.round((new Date(cv.gold_until) - new Date()) / (1000 * 60 * 60 * 24))
+    : 0
 
   return (
     <div className="dashboard-shell">
@@ -108,6 +92,44 @@ export function CandidateDashboard() {
         </div>
       </div>
 
+      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+        <div className="status-card-top">
+          <StatusRing state={isGoldActive ? 'gold' : 'expired'} daysLeft={0} />
+          <div>
+            {isGoldActive ? (
+              <>
+                <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
+                <p className="status-title">Излизаш най-отгоре</p>
+                <p className="status-sub">
+                  Валиден до {new Date(cv.gold_until).toLocaleDateString('bg-BG')} ({goldDaysLeft} {goldDaysLeft === 1 ? 'ден' : 'дни'})
+                </p>
+              </>
+            ) : (
+              <>
+                <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Стандартен профил</span>
+                <p className="status-title">Стани Gold кандидат</p>
+                <p className="status-sub">9.99€ за 30 дни — CV-то ти излиза първо в резултатите.</p>
+              </>
+            )}
+          </div>
+        </div>
+
+        {!isGoldActive && (
+          <div className="status-actions">
+            <CheckoutButton
+              priceId={import.meta.env.VITE_STRIPE_GOLD_PRICE_ID}
+              label="Стани Gold — 9.99€"
+            />
+          </div>
+        )}
+
+        {isGoldActive && (
+          <p className="status-sub" style={{ marginTop: '0.75rem' }}>
+            Можеш да платиш отново след 30 дни.
+          </p>
+        )}
+      </div>
+
       <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
         <Link to="/my-cv" className="action-tile">
           <span className="action-tile-icon">✎</span>
@@ -141,96 +163,55 @@ export function CandidateDashboard() {
         </div>
       )}
 
-      <div className="dashboard-grid-candidate">
-        <div>
-          <CvPaper cv={cv} />
+      <CvPaper cv={cv} />
 
-          <div className="match-strip">
-            <p className="match-strip-heading">Критерии за търсене на работа</p>
+      <div className="match-strip">
+        <p className="match-strip-heading">Критерии за търсене на работа</p>
 
-            {cv.target_salary && (
-              <div className="match-group">
-                <p className="match-group-label">Желана заплата</p>
-                <div className="tag-row">
-                  <span className="tag tag--salary">от {cv.target_salary} евро нетно</span>
-                </div>
-              </div>
-            )}
-
-            {cv.target_sector?.length > 0 && (
-              <div className="match-group">
-                <p className="match-group-label">Сектори в които търсите работа</p>
-                <div className="tag-row">
-                  {cv.target_sector.map((s) => <span key={s} className="tag">{s}</span>)}
-                </div>
-              </div>
-            )}
-
-            {cv.target_cities?.length > 0 && (
-              <div className="match-group">
-                <p className="match-group-label">Градове в които търсите работа</p>
-                <div className="tag-row">
-                  {cv.target_cities.map((c) => <span key={c} className="tag">{c}</span>)}
-                </div>
-              </div>
-            )}
-
-            {cv.target_level?.length > 0 && (
-              <div className="match-group">
-                <p className="match-group-label">Ниво в йерархията, което предпочитате</p>
-                <div className="tag-row">
-                  {cv.target_level.map((l) => <span key={l} className="tag">{l}</span>)}
-                </div>
-              </div>
-            )}
-
-            {cv.target_duration?.length > 0 && (
-              <div className="match-group">
-                <p className="match-group-label">Вид заетост, който търсите</p>
-                <div className="tag-row">
-                  {cv.target_duration.map((d) => <span key={d} className="tag">{d}</span>)}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <div className="status-card">
-            <div className="status-card-top">
-              <StatusRing state={cv.is_gold ? 'gold' : 'expired'} daysLeft={0} />
-              <div>
-                {cv.is_gold ? (
-                  <>
-                    <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
-                    <p className="status-title">Излизаш най-отгоре</p>
-                    <p className="status-sub">CV-то ти се показва първо на всяка фирма, търсеща в твоите критерии.</p>
-                  </>
-                ) : (
-                  <>
-                    <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Стандартен профил</span>
-                    <p className="status-title">Стани Gold кандидат</p>
-                    <p className="status-sub">10€/месец — CV-то ти излиза първо в резултатите.</p>
-                  </>
-                )}
-              </div>
+        {cv.target_salary && (
+          <div className="match-group">
+            <p className="match-group-label">Желана заплата</p>
+            <div className="tag-row">
+              <span className="tag tag--salary">от {cv.target_salary} евро нетно</span>
             </div>
-
-            <div className="status-actions">
-              {cv.is_gold ? (
-                <button onClick={handleCancel} disabled={cancelling} className="btn-text-danger">
-                  {cancelling ? 'Отменям...' : 'Отмени Gold абонамент'}
-                </button>
-              ) : (
-                <CheckoutButton
-                  priceId={import.meta.env.VITE_STRIPE_GOLD_PRICE_ID}
-                  label="Стани Gold — 10€/мес"
-                />
-              )}
-            </div>
-            {message && <p className="status-sub" style={{ marginTop: '0.75rem' }}>{message}</p>}
           </div>
-        </div>
+        )}
+
+        {cv.target_sector?.length > 0 && (
+          <div className="match-group">
+            <p className="match-group-label">Сектори в които търсите работа</p>
+            <div className="tag-row">
+              {cv.target_sector.map((s) => <span key={s} className="tag">{s}</span>)}
+            </div>
+          </div>
+        )}
+
+        {cv.target_cities?.length > 0 && (
+          <div className="match-group">
+            <p className="match-group-label">Градове в които търсите работа</p>
+            <div className="tag-row">
+              {cv.target_cities.map((c) => <span key={c} className="tag">{c}</span>)}
+            </div>
+          </div>
+        )}
+
+        {cv.target_level?.length > 0 && (
+          <div className="match-group">
+            <p className="match-group-label">Ниво в йерархията, което предпочитате</p>
+            <div className="tag-row">
+              {cv.target_level.map((l) => <span key={l} className="tag">{l}</span>)}
+            </div>
+          </div>
+        )}
+
+        {cv.target_duration?.length > 0 && (
+          <div className="match-group">
+            <p className="match-group-label">Вид заетост, който търсите</p>
+            <div className="tag-row">
+              {cv.target_duration.map((d) => <span key={d} className="tag">{d}</span>)}
+            </div>
+          </div>
+        )}
       </div>
 
       {showCvModal && (

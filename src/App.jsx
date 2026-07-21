@@ -64,7 +64,7 @@ function App() {
     <div>
       <nav className="navbar">
         <Link to="/">
-          <img src={logo} alt="Jobnet" className="navbar-logo-img" />
+          <img src={logo} alt="Jobstate" className="navbar-logo-img" />
         </Link>
 
         <button className="navbar-mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

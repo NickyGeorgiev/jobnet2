@@ -63,15 +63,7 @@ useEffect(() => {
       const isInTrial = companyData?.trial_ends_at && new Date(companyData.trial_ends_at) > new Date()
       const hasPaidMonth = companyData?.paid_until && new Date(companyData.paid_until) > new Date()
 
-      const { data: subData } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('company_id', session.user.id)
-        .maybeSingle()
-
-      const hasActiveSub = subData?.status === 'active'
-
-      setHasAccess(isInTrial || hasActiveSub || hasPaidMonth)
+      setHasAccess(isInTrial || hasPaidMonth)
     }
     checkAccess()
   }, [session])

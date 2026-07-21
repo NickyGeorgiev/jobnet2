@@ -28,7 +28,7 @@ export function Footer() {
       </div>
 
       <div className="footer-bottom">
-        © {new Date().getFullYear()} Jobnet. Всички права запазени.
+        © {new Date().getFullYear()} Jobstate.net Всички права запазени.
       </div>
     </footer>
   )
