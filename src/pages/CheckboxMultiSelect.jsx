@@ -41,7 +41,7 @@ export function CheckboxMultiSelect({ options, selected, onChange, label }) {
       <input
         type="text"
         className="input"
-        placeholder="Търси..."
+        placeholder="Търси... /може да изберете повече от един/"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         style={{ marginBottom: '0.5rem' }}

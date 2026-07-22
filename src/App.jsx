@@ -78,7 +78,7 @@ function App() {
 
             {session && profile?.role === 'candidate' && (
               <>
-                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Моето CV</Link>
+                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай CV</Link>
                 <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right' }}>
                   Виж CV
                 </button>
@@ -87,7 +87,7 @@ function App() {
 
             {session && profile?.role === 'company' && (
               <>
-                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Профил на фирмата</Link>
+                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай профила</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
               </>
             )}

@@ -6,7 +6,7 @@ export function Footer() {
     <footer className="site-footer">
       <div className="footer-inner">
         <div>
-          <p className="footer-brand">Jobnet</p>
+          <p className="footer-brand">Jobstate</p>
           <p className="footer-tagline">Обратната платформа за работа — кандидатите казват каква заплата търсят, фирмите намират точно тях.</p>
         </div>
 
