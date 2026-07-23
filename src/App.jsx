@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate } from 'react-router-dom'
 import { Home } from './pages/Home'
 import { Register } from './pages/Register'
@@ -25,6 +25,7 @@ import logo from './assets/logo.png'
 import { ScrollToTop } from './pages/ScrollToTop'
 import { NotFound } from './pages/NotFound'
 import { Spinner } from './pages/Spinner'
+import { PaymentHistory } from './pages/PaymentHistory'
 import './App.css'
 
 function App() {
@@ -33,6 +34,22 @@ function App() {
   const [showMyCv, setShowMyCv] = useState(false)
   const [myCvData, setMyCvData] = useState(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  useEffect(() => {
+    function handleFocusIn(e) {
+      // Само на тесен (мобилен) екран — на desktop няма виртуална клавиатура, няма нужда
+      if (window.innerWidth > 768) return
+
+      const tag = e.target.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        setTimeout(() => {
+          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        }, 300)
+      }
+    }
+    document.addEventListener('focusin', handleFocusIn)
+    return () => document.removeEventListener('focusin', handleFocusIn)
+  }, [])
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -78,17 +95,19 @@ function App() {
 
             {session && profile?.role === 'candidate' && (
               <>
-                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай CV</Link>
+                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Моето CV</Link>
                 <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right' }}>
                   Виж CV
                 </button>
+                <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
               </>
             )}
 
             {session && profile?.role === 'company' && (
               <>
-                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай профила</Link>
+                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Профил на фирмата</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
+                <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
               </>
             )}
 
@@ -130,6 +149,7 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/payments" element={<PaymentHistory />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

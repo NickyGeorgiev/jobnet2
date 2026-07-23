@@ -9,7 +9,7 @@ export function StatusRing({ state, daysLeft }) {
 
   if (state === 'trial' || state === 'gold') {
     fraction = state === 'gold' ? 1 : Math.max(0, Math.min(1, daysLeft / 3))
-    color = 'var(--color-gold)'
+    color = 'var(--color-success)'
     centerContent = state === 'gold'
       ? <span className="status-ring-number">✔</span>
       : (
@@ -35,7 +35,7 @@ export function StatusRing({ state, daysLeft }) {
         <circle
           cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
-          strokeDasharray={`${circumference * fraction} ${circumference}`}
+          strokeDasharray={`${circumference *(1- fraction)} ${circumference}`}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </svg>

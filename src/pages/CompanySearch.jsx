@@ -7,6 +7,7 @@ import { allCities } from '../data/citiesByRegion'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { CvModal } from './CvModal'
 import { Spinner } from './Spinner'
+import { MessageModal } from './MessageModal'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -49,8 +50,14 @@ export function CompanySearch() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedCandidate, setSelectedCandidate] = useState(null)
+  const [messagingCandidate, setMessagingCandidate] = useState(null)
 
-useEffect(() => {
+  async function handleViewDetails(candidate) {
+    await supabase.rpc('increment_profile_view', { candidate_id: candidate.id })
+    setSelectedCandidate(candidate)
+  }
+
+  useEffect(() => {
     async function checkAccess() {
       if (!session) return
 
@@ -110,6 +117,9 @@ useEffect(() => {
       setError(queryError.message)
     } else {
       setResults(shuffleNonGold(data))
+      if (data.length > 0) {
+        await supabase.rpc('increment_search_appearances', { candidate_ids: data.map((c) => c.id) })
+      }
     }
     setLoading(false)
   }
@@ -176,8 +186,15 @@ useEffect(() => {
 
                 <p className="candidate-card-salary">от {c.target_salary} €</p>
 
-                <button className="candidate-card-btn" onClick={() => setSelectedCandidate(c)}>
+                <button className="candidate-card-btn" onClick={() => handleViewDetails(c)}>
                   Виж подробности
+                </button>
+                <button
+                  className="candidate-card-btn"
+                  style={{ marginTop: '0.5rem', background: 'var(--color-gold-soft)', color: 'var(--color-gold)' }}
+                  onClick={() => setMessagingCandidate(c)}
+                >
+                  ✉ Изпрати съобщение
                 </button>
               </div>
             )
@@ -186,6 +203,9 @@ useEffect(() => {
 
         {selectedCandidate && (
           <CvModal cv={selectedCandidate} onClose={() => setSelectedCandidate(null)} showDownload={false} />
+        )}
+        {messagingCandidate && (
+          <MessageModal candidate={messagingCandidate} onClose={() => setMessagingCandidate(null)} />
         )}
       </div>
     )

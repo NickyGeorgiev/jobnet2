@@ -129,7 +129,19 @@ export function CandidateDashboard() {
           </p>
         )}
       </div>
-
+      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+        <p className="status-title" style={{ marginBottom: '1rem' }}>Статистика на профила</p>
+        <div className="facts-row">
+          <div>
+            <span className="fact-value">{cv.search_appearances || 0}</span>
+            <span className="fact-label">Появявания в търсения</span>
+          </div>
+          <div>
+            <span className="fact-value">{cv.profile_views || 0}</span>
+            <span className="fact-label">Отворени подробности</span>
+          </div>
+        </div>
+      </div>
       <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
         <Link to="/my-cv" className="action-tile">
           <span className="action-tile-icon">✎</span>

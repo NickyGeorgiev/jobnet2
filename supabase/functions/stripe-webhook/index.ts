@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
 
     const now = new Date()
 
-    if (actualPriceId === goldPriceId) {
+if (actualPriceId === goldPriceId) {
       const { data: candidateData } = await supabaseAdmin
         .from("candidates")
         .select("gold_until")
@@ -53,6 +53,15 @@ Deno.serve(async (req) => {
         .from("candidates")
         .update({ is_gold: true, gold_until: newUntil.toISOString() })
         .eq("id", userId)
+
+      await supabaseAdmin.from("payments").insert({
+        user_id: userId,
+        user_type: "candidate",
+        amount: session.amount_total / 100,
+        description: "Gold статус — 30 дни",
+        stripe_payment_intent_id: session.payment_intent,
+        stripe_checkout_session_id: session.id,
+      })
     } else if (actualPriceId === companyPriceId) {
       const { data: companyData } = await supabaseAdmin
         .from("companies")
@@ -68,6 +77,15 @@ Deno.serve(async (req) => {
         .from("companies")
         .update({ paid_until: newUntil.toISOString() })
         .eq("id", userId)
+
+      await supabaseAdmin.from("payments").insert({
+        user_id: userId,
+        user_type: "company",
+        amount: session.amount_total / 100,
+        description: "Достъп до търсене — 30 дни",
+        stripe_payment_intent_id: session.payment_intent,
+        stripe_checkout_session_id: session.id,
+      })
     }
   }
 
