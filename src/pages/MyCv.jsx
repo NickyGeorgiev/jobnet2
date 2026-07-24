@@ -9,6 +9,7 @@ import { LanguagesSection } from './LanguagesSection'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { Spinner } from './Spinner'
 import { useToast } from './Toast'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './MyCv.css'
 
 const LEVEL_OPTIONS = [
@@ -45,6 +46,7 @@ function emptyLanguage() {
 }
 
 export function MyCv() {
+  useDocumentTitle('Моето CV')
   const { session } = useAuth()
   const { showToast } = useToast()
   const [formData, setFormData] = useState({

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+Disallow: /my-cv
+Disallow: /company-profile
+Disallow: /search
+Disallow: /payments
+Disallow: /reset-password
+
+Sitemap: https://jobstate.net/sitemap.xml

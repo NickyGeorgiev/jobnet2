@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-assignment */
 export function StatusRing({ state, daysLeft }) {
   const size = 86
   const radius = 36
@@ -20,11 +21,11 @@ export function StatusRing({ state, daysLeft }) {
       )
   } else if (state === 'active') {
     fraction = 1
-    color = 'var(--color-teal)'
+    color = 'var(--color-success)'
     centerContent = <span className="status-ring-number">✔</span>
   } else {
     fraction = 0.06
-    color = 'var(--color-danger)'
+    color = 'none'
     centerContent = <span className="status-ring-number">X</span>
   }
 
@@ -35,7 +36,7 @@ export function StatusRing({ state, daysLeft }) {
         <circle
           cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
-          strokeDasharray={`${circumference *(1- fraction)} ${circumference}`}
+          strokeDasharray={`${circumference * fraction} ${circumference}`}
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </svg>

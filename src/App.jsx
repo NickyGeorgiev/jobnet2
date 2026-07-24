@@ -26,6 +26,8 @@ import { ScrollToTop } from './pages/ScrollToTop'
 import { NotFound } from './pages/NotFound'
 import { Spinner } from './pages/Spinner'
 import { PaymentHistory } from './pages/PaymentHistory'
+import { HowItWorks } from './pages/HowItWorks'
+import { CookiePolicy } from './pages/CookiePolicy'
 import './App.css'
 
 function App() {
@@ -95,7 +97,7 @@ function App() {
 
             {session && profile?.role === 'candidate' && (
               <>
-                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Моето CV</Link>
+                <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай CV</Link>
                 <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right' }}>
                   Виж CV
                 </button>
@@ -150,6 +152,8 @@ function App() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/payments" element={<PaymentHistory />} />
+        <Route path="/how-it-works" element={<HowItWorks />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

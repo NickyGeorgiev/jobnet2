@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './AdminDashboard.css'
 
 const SETTING_LABELS = {
@@ -16,6 +17,7 @@ const SETTING_LABELS = {
 }
 
 export function AdminDashboard() {
+  useDocumentTitle('Админ панел')
   const [stats, setStats] = useState(null)
   const [settings, setSettings] = useState([])
   const [saving, setSaving] = useState(false)

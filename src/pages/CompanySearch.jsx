@@ -8,6 +8,7 @@ import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { CvModal } from './CvModal'
 import { Spinner } from './Spinner'
 import { MessageModal } from './MessageModal'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -39,6 +40,7 @@ function shuffleNonGold(data) {
 }
 
 export function CompanySearch() {
+  useDocumentTitle('Търсене на кандидати')
   const { session } = useAuth()
   const [hasAccess, setHasAccess] = useState(null)
   const [offeredSalary, setOfferedSalary] = useState('')

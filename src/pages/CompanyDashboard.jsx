@@ -4,9 +4,11 @@ import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './CompanyDashboard.css'
 
 export function CompanyDashboard() {
+  useDocumentTitle('Панел за фирма')
   const { session } = useAuth()
   const [company, setCompany] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -67,7 +69,7 @@ export function CompanyDashboard() {
       <div className="status-card" style={{ marginBottom: '1.5rem' }}>
         <div className="status-card-top">
           <StatusRing state={ringState} daysLeft={hasPaidAccess ? 0 : trialDaysLeft} />
-          <div>
+          <div className="status-card-top">
             {hasPaidAccess && (
               <>
                 <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Платен достъп</span>

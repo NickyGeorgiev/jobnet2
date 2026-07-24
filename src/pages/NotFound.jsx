@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useDocumentTitle } from '../useDocumentTitle'
 
 export function NotFound() {
+  useDocumentTitle('Не е намерена')
   return (
     <div style={{
       minHeight: '60vh', display: 'flex', flexDirection: 'column',

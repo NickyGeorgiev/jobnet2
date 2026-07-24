@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
+import { useDocumentTitle } from '../useDocumentTitle'
 import bannerImg from '../assets/background.jpg'
 import './Home.css'
 
@@ -25,6 +26,7 @@ function HeroArt() {
 }
 
 export function Home() {
+  useDocumentTitle(null) // празно = показва основния title
   const [logos, setLogos] = useState([])
 
   useEffect(() => {

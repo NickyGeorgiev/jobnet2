@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './AuthForm.css'
 
 export function Register() {
+  useDocumentTitle('Регистрация')
   const { refreshProfile } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()

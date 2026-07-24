@@ -7,13 +7,14 @@ export function Footer() {
       <div className="footer-inner">
         <div>
           <p className="footer-brand">Jobstate</p>
-          <p className="footer-tagline">Обратната платформа за работа — кандидатите казват каква заплата търсят, фирмите намират точно тях.</p>
+          <p className="footer-tagline">Когато условията съвпаднат, започва разговорът.</p>
         </div>
 
         <div>
           <p className="footer-col-heading">Платформа</p>
           <ul className="footer-links">
             <li><Link to="/about">За нас</Link></li>
+            <li><Link to="/how-it-works">Как работи</Link></li>
             <li><Link to="/contact">Контакти</Link></li>
           </ul>
         </div>
@@ -23,6 +24,7 @@ export function Footer() {
           <ul className="footer-links">
             <li><Link to="/terms">Общи условия</Link></li>
             <li><Link to="/privacy">Политика за поверителност</Link></li>
+            <li><Link to="/cookies">Политика за бисквитки</Link></li>
           </ul>
         </div>
       </div>

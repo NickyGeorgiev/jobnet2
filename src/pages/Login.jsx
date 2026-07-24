@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './AuthForm.css'
 
 export function Login() {
+  useDocumentTitle('Вход')
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

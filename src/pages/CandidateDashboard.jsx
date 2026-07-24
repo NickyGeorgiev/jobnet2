@@ -6,9 +6,11 @@ import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
+import { useDocumentTitle } from '../useDocumentTitle'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
+  useDocumentTitle('Панел за кандидат')
   const { session } = useAuth()
   const [cv, setCv] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -95,7 +97,7 @@ export function CandidateDashboard() {
       <div className="status-card" style={{ marginBottom: '1.5rem' }}>
         <div className="status-card-top">
           <StatusRing state={isGoldActive ? 'gold' : 'expired'} daysLeft={0} />
-          <div>
+          <div className="status-card-top">
             {isGoldActive ? (
               <>
                 <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>

@@ -1,0 +1,28 @@
+.legal-content h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--color-text);
+  margin: 1.75rem 0 0.75rem;
+}
+.legal-content h3:first-child { margin-top: 0; }
+
+.legal-content h4 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.legal-content p { margin: 0 0 0.9rem; }
+
+.legal-content ul { margin: 0 0 0.9rem; padding-left: 1.3rem; }
+.legal-content li { margin-bottom: 0.35rem; }
+
+.legal-content strong { color: var(--color-text); }
+
+.legal-fill-blank {
+  color: var(--color-gold);
+  border-bottom: 1px dashed var(--color-gold);
+  padding: 0 2px;
+  font-style: normal;
+}
