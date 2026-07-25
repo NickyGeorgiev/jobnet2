@@ -97,7 +97,7 @@ export function CandidateDashboard() {
       <div className="status-card" style={{ marginBottom: '1.5rem' }}>
         <div className="status-card-top">
           <StatusRing state={isGoldActive ? 'gold' : 'expired'} daysLeft={0} />
-          <div className="status-card-top">
+          <div>
             {isGoldActive ? (
               <>
                 <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
@@ -136,11 +136,11 @@ export function CandidateDashboard() {
         <div className="facts-row">
           <div>
             <span className="fact-value">{cv.search_appearances || 0}</span>
-            <span className="fact-label">Появявания в търсения</span>
+            <span className="fact-label">Показвания в търсене</span>
           </div>
           <div>
             <span className="fact-value">{cv.profile_views || 0}</span>
-            <span className="fact-label">Отворени подробности</span>
+            <span className="fact-label">Отворено CV</span>
           </div>
         </div>
       </div>

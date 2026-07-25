@@ -28,6 +28,7 @@ import { Spinner } from './pages/Spinner'
 import { PaymentHistory } from './pages/PaymentHistory'
 import { HowItWorks } from './pages/HowItWorks'
 import { CookiePolicy } from './pages/CookiePolicy'
+import { ScrollToTopOnNavigate } from './pages/ScrollToTopOnNavigate'
 import './App.css'
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
 
   return (
     <div>
+      <ScrollToTopOnNavigate />
       <nav className="navbar">
         <Link to="/">
           <img src={logo} alt="Jobstate" className="navbar-logo-img" />
@@ -94,6 +96,7 @@ function App() {
           <div className="navbar-links">
             <Link to="/about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>За нас</Link>
             <Link to="/contact" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Контакти</Link>
+            <Link to="/how-it-works" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Как работи?</Link>
 
             {session && profile?.role === 'candidate' && (
               <>

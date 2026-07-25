@@ -14,7 +14,7 @@ export function CompanyProfile() {
   const { showToast } = useToast()
   const { session } = useAuth()
   const [formData, setFormData] = useState({
-    company_name: '', bulstat: '', sector: '', founded_year: '',
+    company_name: '', bulstat: '', mol: '', sector: '', founded_year: '',
     employee_count: '', locations_count: '', bio: '',
     contact_phone: '', contact_address: '', contact_email: '', logo_url: '',
   })
@@ -35,6 +35,7 @@ export function CompanyProfile() {
         setFormData({
           company_name: data.company_name || '',
           bulstat: data.bulstat || '',
+          mol: data.mol || '',
           sector: data.sector || '',
           founded_year: data.founded_year || '',
           employee_count: data.employee_count || '',
@@ -89,6 +90,7 @@ export function CompanyProfile() {
       .update({
         company_name: formData.company_name,
         bulstat: formData.bulstat,
+        mol: formData.mol,
         sector: formData.sector,
         founded_year: formData.founded_year ? parseInt(formData.founded_year) : null,
         employee_count: formData.employee_count,
@@ -144,6 +146,13 @@ export function CompanyProfile() {
               <label>Булстат</label>
               <input className="input" name="bulstat" value={formData.bulstat} onChange={handleChange} />
             </div>
+            <div className="field">
+              <label>МОЛ (Материално отговорно лице)</label>
+              <input className="input" name="mol" value={formData.mol} onChange={handleChange} />
+            </div>
+          </div>
+
+          <div className="form-row-2">
             <div className="field">
               <label>Сектор на дейност</label>
               <select className="input" name="sector" value={formData.sector} onChange={handleChange}>

@@ -9,6 +9,7 @@ import { CvModal } from './CvModal'
 import { Spinner } from './Spinner'
 import { MessageModal } from './MessageModal'
 import { useDocumentTitle } from '../useDocumentTitle'
+import { CheckoutButton } from './CheckoutButton'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -60,19 +61,35 @@ export function CompanySearch() {
   }
 
   useEffect(() => {
+
     async function checkAccess() {
-      if (!session) return
 
-      const { data: companyData } = await supabase
-        .from('companies')
-        .select('trial_ends_at, paid_until')
-        .eq('id', session.user.id)
-        .single()
+      if (!session) {
+        setHasAccess(false)
+        return
+      }
 
-      const isInTrial = companyData?.trial_ends_at && new Date(companyData.trial_ends_at) > new Date()
-      const hasPaidMonth = companyData?.paid_until && new Date(companyData.paid_until) > new Date()
+      try {
+        const { data: companyData, error: queryError } = await supabase
+          .from('companies')
+          .select('trial_ends_at, paid_until')
+          .eq('id', session.user.id)
+          .single()
 
-      setHasAccess(isInTrial || hasPaidMonth)
+        if (queryError) {
+          console.error('Грешка при проверка на достъпа:', queryError.message)
+          setHasAccess(false)
+          return
+        }
+
+        const isInTrial = Boolean(companyData?.trial_ends_at && new Date(companyData.trial_ends_at) > new Date())
+        const hasPaidMonth = Boolean(companyData?.paid_until && new Date(companyData.paid_until) > new Date())
+
+        setHasAccess(isInTrial || hasPaidMonth)
+      } catch (err) {
+        console.error('Неочаквана грешка при проверка на достъпа:', err)
+        setHasAccess(false)
+      }
     }
     checkAccess()
   }, [session])
@@ -139,13 +156,19 @@ export function CompanySearch() {
       <div className="search-shell" style={{ maxWidth: '500px' }}>
         <h2 style={{ fontFamily: 'var(--font-display)' }}>Търсене на кандидати</h2>
         <div className="status-card" style={{ borderColor: 'var(--color-gold)' }}>
-          <h3 className="status-title">Нямате активен абонамент</h3>
-          <p className="status-sub" style={{ marginBottom: '1rem' }}>
-            За да търсите кандидати, трябва да имате активен абонамент (30€/месец) или неизтекъл пробен период.
+          <h3 className="status-title">Нямате достъп до търсенето</h3>
+          <p className="status-sub" style={{ marginBottom: '1.25rem' }}>
+            Пробният период е изтекъл или все още нямате платен достъп. Платете 29.99€ за 30 дни достъп, за да продължите да търсите кандидати.
           </p>
-          <Link to="/" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
-            Към началния екран
-          </Link>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <CheckoutButton
+              priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
+              label="Плати за 30 дни — 29.99€"
+            />
+            <Link to="/" className="btn-secondary" style={{ display: 'inline-block', textDecoration: 'none' }}>
+              Обратно към началото
+            </Link>
+          </div>
         </div>
       </div>
     )

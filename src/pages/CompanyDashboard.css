@@ -230,13 +230,14 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.1rem;
 }
 
 .fact-value {
   font-family: var(--font-mono);
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   display: block;
+  text-align: center;
 }
 
 .fact-label {

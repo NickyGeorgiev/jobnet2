@@ -15,12 +15,15 @@ export function LegalPage({ title, isPlaceholder, children }) {
         </div>
       )}
 
-      <div className="legal-content" style={{
+      <div style={{
         background: 'var(--color-surface)', border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-lg)', padding: '2rem',
-        color: 'var(--color-text-muted)', lineHeight: 1.75, fontSize: '0.95rem'
       }}>
-        {children}
+        <div className="legal-content legal-window" style={{
+          color: 'var(--color-text-muted)', lineHeight: 1.75, fontSize: '0.95rem'
+        }}>
+          {children}
+        </div>
       </div>
     </div>
   )

@@ -29,30 +29,38 @@ export function AdminDashboard() {
   }, [])
 
   async function loadStats() {
+    const now = new Date().toISOString()
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+
     const [
       candidatesCount,
       companiesCount,
-      goldCount,
-      activeSubsCount,
+      goldActiveCount,
+      companiesPaidCount,
       trialCount,
+      monthPayments,
+      allPayments,
     ] = await Promise.all([
       supabase.from('candidates').select('*', { count: 'exact', head: true }),
       supabase.from('companies').select('*', { count: 'exact', head: true }),
-      supabase.from('candidates').select('*', { count: 'exact', head: true }).eq('is_gold', true),
-      supabase.from('subscriptions').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-      supabase.from('companies').select('*', { count: 'exact', head: true }).gt('trial_ends_at', new Date().toISOString()),
+      supabase.from('candidates').select('*', { count: 'exact', head: true }).gt('gold_until', now),
+      supabase.from('companies').select('*', { count: 'exact', head: true }).gt('paid_until', now),
+      supabase.from('companies').select('*', { count: 'exact', head: true }).gt('trial_ends_at', now),
+      supabase.from('payments').select('amount').gte('created_at', startOfMonth),
+      supabase.from('payments').select('amount'),
     ])
 
-    const gold = goldCount.count || 0
-    const activeSubs = activeSubsCount.count || 0
+    const monthRevenue = (monthPayments.data || []).reduce((sum, p) => sum + Number(p.amount), 0)
+    const totalRevenue = (allPayments.data || []).reduce((sum, p) => sum + Number(p.amount), 0)
 
     setStats({
       candidates: candidatesCount.count || 0,
       companies: companiesCount.count || 0,
-      gold,
-      activeSubs,
+      goldActive: goldActiveCount.count || 0,
+      companiesPaid: companiesPaidCount.count || 0,
       trialing: trialCount.count || 0,
-      estimatedRevenue: gold * 10 + activeSubs * 30,
+      monthRevenue,
+      totalRevenue,
     })
   }
 
@@ -106,20 +114,24 @@ export function AdminDashboard() {
             <p className="admin-stat-label">Регистрирани фирми</p>
           </div>
           <div className="admin-stat-card">
-            <p className="admin-stat-value">{stats.gold}</p>
-            <p className="admin-stat-label">Gold кандидати</p>
+            <p className="admin-stat-value">{stats.goldActive}</p>
+            <p className="admin-stat-label">Активни Gold кандидати</p>
           </div>
           <div className="admin-stat-card">
-            <p className="admin-stat-value">{stats.activeSubs}</p>
-            <p className="admin-stat-label">Активни фирмени абонаменти</p>
+            <p className="admin-stat-value">{stats.companiesPaid}</p>
+            <p className="admin-stat-label">Фирми с платен достъп</p>
           </div>
           <div className="admin-stat-card">
             <p className="admin-stat-value">{stats.trialing}</p>
             <p className="admin-stat-label">Фирми в пробен период</p>
           </div>
           <div className="admin-stat-card" style={{ borderColor: 'var(--color-gold)' }}>
-            <p className="admin-stat-value" style={{ color: 'var(--color-gold)' }}>{stats.estimatedRevenue}€</p>
-            <p className="admin-stat-label">Очакван месечен приход</p>
+            <p className="admin-stat-value" style={{ color: 'var(--color-gold)' }}>{stats.monthRevenue.toFixed(2)}€</p>
+            <p className="admin-stat-label">Приход този месец</p>
+          </div>
+          <div className="admin-stat-card" style={{ borderColor: 'var(--color-teal)' }}>
+            <p className="admin-stat-value" style={{ color: 'var(--color-teal)' }}>{stats.totalRevenue.toFixed(2)}€</p>
+            <p className="admin-stat-label">Общ приход (всички времена)</p>
           </div>
         </div>
       )}

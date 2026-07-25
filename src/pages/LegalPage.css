@@ -26,3 +26,18 @@
   padding: 0 2px;
   font-style: normal;
 }
+
+.legal-window {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.legal-window::-webkit-scrollbar { width: 8px; }
+.legal-window::-webkit-scrollbar-track { background: var(--color-surface-raised); border-radius: 8px; }
+.legal-window::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 8px; }
+.legal-window::-webkit-scrollbar-thumb:hover { background: var(--color-teal); }
+
+@media (max-width: 600px) {
+  .legal-window { max-height: 55vh; }
+}

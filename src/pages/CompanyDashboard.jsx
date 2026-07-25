@@ -69,7 +69,7 @@ export function CompanyDashboard() {
       <div className="status-card" style={{ marginBottom: '1.5rem' }}>
         <div className="status-card-top">
           <StatusRing state={ringState} daysLeft={hasPaidAccess ? 0 : trialDaysLeft} />
-          <div className="status-card-top">
+          <div>
             {hasPaidAccess && (
               <>
                 <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Платен достъп</span>
