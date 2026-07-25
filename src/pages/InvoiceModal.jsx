@@ -127,6 +127,7 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
               <p style={{ fontSize: '0.9rem', margin: 0, lineHeight: 1.6 }}>
                 <strong>{company.company_name}</strong><br />
                 ЕИК: {company.bulstat}<br />
+                ИН по ДДС: BG{company.bulstat}<br />
                 МОЛ: {company.mol}<br />
                 Адрес: {company.contact_address}<br />
                 {userEmail}
