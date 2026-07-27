@@ -132,6 +132,7 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
                 Адрес: {company.contact_address}<br />
                 {userEmail}
               </p>
+              
             ) : (
               <p style={{ fontSize: '0.9rem', margin: 0 }}><strong>{userEmail}</strong></p>
             )}

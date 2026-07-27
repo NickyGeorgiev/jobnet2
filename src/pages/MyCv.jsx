@@ -304,6 +304,20 @@ export function MyCv() {
           </div>
         </div>
 
+        <EducationSection
+          education={education}
+          onChange={handleEducationChange}
+          onAdd={addEducation}
+          onRemove={removeEducation}
+        />
+
+        <WorkExperienceSection
+          workExperience={workExperience}
+          onChange={handleWorkExperienceChange}
+          onAdd={addWorkExperience}
+          onRemove={removeWorkExperience}
+        />
+
         <div className="cv-form-section">
           <h3 className="cv-form-section-title">Допълнителна информация</h3>
 
@@ -339,20 +353,6 @@ export function MyCv() {
           onChange={handleLanguageChange}
           onAdd={addLanguage}
           onRemove={removeLanguage}
-        />
-
-        <WorkExperienceSection
-          workExperience={workExperience}
-          onChange={handleWorkExperienceChange}
-          onAdd={addWorkExperience}
-          onRemove={removeWorkExperience}
-        />
-
-        <EducationSection
-          education={education}
-          onChange={handleEducationChange}
-          onAdd={addEducation}
-          onRemove={removeEducation}
         />
 
         <div className="cv-form-section">

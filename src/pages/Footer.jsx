@@ -7,7 +7,7 @@ export function Footer() {
       <div className="footer-inner">
         <div>
           <p className="footer-brand">Jobstate</p>
-          <p className="footer-tagline">Когато условията съвпаднат, започва разговорът.</p>
+          <p className="footer-tagline">Jobstate свързва кандидати и работодатели чрез съвпадение на реални условия — заплата, град, сектор. Кандидатите казват какво търсят, работодателите намират точните хора.</p>
         </div>
 
         <div>
@@ -15,6 +15,7 @@ export function Footer() {
           <ul className="footer-links">
             <li><Link to="/about">За нас</Link></li>
             <li><Link to="/how-it-works">Как работи</Link></li>
+            <li><Link to="/blog">Блог</Link></li>
             <li><Link to="/contact">Контакти</Link></li>
           </ul>
         </div>

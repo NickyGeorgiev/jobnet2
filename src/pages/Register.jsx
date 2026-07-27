@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 import { useDocumentTitle } from '../useDocumentTitle'
+import { TurnstileWidget } from './TurnstileWidget'
 import './AuthForm.css'
 
 export function Register() {
@@ -16,11 +17,28 @@ export function Register() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (!turnstileToken) {
+      setError('Моля, потвърдете, че не сте робот.')
+      return
+    }
+
     setLoading(true)
+
+    const { data: verifyData } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: turnstileToken },
+    })
+
+    if (!verifyData?.success) {
+      setError('Проверката не бе успешна, опитайте отново.')
+      setLoading(false)
+      return
+    }
 
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
 
@@ -78,6 +96,8 @@ export function Register() {
           <label>Парола</label>
           <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
         </div>
+
+        <TurnstileWidget onVerify={setTurnstileToken} />
 
         {error && <p className="auth-error">{error}</p>}
 

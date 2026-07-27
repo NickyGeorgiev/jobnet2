@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useToast } from './Toast'
+import { TurnstileWidget } from './TurnstileWidget'
 
 export function ContactUs() {
   const { showToast } = useToast()
@@ -9,11 +10,28 @@ export function ContactUs() {
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setSending(true)
     setError('')
+
+    if (!turnstileToken) {
+      setError('Моля, потвърдете, че не сте робот.')
+      return
+    }
+
+    setSending(true)
+
+    const { data: verifyData } = await supabase.functions.invoke('verify-turnstile', {
+      body: { token: turnstileToken },
+    })
+
+    if (!verifyData?.success) {
+      setError('Проверката не бе успешна, опитайте отново.')
+      setSending(false)
+      return
+    }
 
     const { data, error: invokeError } = await supabase.functions.invoke('send-contact-message', {
       body: { name, email, message },
@@ -45,19 +63,21 @@ export function ContactUs() {
 
           <form onSubmit={handleSubmit}>
             <div className="field">
-              <label>Име</label>
+              <label>Вашето име</label>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} required />
             </div>
 
             <div className="field">
-              <label>Имейл</label>
+              <label>Вашият имейл</label>
               <input type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
 
             <div className="field">
-              <label>Съобщение</label>
+              <label>Напишете съобщение</label>
               <textarea className="input" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} required />
             </div>
+
+            <TurnstileWidget onVerify={setTurnstileToken} />
 
             {error && <p style={{ color: 'var(--color-danger)', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</p>}
 

@@ -29,6 +29,10 @@ import { PaymentHistory } from './pages/PaymentHistory'
 import { HowItWorks } from './pages/HowItWorks'
 import { CookiePolicy } from './pages/CookiePolicy'
 import { ScrollToTopOnNavigate } from './pages/ScrollToTopOnNavigate'
+import { BlogList } from './pages/BlogList'
+import { BlogPost } from './pages/BlogPost'
+import { AdminBlog } from './pages/AdminBlog'
+import { AdminBlogEditor } from './pages/AdminBlogEditor'
 import './App.css'
 
 function App() {
@@ -95,6 +99,7 @@ function App() {
         <div className={`navbar-right ${mobileMenuOpen ? 'navbar-right--open' : ''}`}>
           <div className="navbar-links">
             <Link to="/about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>За нас</Link>
+            <Link to="/blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог</Link>
             <Link to="/contact" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Контакти</Link>
             <Link to="/how-it-works" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Как работи?</Link>
 
@@ -117,7 +122,10 @@ function App() {
             )}
 
             {session && profile?.role === 'admin' && (
-              <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Admin панел</Link>
+              <>
+                <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Admin панел</Link>
+                <Link to="/admin-blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог статии</Link>
+              </>
             )}
           </div>
 
@@ -157,6 +165,10 @@ function App() {
         <Route path="/payments" element={<PaymentHistory />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="/cookies" element={<CookiePolicy />} />
+        <Route path="/blog" element={<BlogList />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/admin-blog" element={<AdminBlog />} />
+        <Route path="/admin-blog/:id" element={<AdminBlogEditor />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
