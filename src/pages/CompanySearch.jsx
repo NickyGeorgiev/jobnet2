@@ -54,6 +54,7 @@ export function CompanySearch() {
   const [error, setError] = useState('')
   const [selectedCandidate, setSelectedCandidate] = useState(null)
   const [messagingCandidate, setMessagingCandidate] = useState(null)
+  const [savedIds, setSavedIds] = useState(new Set())
 
   async function handleViewDetails(candidate) {
     await supabase.rpc('increment_profile_view', { candidate_id: candidate.id })
@@ -221,6 +222,13 @@ export function CompanySearch() {
                 >
                   ✉ Изпрати съобщение
                 </button>
+                <button
+                  className="candidate-card-btn"
+                  style={{ marginTop: '0.5rem' }}
+                  onClick={() => handleToggleSave(c.id)}
+                >
+                  {savedIds.has(c.id) ? '★ Запазен' : '☆ Запази'}
+                </button>
               </div>
             )
           })}
@@ -235,7 +243,25 @@ export function CompanySearch() {
       </div>
     )
   }
-
+  async function handleToggleSave(candidateId) {
+    if (savedIds.has(candidateId)) {
+      await supabase
+        .from('saved_candidates')
+        .delete()
+        .eq('company_id', session.user.id)
+        .eq('candidate_id', candidateId)
+      setSavedIds((prev) => {
+        const next = new Set(prev)
+        next.delete(candidateId)
+        return next
+      })
+    } else {
+      await supabase
+        .from('saved_candidates')
+        .insert({ company_id: session.user.id, candidate_id: candidateId })
+      setSavedIds((prev) => new Set(prev).add(candidateId))
+    }
+  }
   // --- Изгледът с формата за търсене ---
   return (
     <div className="search-shell" style={{ maxWidth: '700px' }}>

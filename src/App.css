@@ -14,13 +14,17 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.1rem;
+}
+
+.nav-link {
+  font-size: 0.85rem;
 }
 
 /* Анимиран underline hover ефект за навигационните връзки */
@@ -87,7 +91,7 @@
   cursor: pointer;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1150px) {
   .navbar-mobile-toggle { display: block; }
 
   .navbar-right {

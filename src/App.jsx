@@ -33,6 +33,7 @@ import { BlogList } from './pages/BlogList'
 import { BlogPost } from './pages/BlogPost'
 import { AdminBlog } from './pages/AdminBlog'
 import { AdminBlogEditor } from './pages/AdminBlogEditor'
+import { SavedCandidates } from './pages/SavedCandidates'
 import './App.css'
 
 function App() {
@@ -115,8 +116,9 @@ function App() {
 
             {session && profile?.role === 'company' && (
               <>
-                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Профил на фирмата</Link>
+                <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай профил</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
+                <Link to="/saved-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Запазени кандидати</Link>
                 <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
               </>
             )}
@@ -169,6 +171,7 @@ function App() {
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/admin-blog" element={<AdminBlog />} />
         <Route path="/admin-blog/:id" element={<AdminBlogEditor />} />
+        <Route path="/saved-candidates" element={<SavedCandidates />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

@@ -25,7 +25,10 @@ export function BlogList() {
   return (
     <div className="blog-list-shell">
       <h1 style={{ fontFamily: 'var(--font-display)' }}>Блог</h1>
-      <p style={{ color: 'var(--color-text-muted)' }}>Съвети за търсене на работа, пазар на труда и кариерно развитие.</p>
+      <p style={{ color: 'var(--color-text-muted)' }}>
+        Съвети за търсене на работа, пазар на труда и кариерно развитие.
+        {' '}<a href="/rss.xml" style={{ color: 'var(--color-teal)' }}>RSS</a>
+      </p>
 
       {posts.length === 0 && <p style={{ color: 'var(--color-text-muted)', marginTop: '2rem' }}>Очаквайте скоро първите статии.</p>}
 
