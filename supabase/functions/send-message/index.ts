@@ -102,6 +102,11 @@ Deno.serve(async (req) => {
       })
     }
 
+    await supabaseAdmin.from("message_logs").insert({
+      company_id: user.id,
+      candidate_id: candidateId,
+    })
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     })

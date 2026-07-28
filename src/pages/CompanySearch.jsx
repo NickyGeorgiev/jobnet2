@@ -10,6 +10,7 @@ import { Spinner } from './Spinner'
 import { MessageModal } from './MessageModal'
 import { useDocumentTitle } from '../useDocumentTitle'
 import { CheckoutButton } from './CheckoutButton'
+import { useFreeMode } from '../FreeModeContext'
 import './CompanySearch.css'
 
 const LEVEL_OPTIONS = [
@@ -40,9 +41,19 @@ function shuffleNonGold(data) {
   return [...goldOnes, ...others]
 }
 
+function shuffleAll(data) {
+  const arr = [...data]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
 export function CompanySearch() {
   useDocumentTitle('Търсене на кандидати')
   const { session } = useAuth()
+  const { freeMode, loaded: freeModeLoaded } = useFreeMode()
   const [hasAccess, setHasAccess] = useState(null)
   const [offeredSalary, setOfferedSalary] = useState('')
   const [selectedSectors, setSelectedSectors] = useState([])
@@ -62,8 +73,13 @@ export function CompanySearch() {
   }
 
   useEffect(() => {
-
     async function checkAccess() {
+      if (!freeModeLoaded) return
+
+      if (freeMode) {
+        setHasAccess(true)
+        return
+      }
 
       if (!session) {
         setHasAccess(false)
@@ -93,7 +109,7 @@ export function CompanySearch() {
       }
     }
     checkAccess()
-  }, [session])
+  }, [session, freeMode, freeModeLoaded])
 
   function handleCheckboxGroup(setter, currentValues, value, checked) {
     setter(checked ? [...currentValues, value] : currentValues.filter((v) => v !== value))
@@ -129,17 +145,27 @@ export function CompanySearch() {
       query = query.filter('target_duration', 'ov', toPgArrayLiteral(selectedDurations))
     }
 
-    query = query.order('is_gold', { ascending: false })
+    if (!freeMode) {
+      query = query.order('is_gold', { ascending: false })
+    }
 
     const { data, error: queryError } = await query
 
     if (queryError) {
       setError(queryError.message)
     } else {
-      setResults(shuffleNonGold(data))
+      setResults(freeMode ? shuffleAll(data) : shuffleNonGold(data))
       if (data.length > 0) {
         await supabase.rpc('increment_search_appearances', { candidate_ids: data.map((c) => c.id) })
       }
+      await supabase.rpc('log_search', {
+        p_sectors: selectedSectors,
+        p_cities: selectedCities,
+        p_levels: selectedLevels,
+        p_durations: selectedDurations,
+        p_salary: parseInt(offeredSalary),
+        p_results_count: data.length,
+      })
     }
     setLoading(false)
   }
@@ -196,9 +222,10 @@ export function CompanySearch() {
         <div className="candidate-grid">
           {results.map((c) => {
             const fullName = [c.fname, c.lname].filter(Boolean).join(' ') || 'Кандидат'
+            const showGold = c.is_gold && !freeMode
             return (
-              <div key={c.id} className={`candidate-card ${c.is_gold ? 'candidate-card--gold' : ''}`}>
-                {c.is_gold && <span className="candidate-gold-ribbon">GOLD</span>}
+              <div key={c.id} className={`candidate-card ${showGold ? 'candidate-card--gold' : ''}`}>
+                {showGold && <span className="candidate-gold-ribbon">GOLD</span>}
 
                 {c.avatar_url ? (
                   <img src={c.avatar_url} alt={fullName} className="candidate-card-avatar" />

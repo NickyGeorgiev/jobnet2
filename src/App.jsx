@@ -34,10 +34,13 @@ import { BlogPost } from './pages/BlogPost'
 import { AdminBlog } from './pages/AdminBlog'
 import { AdminBlogEditor } from './pages/AdminBlogEditor'
 import { SavedCandidates } from './pages/SavedCandidates'
+import { CompanyDirectory } from './pages/CompanyDirectory'
+import { useFreeMode } from './FreeModeContext'
 import './App.css'
 
 function App() {
   const { session, profile, loading } = useAuth()
+  const { freeMode } = useFreeMode()
   const navigate = useNavigate()
   const [showMyCv, setShowMyCv] = useState(false)
   const [myCvData, setMyCvData] = useState(null)
@@ -49,6 +52,12 @@ function App() {
       if (window.innerWidth > 768) return
 
       const tag = e.target.tagName
+      const type = e.target.type
+
+      // Изключваме чекбоксове и radio бутони — те не отварят клавиатура,
+      // затова скролването само пречи и мести екрана без причина
+      if (type === 'checkbox' || type === 'radio') return
+
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
         setTimeout(() => {
           e.target.scrollIntoView({ block: 'center', behavior: 'smooth' })
@@ -107,10 +116,13 @@ function App() {
             {session && profile?.role === 'candidate' && (
               <>
                 <Link to="/my-cv" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай CV</Link>
+                <Link to="/companies" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Фирми</Link>
                 <button onClick={() => { handleViewMyCv(); setMobileMenuOpen(false) }} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'right' }}>
                   Виж CV
                 </button>
-                <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
+                {!freeMode && (
+                  <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
+                )}
               </>
             )}
 
@@ -119,7 +131,9 @@ function App() {
                 <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай профил</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
                 <Link to="/saved-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Запазени кандидати</Link>
-                <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
+                {!freeMode && (
+                  <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
+                )}
               </>
             )}
 
@@ -172,6 +186,7 @@ function App() {
         <Route path="/admin-blog" element={<AdminBlog />} />
         <Route path="/admin-blog/:id" element={<AdminBlogEditor />} />
         <Route path="/saved-candidates" element={<SavedCandidates />} />
+        <Route path="/companies" element={<CompanyDirectory />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

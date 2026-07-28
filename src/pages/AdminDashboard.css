@@ -45,3 +45,25 @@
   background: none;
   padding: 0;
 }
+
+.top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.top-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0.9rem;
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-sm);
+  font-size: 0.88rem;
+}
+
+.top-list-count {
+  font-family: var(--font-mono);
+  color: var(--color-teal);
+  font-weight: 600;
+}

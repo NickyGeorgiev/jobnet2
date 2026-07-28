@@ -15,6 +15,7 @@ export function Register() {
   const [role, setRole] = useState(initialRole)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
@@ -22,6 +23,11 @@ export function Register() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    if (!termsAccepted) {
+      setError('Трябва да приемете Общите условия и Политиката за поверителност, за да продължите.')
+      return
+    }
 
     if (!turnstileToken) {
       setError('Моля, потвърдете, че не сте робот.')
@@ -52,7 +58,7 @@ export function Register() {
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .insert({ id: userId, role: role })
+      .insert({ id: userId, role: role, terms_accepted_at: new Date().toISOString() })
 
     if (profileError) {
       setError(profileError.message)
@@ -97,11 +103,27 @@ export function Register() {
           <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
         </div>
 
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+            style={{ marginTop: '0.2rem', accentColor: 'var(--color-teal)', width: '16px', height: '16px', flexShrink: 0 }}
+          />
+          <span>
+            Съгласен съм с{' '}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>Общите условия</a>,{' '}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>Политиката за поверителност</a>{' '}
+            и{' '}
+            <a href="/cookies" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-teal)' }}>Политиката за бисквитки</a>.
+          </span>
+        </label>
+
         <TurnstileWidget onVerify={setTurnstileToken} />
 
         {error && <p className="auth-error">{error}</p>}
 
-        <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
+        <button type="submit" className="btn-primary" disabled={loading || !termsAccepted} style={{ width: '100%' }}>
           {loading ? 'Регистрирам...' : 'Регистрирай се'}
         </button>
       </form>

@@ -5,11 +5,13 @@ import { supabase } from '../supabaseClient'
 import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { useDocumentTitle } from '../useDocumentTitle'
+import { useFreeMode } from '../FreeModeContext'
 import './CompanyDashboard.css'
 
 export function CompanyDashboard() {
   useDocumentTitle('Панел за фирма')
   const { session } = useAuth()
+  const { freeMode } = useFreeMode()
   const [company, setCompany] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -66,93 +68,105 @@ export function CompanyDashboard() {
         </div>
       </div>
 
-      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
-        <div className="status-card-top">
-          <StatusRing state={ringState} daysLeft={hasPaidAccess ? 0 : trialDaysLeft} />
-          <div>
-            {hasPaidAccess && (
-              <>
-                <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Платен достъп</span>
-                <p className="status-title">Търсенето е активно</p>
-                <p className="status-sub">
-                  Валидно до {new Date(company.paid_until).toLocaleDateString('bg-BG')} ({paidDaysLeft} {paidDaysLeft === 1 ? 'ден' : 'дни'})
-                </p>
-              </>
-            )}
-            {!hasPaidAccess && isInTrial && (
-              <>
-                <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Пробен период</span>
-                <p className="status-title">Безплатен достъп</p>
-                <p className="status-sub">Остават {trialDaysLeft} {trialDaysLeft === 1 ? 'ден' : 'дни'}.</p>
-              </>
-            )}
-            {!hasAnyAccess && (
-              <>
-                <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Няма достъп</span>
-                <p className="status-title">Търсенето е спряно</p>
-                <p className="status-sub">Платете, за да продължите да търсите кандидати.</p>
-              </>
-            )}
-          </div>
+      {freeMode ? (
+        <div className="status-card" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-teal)' }}>
+          <span className="badge" style={{ background: 'var(--color-teal-soft)', color: 'var(--color-teal)', marginBottom: '0.5rem', display: 'inline-block' }}>
+            🎉 Безплатен старт
+          </span>
+          <p className="status-title">Търсенето е напълно безплатно</p>
+          <p className="status-sub">Platformata е в начален, безплатен период — търсете кандидати без ограничения.</p>
         </div>
-
-        {!hasPaidAccess && (
-          <div className="status-actions">
-            <CheckoutButton
-              priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
-              label="Плати за 30 дни — 29.99€"
-            />
+      ) : (
+        <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+          <div className="status-card-top">
+            <StatusRing state={ringState} daysLeft={hasPaidAccess ? 0 : trialDaysLeft} />
+            <div>
+              {hasPaidAccess && (
+                <>
+                  <span className="badge badge--success" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Платен достъп</span>
+                  <p className="status-title">Търсенето е активно</p>
+                  <p className="status-sub">
+                    Валидно до {new Date(company.paid_until).toLocaleDateString('bg-BG')} ({paidDaysLeft} {paidDaysLeft === 1 ? 'ден' : 'дни'})
+                  </p>
+                </>
+              )}
+              {!hasPaidAccess && isInTrial && (
+                <>
+                  <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Пробен период</span>
+                  <p className="status-title">Безплатен достъп</p>
+                  <p className="status-sub">Остават {trialDaysLeft} {trialDaysLeft === 1 ? 'ден' : 'дни'}.</p>
+                </>
+              )}
+              {!hasAnyAccess && (
+                <>
+                  <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Няма достъп</span>
+                  <p className="status-title">Търсенето е спряно</p>
+                  <p className="status-sub">Платете, за да продължите да търсите кандидати.</p>
+                </>
+              )}
+            </div>
           </div>
-        )}
 
-        {hasPaidAccess && (
-          <p className="status-sub" style={{ marginTop: '0.75rem' }}>
-            Можете да платите отново за достъп, след изтичане на дните
-          </p>
-        )}
-      </div>
-
-      <div className="action-grid">
-        <Link to="/company-profile" className="action-tile">
-          <span className="action-tile-icon">✎</span>
-          <div>
-            <p className="action-tile-title">Редактирай профила</p>
-            <p className="action-tile-sub">Лого, описание, контакти</p>
-          </div>
-        </Link>
-        <Link to="/search" className="action-tile">
-          <span className="action-tile-icon">🔍</span>
-          <div>
-            <p className="action-tile-title">Търси кандидати</p>
-            <p className="action-tile-sub">Филтрирай по заплата, сектор, град</p>
-          </div>
-        </Link>
-      </div>
-
-      {(facts.length > 0 || company.bio || company.contact_phone || company.contact_email || company.contact_address) && (
-        <div className="company-details">
-          {facts.length > 0 && (
-            <div className="facts-row">
-              {facts.map((f) => (
-                <div key={f.label}>
-                  <span className="fact-value">{f.value}</span>
-                  <span className="fact-label">{f.label}</span>
-                </div>
-              ))}
+          {!hasPaidAccess && (
+            <div className="status-actions">
+              <CheckoutButton
+                priceId={import.meta.env.VITE_STRIPE_COMPANY_PRICE_ID}
+                label="Плати за 30 дни — 29.99€"
+              />
             </div>
           )}
 
-          {company.bio && <p className="company-bio">{company.bio}</p>}
-
-          {(company.contact_phone || company.contact_email || company.contact_address) && (
-            <div className="contact-row">
-              {company.contact_phone && <span>📞 {company.contact_phone}</span>}
-              {company.contact_email && <span>✉ {company.contact_email}</span>}
-              {company.contact_address && <span>📍 {company.contact_address}</span>}
-            </div>
+          {hasPaidAccess && (
+            <p className="status-sub" style={{ marginTop: '0.75rem' }}>
+              Можете да платите отново за достъп, след изтичане на дните
+            </p>
           )}
+        </div>
+    )
+  }
+<div className="action-grid">
+  <Link to="/company-profile" className="action-tile">
+    <span className="action-tile-icon">✎</span>
+    <div>
+      <p className="action-tile-title">Редактирай профила</p>
+      <p className="action-tile-sub">Лого, описание, контакти</p>
+    </div>
+  </Link>
+  <Link to="/search" className="action-tile">
+    <span className="action-tile-icon">🔍</span>
+    <div>
+      <p className="action-tile-title">Търси кандидати</p>
+      <p className="action-tile-sub">Филтрирай по заплата, сектор, град</p>
+    </div>
+  </Link>
+</div>
+
+{
+  (facts.length > 0 || company.bio || company.contact_phone || company.contact_email || company.contact_address) && (
+    <div className="company-details">
+      {facts.length > 0 && (
+        <div className="facts-row">
+          {facts.map((f) => (
+            <div key={f.label}>
+              <span className="fact-value">{f.value}</span>
+              <span className="fact-label">{f.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {company.bio && <p className="company-bio">{company.bio}</p>}
+
+      {(company.contact_phone || company.contact_email || company.contact_address) && (
+        <div className="contact-row">
+          {company.contact_phone && <span>📞 {company.contact_phone}</span>}
+          {company.contact_email && <span>✉ {company.contact_email}</span>}
+          {company.contact_address && <span>📍 {company.contact_address}</span>}
         </div>
       )}
     </div>
+  )
+}
+    </div >
   )
 }

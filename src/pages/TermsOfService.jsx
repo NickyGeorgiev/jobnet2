@@ -4,7 +4,7 @@ import { useDocumentTitle } from '../useDocumentTitle'
 export function TermsOfService() {
   useDocumentTitle('Общи условия')
   return (
-    <LegalPage title="Общи условия за използване на платформата Jobstate.net" isPlaceholder>
+    <LegalPage title="Общи условия за използване на платформата Jobstate.net">
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 01.08.2026 г.</p>
       <p>
         Настоящите Общи условия уреждат отношенията между оператора на платформата Jobstate.net и лицата,
@@ -16,15 +16,7 @@ export function TermsOfService() {
 
       <h3>I. Общи положения</h3>
       <h4>1. Данни за оператора</h4>
-      <p>1.1. Платформата Jobstate.net („Платформата") се управлява от:</p>
-      <p>
-        <strong>Наименование:</strong> <span className="legal-fill-blank">[попълни наименование на фирмата]</span><br />
-        <strong>ЕИК:</strong> <span className="legal-fill-blank">[попълни ЕИК]</span><br />
-        <strong>Седалище и адрес на управление:</strong> <span className="legal-fill-blank">[попълни адрес]</span><br />
-        <strong>Адрес за кореспонденция:</strong> <span className="legal-fill-blank">[попълни адрес]</span><br />
-        <strong>Електронна поща:</strong> info@jobstate.net
-      </p>
-      <p>наричан по-долу за краткост <strong>„Оператор"</strong>.</p>
+      <p>1.1. Платформата Jobstate.net, наричан по-долу за краткост <strong>„Оператор"</strong>.</p>
       <p>1.2. Операторът предоставя онлайн услуга, която позволява създаването на профили от кандидати за работа и работодатели, както и автоматизирано откриване на съвпадения между зададени критерии за търсене.</p>
 
       <h3>II. Предмет на платформата</h3>

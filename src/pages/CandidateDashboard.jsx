@@ -7,11 +7,13 @@ import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
 import { useDocumentTitle } from '../useDocumentTitle'
+import { useFreeMode } from '../FreeModeContext'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
   useDocumentTitle('Панел за кандидат')
   const { session } = useAuth()
+  const { freeMode } = useFreeMode()
   const [cv, setCv] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showCvModal, setShowCvModal] = useState(false)
@@ -94,56 +96,45 @@ export function CandidateDashboard() {
         </div>
       </div>
 
-      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
-        <div className="status-card-top">
-          <StatusRing state={isGoldActive ? 'gold' : 'expired'} daysLeft={0} />
-          <div>
-            {isGoldActive ? (
-              <>
-                <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
-                <p className="status-title">Излизаш най-отгоре</p>
-                <p className="status-sub">
-                  Валиден до {new Date(cv.gold_until).toLocaleDateString('bg-BG')} ({goldDaysLeft} {goldDaysLeft === 1 ? 'ден' : 'дни'})
-                </p>
-              </>
-            ) : (
-              <>
-                <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Стандартен профил</span>
-                <p className="status-title">Стани Gold кандидат</p>
-                <p className="status-sub">9.99€ за 30 дни — CV-то ти излиза първо в резултатите.</p>
-              </>
-            )}
+      {!freeMode && (
+        <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+          <div className="status-card-top">
+            <StatusRing state={cv.is_gold ? 'gold' : 'expired'} daysLeft={0} />
+            <div>
+              {isGoldActive ? (
+                <>
+                  <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
+                  <p className="status-title">Излизаш най-отгоре</p>
+                  <p className="status-sub">
+                    Валиден до {new Date(cv.gold_until).toLocaleDateString('bg-BG')} ({goldDaysLeft} {goldDaysLeft === 1 ? 'ден' : 'дни'})
+                  </p>
+                </>
+              ) : (
+                <>
+                  <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Стандартен профил</span>
+                  <p className="status-title">Стани Gold кандидат</p>
+                  <p className="status-sub">10€ за 30 дни — CV-то ти излиза първо в резултатите.</p>
+                </>
+              )}
+            </div>
           </div>
-        </div>
 
-        {!isGoldActive && (
-          <div className="status-actions">
-            <CheckoutButton
-              priceId={import.meta.env.VITE_STRIPE_GOLD_PRICE_ID}
-              label="Стани Gold — 9.99€"
-            />
-          </div>
-        )}
+          {!isGoldActive && (
+            <div className="status-actions">
+              <CheckoutButton
+                priceId={import.meta.env.VITE_STRIPE_GOLD_PRICE_ID}
+                label="Стани Gold — 10€"
+              />
+            </div>
+          )}
 
-        {isGoldActive && (
-          <p className="status-sub" style={{ marginTop: '0.75rem' }}>
-            Можеш да платиш отново след 30 дни.
-          </p>
-        )}
-      </div>
-      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
-        <p className="status-title" style={{ marginBottom: '1rem' }}>Статистика на профила</p>
-        <div className="facts-row">
-          <div>
-            <span className="fact-value">{cv.search_appearances || 0}</span>
-            <span className="fact-label">Показвания в търсене</span>
-          </div>
-          <div>
-            <span className="fact-value">{cv.profile_views || 0}</span>
-            <span className="fact-label">Отворено CV</span>
-          </div>
+          {isGoldActive && (
+            <p className="status-sub" style={{ marginTop: '0.75rem' }}>
+              Можеш да платиш отново по всяко време — новите 30 дни ще се добавят след изтичане на текущите.
+            </p>
+          )}
         </div>
-      </div>
+      )}
       <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
         <Link to="/my-cv" className="action-tile">
           <span className="action-tile-icon">✎</span>
