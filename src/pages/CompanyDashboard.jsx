@@ -71,10 +71,10 @@ export function CompanyDashboard() {
       {freeMode ? (
         <div className="status-card" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-teal)' }}>
           <span className="badge" style={{ background: 'var(--color-teal-soft)', color: 'var(--color-teal)', marginBottom: '0.5rem', display: 'inline-block' }}>
-            🎉 Безплатен старт
+            🎉 Безплатен старт 🎉
           </span>
           <p className="status-title">Търсенето е напълно безплатно</p>
-          <p className="status-sub">Platformata е в начален, безплатен период — търсете кандидати без ограничения.</p>
+          <p className="status-sub">Платформата е в безплатен период — може да търсите кандидати без ограничения.</p>
         </div>
       ) : (
         <div className="status-card" style={{ marginBottom: '1.5rem' }}>

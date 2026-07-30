@@ -4,6 +4,8 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 import { useDocumentTitle } from '../useDocumentTitle'
 import { TurnstileWidget } from './TurnstileWidget'
+import { PasswordInput } from './PasswordInput'
+import { validatePassword } from '../passwordValidation'
 import './AuthForm.css'
 
 export function Register() {
@@ -15,14 +17,27 @@ export function Register() {
   const [role, setRole] = useState(initialRole)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
+  const [registrationSent, setRegistrationSent] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    const passwordErrors = validatePassword(password)
+    if (passwordErrors.length > 0) {
+      setError('Паролата трябва да съдържа: ' + passwordErrors.join(', '))
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Паролите не съвпадат.')
+      return
+    }
 
     if (!termsAccepted) {
       setError('Трябва да приемете Общите условия и Политиката за поверителност, за да продължите.')
@@ -46,7 +61,11 @@ export function Register() {
       return
     }
 
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { role } }, // подаваме ролята като metadata — trigger-ът я ползва
+    })
 
     if (authError) {
       setError(authError.message)
@@ -54,27 +73,28 @@ export function Register() {
       return
     }
 
-    const userId = authData.user.id
-
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({ id: userId, role: role, terms_accepted_at: new Date().toISOString() })
-
-    if (profileError) {
-      setError(profileError.message)
-      setLoading(false)
-      return
-    }
-
-    if (role === 'candidate') {
-      await supabase.from('candidates').insert({ id: userId, contact_email: email })
-    } else {
-      await supabase.from('companies').insert({ id: userId, company_name: '' })
-    }
-
-    await refreshProfile()
     setLoading(false)
-    navigate('/')
+
+    if (authData.session) {
+      // Ако все пак има активна сесия (напр. email confirm е изключено някъде), продължаваме както преди
+      await refreshProfile()
+      navigate('/')
+    } else {
+      // Изисква се потвърждение на имейл — показваме съобщение вместо да пренасочваме
+      setRegistrationSent(true)
+    }
+  }
+
+  if (registrationSent) {
+    return (
+      <div className="auth-shell">
+        <h2 className="auth-title">Проверете имейла си</h2>
+        <p style={{ color: 'var(--color-text-muted)' }}>
+          Изпратихме линк за потвърждение на <strong style={{ color: 'var(--color-text)' }}>{email}</strong>.
+          Моля, кликнете линка, за да активирате акаунта си.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -100,7 +120,15 @@ export function Register() {
 
         <div className="auth-field">
           <label>Парола</label>
-          <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '0.35rem' }}>
+            Поне 8 символа, главна и малка буква, цифра и специален символ.
+          </p>
+        </div>
+
+        <div className="auth-field">
+          <label>Повтори паролата</label>
+          <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
         </div>
 
         <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '1.25rem', cursor: 'pointer' }}>

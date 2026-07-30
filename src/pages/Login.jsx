@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useDocumentTitle } from '../useDocumentTitle'
+import { PasswordInput } from './PasswordInput'
 import './AuthForm.css'
 
 export function Login() {
@@ -41,7 +42,7 @@ export function Login() {
 
         <div className="auth-field">
           <label>Парола</label>
-          <input type="password" className="auth-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
 
         {error && <p className="auth-error">{error}</p>}

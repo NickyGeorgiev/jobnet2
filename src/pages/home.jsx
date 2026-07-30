@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { useDocumentTitle } from '../useDocumentTitle'
-import bannerImg from '../assets/background.jpg'
+import { useFreeMode } from '../FreeModeContext'
+import bannerDesktop from '../assets/background-desktop.avif'
+import bannerMobile from '../assets/background-mobile.avif'
 import './Home.css'
 
 function HeroArt() {
@@ -27,20 +29,34 @@ function HeroArt() {
 
 export function Home() {
   useDocumentTitle(null) // празно = показва основния title
+  const { freeMode } = useFreeMode()
   const [logos, setLogos] = useState([])
 
   useEffect(() => {
     async function loadLogos() {
-      const { data } = await supabase.from('partner_logos').select('*')
-      setLogos(data || [])
+      if (freeMode) {
+        // По време на безплатния launch период — показваме всички регистрирани фирми с лого,
+        // независимо от плащане (все още никой не плаща)
+        const { data } = await supabase
+          .from('company_directory')
+          .select('company_name, logo_url')
+          .not('logo_url', 'is', null)
+        setLogos(data || [])
+      } else {
+        const { data } = await supabase.from('partner_logos').select('*')
+        setLogos(data || [])
+      }
     }
     loadLogos()
-  }, [])
+  }, [freeMode])
 
   return (
     <div>
       <div className="hero-banner">
-        <img src={bannerImg} alt="Jobstate" />
+        <picture>
+          <source media="(max-width: 700px)" srcSet={bannerMobile} />
+          <img src={bannerDesktop} alt="Jobstate" width="1200" height="393" fetchpriority="high" />
+        </picture>
         <div className="hero-banner-overlay">
           <div className="hero-banner-text">
             <p className="hero-banner-eyebrow">Jobstate</p>
