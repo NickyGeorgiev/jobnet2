@@ -8,11 +8,14 @@ import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
 import { useDocumentTitle } from '../useDocumentTitle'
 import { useFreeMode } from '../FreeModeContext'
+import { useToast } from './Toast'
+import { calculateCvCompleteness } from '../cvCompleteness'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
   useDocumentTitle('Панел за кандидат')
   const { session } = useAuth()
+  const { showToast } = useToast()
   const { freeMode } = useFreeMode()
   const [cv, setCv] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -48,12 +51,17 @@ export function CandidateDashboard() {
     setTogglingActive(false)
   }
 
+  function handleCopyPublicLink() {
+    const url = `${window.location.origin}/cv/${session.user.id}`
+    navigator.clipboard.writeText(url)
+    showToast('Линкът е копиран!', 'success')
+  }
+
   if (loading || !cv) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Твоето име'
 
-  const isCvComplete = cv.fname && cv.lname && cv.avatar_url && cv.target_salary &&
-    cv.target_sector?.length > 0 && cv.target_cities?.length > 0
+  const { percent: completenessPercent, missing: missingFields } = calculateCvCompleteness(cv)
 
   const isGoldActive = cv.gold_until && new Date(cv.gold_until) > new Date()
   const goldDaysLeft = isGoldActive
@@ -154,14 +162,49 @@ export function CandidateDashboard() {
             <p className="action-tile-sub">Как изглежда за фирмите</p>
           </div>
         </button>
+        <button
+          onClick={handleCopyPublicLink}
+          className="action-tile"
+          style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit' }}
+        >
+          <span className="action-tile-icon">🔗</span>
+          <div>
+            <p className="action-tile-title">Сподели CV-то си</p>
+            <p className="action-tile-sub">Копирай публичен линк</p>
+          </div>
+        </button>
       </div>
 
-      {!isCvComplete && (
+      {completenessPercent < 100 && (
         <div className="status-card" style={{ marginBottom: '1.5rem', borderColor: 'var(--color-gold)' }}>
-          <p className="status-title" style={{ marginBottom: '0.4rem' }}>CV-то ти не е напълно попълнено</p>
-          <p className="status-sub" style={{ marginBottom: '1rem' }}>
-            Липсват задължителни данни (снимка, заплата, сектори или градове) — фирмите няма да те виждат в търсенето, докато не ги допълниш.
+          <p className="status-title" style={{ marginBottom: '0.2rem' }}>
+            Профилът ти е {completenessPercent}% готов
           </p>
+          <p className="status-sub">
+            По-пълните профили получават повече внимание от фирмите.
+          </p>
+
+          <div className="completeness-bar-track">
+            <div
+              className="completeness-bar-fill"
+              style={{
+                width: `${completenessPercent}%`,
+                background: completenessPercent < 50 ? 'var(--color-danger)' : completenessPercent < 80 ? 'var(--color-gold)' : 'var(--color-success)',
+              }}
+            />
+          </div>
+
+          {missingFields.length > 0 && (
+            <>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>Липсва:</p>
+              <div className="completeness-missing-list" style={{ marginBottom: '1.25rem' }}>
+                {missingFields.map((field) => (
+                  <span key={field} className="completeness-missing-tag">{field}</span>
+                ))}
+              </div>
+            </>
+          )}
+
           <Link to="/my-cv" className="btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
             Довърши CV-то
           </Link>

@@ -36,8 +36,8 @@ Deno.serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Jobstate контактна форма <onboarding@resend.dev>",
-        to: ["n.georrgiev@gmail.com"],
+        from: "Jobstate контактна форма <info@jobstate.net>",
+        to: ["info@jobstate.net"],
         reply_to: [trimmedEmail],
         subject: `Ново съобщение от ${name} (контактна форма)`,
         html: `

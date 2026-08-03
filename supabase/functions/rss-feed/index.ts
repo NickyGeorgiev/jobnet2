@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
       <description>${escapeXml(post.excerpt || "")}</description>
     </item>`).join("")
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  const xml = `\uFEFF<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
     <title>Jobstate — Блог</title>

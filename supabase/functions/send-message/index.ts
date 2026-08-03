@@ -49,6 +49,15 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       })
     }
+    // Rate limit: максимум 1 съобщение на 24ч към същия кандидат
+    const { data: canSend } = await supabaseAdmin.rpc('can_send_message', { p_candidate_id: candidateId })
+
+    if (!canSend) {
+      return new Response(JSON.stringify({ error: "Вече изпратихте съобщение до този кандидат през последните 24 часа. Опитайте отново по-късно." }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
 
     const { data: company } = await supabaseAdmin
       .from("companies")

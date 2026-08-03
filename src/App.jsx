@@ -36,6 +36,8 @@ import { AdminBlogEditor } from './pages/AdminBlogEditor'
 import { SavedCandidates } from './pages/SavedCandidates'
 import { CompanyDirectory } from './pages/CompanyDirectory'
 import { useFreeMode } from './FreeModeContext'
+import { PublicCv } from './pages/PublicCv'
+import { AccountSettings } from './pages/AccountSettings'
 import './App.css'
 
 function App() {
@@ -156,7 +158,7 @@ function App() {
 
           {session && (
             <div className="navbar-links">
-              <span className="navbar-user" style={{ padding: '0.9rem 1.5rem' }}>{session.user.email}</span>
+              <Link to="/account-settings" className="navbar-user" style={{ textDecoration: 'none' }}>{session.user.email}</Link>
               <button onClick={handleLogout} className="btn-logout">Изход</button>
             </div>
           )}
@@ -187,6 +189,8 @@ function App() {
         <Route path="/admin-blog/:id" element={<AdminBlogEditor />} />
         <Route path="/saved-candidates" element={<SavedCandidates />} />
         <Route path="/companies" element={<CompanyDirectory />} />
+        <Route path="/cv/:id" element={<PublicCv />} />
+        <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
