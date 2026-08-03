@@ -31,6 +31,13 @@ export function CvPaper({ cv }) {
           {cv.phone && <p className="cv-sidebar-item"><strong>Телефон</strong>{cv.phone}</p>}
           {cv.contact_email && <p className="cv-sidebar-item"><strong>Email</strong>{cv.contact_email}</p>}
           {cv.current_city && <p className="cv-sidebar-item"><strong>Град</strong>{cv.current_city}</p>}
+          {cv.birth_date && (
+            <p className="cv-sidebar-item">
+              <strong>Дата на раждане</strong>
+              {new Date(cv.birth_date).toLocaleDateString('bg-BG')}
+            </p>
+          )}
+          {cv.gender && <p className="cv-sidebar-item"><strong>Пол</strong>{cv.gender}</p>}
         </div>
 
         {education.length > 0 && (

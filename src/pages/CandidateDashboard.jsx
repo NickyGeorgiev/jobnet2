@@ -24,7 +24,7 @@ export function CandidateDashboard() {
 
   useEffect(() => {
     loadCv()
-  }, [session])
+  }, [session?.user?.id])
 
   async function loadCv() {
     const { data } = await supabase

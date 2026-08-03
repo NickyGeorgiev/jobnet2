@@ -100,7 +100,7 @@ export function MyCv() {
       setLoading(false)
     }
     loadCv()
-  }, [session])
+  }, [session?.user?.id])
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value })

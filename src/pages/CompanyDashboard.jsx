@@ -17,7 +17,7 @@ export function CompanyDashboard() {
 
   useEffect(() => {
     loadStatus()
-  }, [session])
+  }, [session?.user?.id])
 
   async function loadStatus() {
     const { data: companyData } = await supabase

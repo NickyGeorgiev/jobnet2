@@ -86,7 +86,7 @@ export function Home() {
         <p className="partners-heading">Нашите доверени партньори</p>
 
         {logos.length === 0 && (
-          <p className="partners-empty">Скоро тук ще виждате фирмите, които вече ползват Jobnet.</p>
+          <p className="partners-empty">Скоро тук ще виждате фирмите, които вече ползват Jobstate</p>
         )}
 
         {logos.length > 0 && logos.length < 6 && (

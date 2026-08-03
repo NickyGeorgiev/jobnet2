@@ -50,7 +50,7 @@ export function CompanyProfile() {
       setLoading(false)
     }
     loadCompany()
-  }, [session])
+  }, [session?.user?.id])
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value })
