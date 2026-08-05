@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './BlogList.css'
 
 export function BlogList() {
-  useDocumentTitle('Блог')
+  useSeo(seo.blog)
   const [posts, setPosts] = useState(null)
 
   useEffect(() => {

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './CompanyDirectory.css'
 
 export function CompanyDirectory() {
-  useDocumentTitle('Регистрирани фирми')
+  useSeo(seo.companies)
   const [companies, setCompanies] = useState(null)
   const [selected, setSelected] = useState(null)
 

@@ -1,8 +1,9 @@
 import { LegalPage } from './LegalPage'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function PrivacyPolicy() {
-  useDocumentTitle('Политика за поверителност')
+  useSeo(seo.privacy)
   return (
     <LegalPage title="Политика за поверителност и защита на личните данни">
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 01.08.2026 г.</p>

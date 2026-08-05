@@ -1,5 +1,4 @@
 import { months } from '../data/months'
-import { useDocumentTitle } from '../useDocumentTitle'
 import './CandidateDashboard.css'
 
 function formatRange(startMonth, startYear, endMonth, endYear, current) {
@@ -10,7 +9,6 @@ function formatRange(startMonth, startYear, endMonth, endYear, current) {
 }
 
 export function CvPaper({ cv }) {
-  useDocumentTitle('Виж CV')
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Кандидат'
   const workExperience = cv.work_experience || []
   const education = cv.education || []

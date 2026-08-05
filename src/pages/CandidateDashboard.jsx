@@ -6,14 +6,15 @@ import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
-import { useDocumentTitle } from '../useDocumentTitle'
 import { useFreeMode } from '../FreeModeContext'
 import { useToast } from './Toast'
 import { calculateCvCompleteness } from '../cvCompleteness'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
-  useDocumentTitle('Панел за кандидат')
+  useSeo(seo.candidateDashboard)
   const { session } = useAuth()
   const { showToast } = useToast()
   const { freeMode } = useFreeMode()

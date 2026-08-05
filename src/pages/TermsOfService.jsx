@@ -1,8 +1,9 @@
 import { LegalPage } from './LegalPage'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function TermsOfService() {
-  useDocumentTitle('Общи условия')
+  useSeo(seo.TermsOfService)
   return (
     <LegalPage title="Общи условия за използване на платформата Jobstate.net">
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 01.08.2026 г.</p>

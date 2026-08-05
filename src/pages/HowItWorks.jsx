@@ -1,8 +1,9 @@
 import { LegalPage } from './LegalPage'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function HowItWorks() {
-  useDocumentTitle('Как работи')
+  useSeo(seo.howItWorks)
   return (
     <LegalPage title="Как работи Jobstate.net">
       <h3>Новият начин за намиране на работа</h3>

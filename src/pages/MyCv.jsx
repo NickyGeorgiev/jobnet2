@@ -9,7 +9,8 @@ import { LanguagesSection } from './LanguagesSection'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { Spinner } from './Spinner'
 import { useToast } from './Toast'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './MyCv.css'
 
 const LEVEL_OPTIONS = [
@@ -46,7 +47,7 @@ function emptyLanguage() {
 }
 
 export function MyCv() {
-  useDocumentTitle('Моето CV')
+  useSeo(seo.myCv)
   const { session } = useAuth()
   const { showToast } = useToast()
   const [formData, setFormData] = useState({
@@ -166,6 +167,14 @@ export function MyCv() {
 
   function validate() {
     const missing = []
+
+    if (formData.birth_date) {
+      const age = Math.floor((new Date() - new Date(formData.birth_date)) / (1000 * 60 * 60 * 24 * 365.25))
+      if (age < 15 || age > 100) {
+        missing.push('Валидна дата на раждане (възраст между 15 и 100 години)')
+      }
+    }
+
     if (!formData.fname.trim()) missing.push('Име')
     if (!formData.lname.trim()) missing.push('Фамилия')
     if (!formData.phone.trim()) missing.push('Телефон')
@@ -264,9 +273,17 @@ export function MyCv() {
           </div>
 
           <div className="field">
-            <label>Дата на раждане</label>
-            <input type="date" className="input" name="birth_date" value={formData.birth_date} onChange={handleChange} />
-          </div>
+          <label>Дата на раждане</label>
+          <input
+            type="date"
+            className="input"
+            name="birth_date"
+            value={formData.birth_date}
+            onChange={handleChange}
+            min="1940-01-01"
+            max={new Date().toISOString().split('T')[0]}
+          />
+        </div>
 
           <div className="field">
             <label>Пол</label>

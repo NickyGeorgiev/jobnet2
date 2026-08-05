@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './AdminDashboard.css'
 
 const SETTING_LABELS = {
@@ -17,7 +18,7 @@ const SETTING_LABELS = {
 }
 
 export function AdminDashboard() {
-  useDocumentTitle('Админ панел')
+  useSeo(seo.adminDashboard)
   const [stats, setStats] = useState(null)
   const [freeMode, setFreeModeLocal] = useState(null)
   const [togglingFreeMode, setTogglingFreeMode] = useState(false)

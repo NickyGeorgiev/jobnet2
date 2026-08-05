@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { useToast } from './Toast'
 import { TurnstileWidget } from './TurnstileWidget'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function ContactUs() {
+  useSeo(seo.contact)
   const { showToast } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')

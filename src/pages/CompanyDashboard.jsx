@@ -4,12 +4,13 @@ import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { CheckoutButton } from './CheckoutButton'
 import { StatusRing } from './StatusRing'
-import { useDocumentTitle } from '../useDocumentTitle'
 import { useFreeMode } from '../FreeModeContext'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './CompanyDashboard.css'
 
 export function CompanyDashboard() {
-  useDocumentTitle('Панел за фирма')
+  useSeo(seo.companyDashboard)
   const { session } = useAuth()
   const { freeMode } = useFreeMode()
   const [company, setCompany] = useState(null)

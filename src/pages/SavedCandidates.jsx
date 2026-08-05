@@ -3,11 +3,12 @@ import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { CvModal } from './CvModal'
 import { MessageModal } from './MessageModal'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './CompanySearch.css'
 
 export function SavedCandidates() {
-  useDocumentTitle('Запазени кандидати')
+  useSeo(seo.savedCandidates)
   const { session } = useAuth()
   const [saved, setSaved] = useState(null)
   const [selectedCandidate, setSelectedCandidate] = useState(null)

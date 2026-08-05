@@ -1,8 +1,9 @@
 import { LegalPage } from './LegalPage'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function AboutUs() {
-  useDocumentTitle('За нас')
+  useSeo(seo.about)
   return (
     <LegalPage title="За нас">
       <h3>Нов начин за намиране на работа</h3>

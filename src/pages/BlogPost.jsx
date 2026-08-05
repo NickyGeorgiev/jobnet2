@@ -59,8 +59,20 @@ export function BlogPost() {
     )
   }
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": post.title,
+    "description": post.excerpt,
+    "image": post.cover_image_url || "https://jobstate.net/og-image.jpg",
+    "datePublished": post.published_at,
+    "author": { "@type": "Organization", "name": "Jobstate" },
+    "publisher": { "@type": "Organization", "name": "Jobstate", "logo": { "@type": "ImageObject", "url": "https://jobstate.net/favicon.png" } },
+  }
+
   return (
     <div className="blog-post-shell">
+      <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
       <Link to="/blog" style={{ color: 'var(--color-teal)', fontSize: '0.85rem', textDecoration: 'none' }}>← Обратно към блога</Link>
 
       {post.cover_image_url && <img src={post.cover_image_url} alt={post.title} className="blog-post-cover" style={{ marginTop: '1rem' }} />}

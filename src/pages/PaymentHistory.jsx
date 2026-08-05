@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { InvoiceModal } from './InvoiceModal'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './PaymentHistory.css'
 
 export function PaymentHistory() {
+  useSeo(seo.payments)
   const { session } = useAuth()
   const [payments, setPayments] = useState(null)
   const [selectedPayment, setSelectedPayment] = useState(null)

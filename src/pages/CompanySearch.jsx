@@ -8,7 +8,8 @@ import { CheckboxMultiSelect } from './CheckboxMultiSelect'
 import { CvModal } from './CvModal'
 import { Spinner } from './Spinner'
 import { MessageModal } from './MessageModal'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import { CheckoutButton } from './CheckoutButton'
 import { useFreeMode } from '../FreeModeContext'
 import './CompanySearch.css'
@@ -51,7 +52,7 @@ function shuffleAll(data) {
 }
 
 export function CompanySearch() {
-  useDocumentTitle('Търсене на кандидати')
+  useSeo(seo.search)
   const { session } = useAuth()
   const { freeMode, loaded: freeModeLoaded } = useFreeMode()
   const [hasAccess, setHasAccess] = useState(null)

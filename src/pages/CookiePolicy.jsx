@@ -1,8 +1,9 @@
 import { LegalPage } from './LegalPage'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 
 export function CookiePolicy() {
-  useDocumentTitle('Политика за бисквитки')
+  useSeo(seo.cookies)
   return (
     <LegalPage title="Политика за бисквитки (Cookie Policy)">
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 01.08.2026 г.</p>

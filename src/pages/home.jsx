@@ -5,6 +5,8 @@ import { useDocumentTitle } from '../useDocumentTitle'
 import { useFreeMode } from '../FreeModeContext'
 import bannerDesktop from '../assets/background-desktop.avif'
 import bannerMobile from '../assets/background-mobile.avif'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './Home.css'
 
 function HeroArt() {
@@ -28,6 +30,7 @@ function HeroArt() {
 }
 
 export function Home() {
+  useSeo(seo.home)
   useDocumentTitle(null) // празно = показва основния title
   const { freeMode } = useFreeMode()
   const [logos, setLogos] = useState([])

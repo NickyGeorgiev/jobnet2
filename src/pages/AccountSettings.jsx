@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
-import { useDocumentTitle } from '../useDocumentTitle'
 import { useToast } from './Toast'
 
 export function AccountSettings() {
-  useDocumentTitle('Настройки на акаунта')
   const { session } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()

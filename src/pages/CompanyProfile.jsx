@@ -4,13 +4,14 @@ import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
 import { Spinner } from './Spinner'
 import { useToast } from './Toast'
-import { useDocumentTitle } from '../useDocumentTitle'
+import { useSeo } from '../useSeo'
+import { seo } from '../seo'
 import './CompanyProfile.css'
 
 const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
 
 export function CompanyProfile() {
-  useDocumentTitle('Фирмен профил')
+  useSeo(seo.companyProfile)
   const { showToast } = useToast()
   const { session } = useAuth()
   const [formData, setFormData] = useState({
