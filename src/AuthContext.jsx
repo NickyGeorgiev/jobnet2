@@ -6,6 +6,7 @@ const AuthContext = createContext()
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
+  const [displayName, setDisplayName] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -38,6 +39,15 @@ export function AuthProvider({ children }) {
       .eq('id', userId)
       .single()
     setProfile(data)
+
+    if (data?.role === 'candidate') {
+      const { data: cv } = await supabase.from('candidates').select('fname, lname').eq('id', userId).single()
+      setDisplayName([cv?.fname, cv?.lname].filter(Boolean).join(' ') || null)
+    } else if (data?.role === 'company') {
+      const { data: comp } = await supabase.from('companies').select('company_name').eq('id', userId).single()
+      setDisplayName(comp?.company_name || null)
+    }
+
     setLoading(false)
   }
 
@@ -53,7 +63,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, refreshProfile }}>
+    <AuthContext.Provider value={{ session, profile, loading, refreshProfile, displayName }}>
       {children}
     </AuthContext.Provider>
   )

@@ -350,3 +350,33 @@ button {
 @media (max-width: 700px) {
   .contact-grid { grid-template-columns: 1fr !important; }
 }
+
+:root[data-theme="light"] {
+  --color-bg: #f5f6f8;
+  --color-surface: #ffffff;
+  --color-surface-raised: #eef0f3;
+  --color-border: #dde1e6;
+  --color-text: #1a1d23;
+  --color-text-muted: #5c6270;
+  --color-gold: #b8863a;
+  --color-gold-soft: rgba(184, 134, 58, 0.12);
+  --color-teal: #1f8f82;
+  --color-teal-soft: rgba(31, 143, 130, 0.12);
+  --color-danger: #c94f3a;
+  --color-success: #3d8f5f;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle-btn:hover { border-color: var(--color-teal); }

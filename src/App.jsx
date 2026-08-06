@@ -38,10 +38,13 @@ import { CompanyDirectory } from './pages/CompanyDirectory'
 import { useFreeMode } from './FreeModeContext'
 import { PublicCv } from './pages/PublicCv'
 import { AccountSettings } from './pages/AccountSettings'
+import { ThemeToggle } from './pages/ThemeToggle'
+import { AdminCandidates } from './pages/AdminCandidates'
+import { AdminCompanies } from './pages/AdminCompanies'
 import './App.css'
 
 function App() {
-  const { session, profile, loading } = useAuth()
+  const { session, profile, loading, displayName } = useAuth()
   const { freeMode } = useFreeMode()
   const navigate = useNavigate()
   const [showMyCv, setShowMyCv] = useState(false)
@@ -109,6 +112,7 @@ function App() {
         </button>
 
         <div className={`navbar-right ${mobileMenuOpen ? 'navbar-right--open' : ''}`}>
+          <ThemeToggle />
           <div className="navbar-links">
             <Link to="/about" className="nav-link" onClick={() => setMobileMenuOpen(false)}>За нас</Link>
             <Link to="/blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог</Link>
@@ -142,6 +146,8 @@ function App() {
             {session && profile?.role === 'admin' && (
               <>
                 <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Admin панел</Link>
+                <Link to="/admin-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Кандидати</Link>
+                <Link to="/admin-companies" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Фирми</Link>
                 <Link to="/admin-blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог статии</Link>
               </>
             )}
@@ -158,7 +164,7 @@ function App() {
 
           {session && (
             <div className="navbar-links">
-              <Link to="/account-settings" className="navbar-user" style={{ textDecoration: 'none' }}>{session.user.email}</Link>
+              <Link to="/account-settings" className="navbar-user" style={{ textDecoration: 'none' }}>{displayName || session.user.email}</Link>
               <button onClick={handleLogout} className="btn-logout">Изход</button>
             </div>
           )}
@@ -191,6 +197,8 @@ function App() {
         <Route path="/companies" element={<CompanyDirectory />} />
         <Route path="/cv/:id" element={<PublicCv />} />
         <Route path="/account-settings" element={<AccountSettings />} />
+        <Route path="/admin-candidates" element={<AdminCandidates />} />
+        <Route path="/admin-companies" element={<AdminCompanies />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

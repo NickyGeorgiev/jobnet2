@@ -9,7 +9,7 @@ import { loadTheme } from './loadTheme.js'
 import App from './App.jsx'
 
 loadTheme()
-
+document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark')
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
