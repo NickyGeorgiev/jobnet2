@@ -8,8 +8,11 @@ import './theme.css'
 import { loadTheme } from './loadTheme.js'
 import App from './App.jsx'
 
-loadTheme()
-document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark')
+const savedTheme = localStorage.getItem('theme') || 'dark'
+document.documentElement.setAttribute('data-theme', savedTheme)
+if (savedTheme === 'dark') {
+  loadTheme()
+}
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>

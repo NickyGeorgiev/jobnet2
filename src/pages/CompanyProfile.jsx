@@ -13,7 +13,7 @@ const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
 export function CompanyProfile() {
   useSeo(seo.companyProfile)
   const { showToast } = useToast()
-  const { session } = useAuth()
+  const { session, refreshProfile } = useAuth()
   const [formData, setFormData] = useState({
     company_name: '', bulstat: '', mol: '', sector: '', founded_year: '',
     employee_count: '', locations_count: '', bio: '',
@@ -108,6 +108,7 @@ export function CompanyProfile() {
       showToast('Грешка: ' + error.message, 'error')
     } else {
       showToast('Профилът е записан успешно!', 'success')
+      await refreshProfile()
     }
     setSaving(false)
   }

@@ -34,6 +34,11 @@ export function AdminCandidates() {
                   {fullName}
                 </p>
                 <p className="blog-admin-row-meta">{c.contact_email || '—'} · {percent}% попълнено · рег. {new Date(c.created_at).toLocaleDateString('bg-BG')}</p>
+                <p className="blog-admin-row-meta" style={{ marginTop: '0.3rem' }}>
+                  {c.target_salary ? `от ${c.target_salary}€` : 'без заплата'} ·{' '}
+                  {(c.target_sector || []).join(', ') || 'без сектор'} ·{' '}
+                  {(c.target_cities || []).join(', ') || 'без град'}
+                </p>
               </div>
               <button className="btn-secondary" onClick={() => setSelected(c)}>Виж CV</button>
             </div>

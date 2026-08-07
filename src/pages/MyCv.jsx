@@ -48,7 +48,7 @@ function emptyLanguage() {
 
 export function MyCv() {
   useSeo(seo.myCv)
-  const { session } = useAuth()
+  const { session, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [formData, setFormData] = useState({
     fname: '', lname: '', phone: '', birth_date: '', gender: '',
@@ -232,6 +232,7 @@ export function MyCv() {
       showToast('Грешка: ' + error.message, 'error')
     } else {
       showToast('CV-то е записано успешно!', 'success')
+      await refreshProfile()
     }
     setSaving(false)
   }
