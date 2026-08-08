@@ -7,6 +7,27 @@ export function AdminCandidates() {
   const [candidates, setCandidates] = useState(null)
   const [selected, setSelected] = useState(null)
 
+  function exportCsv() {
+    const rows = candidates.map(c => [
+      [c.fname, c.lname].filter(Boolean).join(' '),
+      c.contact_email || '',
+      c.phone || '',
+      c.current_city || '',
+      c.target_salary || '',
+      c.target_sector || '',
+      c.target_cities || '',
+      c.target_level || '',
+      new Date(c.created_at).toLocaleDateString('bg-BG'),
+    ])
+    const csv = [['Име', 'Email', 'Телефон', 'Град', 'Желана заплата', 'Желан сектор', 'Желан град', 'Желано ниво', 'Регистриран на'], ...rows]
+      .map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'kandidati.csv'
+    link.click()
+  }
+
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from('candidates').select('*').order('created_at', { ascending: false })
@@ -19,7 +40,10 @@ export function AdminCandidates() {
 
   return (
     <div className="dashboard-shell">
-      <div className="dashboard-header"><div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички кандидати ({candidates.length})</h1></div></div>
+      <div className="dashboard-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
+        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички кандидати ({candidates.length})</h1></div>
+        <button className="btn-secondary" onClick={exportCsv}>⬇ Export CSV</button>
+      </div>
 
       <div className="blog-admin-list">
         {candidates.map((c) => {

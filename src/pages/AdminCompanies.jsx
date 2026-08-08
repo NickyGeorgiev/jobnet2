@@ -4,6 +4,26 @@ import { supabase } from '../supabaseClient'
 export function AdminCompanies() {
   const [companies, setCompanies] = useState(null)
 
+  function exportCsv() {
+    const rows = companies.map(c => [
+      c.company_name || '',
+      c.bulstat || '',
+      c.mol || '',
+      c.contact_email || '',
+      c.contact_phone || '',
+      c.contact_address || '',
+      c.sector || '',
+      new Date(c.created_at).toLocaleDateString('bg-BG'),
+    ])
+    const csv = [['Име на фирма', 'Булстат', 'МОЛ на фирмата', 'Email', 'Телефон', 'Адрес', 'Сектор', 'Регистриран на'], ...rows]
+      .map(r => r.map(v => `"${v}"`).join(',')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'firmi.csv'
+    link.click()
+  }
+
   useEffect(() => {
     async function load() {
       const { data } = await supabase.from('companies').select('*').order('created_at', { ascending: false })
@@ -16,7 +36,10 @@ export function AdminCompanies() {
 
   return (
     <div className="dashboard-shell">
-      <div className="dashboard-header"><div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички фирми ({companies.length})</h1></div></div>
+      <div className="dashboard-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
+        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички фирми ({companies.length})</h1></div>
+        <button className="btn-secondary" onClick={exportCsv}>⬇ Export CSV</button>
+      </div>
 
       <div className="blog-admin-list">
         {companies.map((c) => {

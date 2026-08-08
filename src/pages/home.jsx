@@ -31,15 +31,13 @@ function HeroArt() {
 
 export function Home() {
   useSeo(seo.home)
-  useDocumentTitle(null) // празно = показва основния title
+  useDocumentTitle(null)
   const { freeMode } = useFreeMode()
   const [logos, setLogos] = useState([])
 
   useEffect(() => {
     async function loadLogos() {
       if (freeMode) {
-        // По време на безплатния launch период — показваме всички регистрирани фирми с лого,
-        // независимо от плащане (все още никой не плаща)
         const { data } = await supabase
           .from('company_directory')
           .select('company_name, logo_url')
@@ -62,8 +60,8 @@ export function Home() {
         </picture>
         <div className="hero-banner-overlay">
           <div className="hero-banner-text">
-            <p className="hero-banner-eyebrow">Jobstate</p>
-            <h2 className="hero-banner-title">Работата те намира, не обратното.</h2>
+            <p className="hero-banner-eyebrow">Jobstate - Работата те намира</p>
+            <h2 className="hero-banner-title">Тук няма да видиш обяви за работа. Регистрираш се, правиш си CV и фирмите намират теб!</h2>
           </div>
           <div className="hero-banner-ctas">
             <Link to="/register?role=candidate" className="btn-primary" style={{ textDecoration: 'none' }}>Регистрирай се като кандидат</Link>
@@ -74,10 +72,10 @@ export function Home() {
 
       <section className="hero">
         <div>
-          <p className="hero-eyebrow">Обратна платформа за работа</p>
+          <p className="hero-eyebrow">Платформа за работа с обърнат процес</p>
           <h1 className="hero-title">Кандидатите казват каква заплата търсят.</h1>
           <p className="hero-sub">
-            Без купища ирелевантни обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако плащат това, което искаш.
+            Без купища обяви. Попълваш едно CV с ясни критерии, а фирмите те намират точно теб — ако плащат това, което искаш.
           </p>
         </div>
         <div className="hero-art">

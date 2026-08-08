@@ -145,7 +145,6 @@ function App() {
 
             {session && profile?.role === 'admin' && (
               <>
-                <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Admin панел</Link>
                 <Link to="/admin-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Кандидати</Link>
                 <Link to="/admin-companies" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Фирми</Link>
                 <Link to="/admin-blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог статии</Link>
