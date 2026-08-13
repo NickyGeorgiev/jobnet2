@@ -202,7 +202,7 @@ export function CompanySearch() {
     )
   }
 
-  // --- Изгледът с резултати (grid визитки) ---
+
   if (results !== null) {
     return (
       <div className="search-shell">

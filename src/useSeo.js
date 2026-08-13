@@ -16,5 +16,4 @@ export function useSeo({ title, description } = {}) {
   }, [title, description])
 }
 
-// Пазим старото име като алиас, за да не се налага да пипаме всеки файл наведнъж
 export const useDocumentTitle = (title) => useSeo({ title })

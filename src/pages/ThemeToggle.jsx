@@ -34,7 +34,7 @@ export function ThemeToggle() {
 
   return (
     <button className="theme-toggle-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Смени темата">
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {theme === 'dark' ? '✹' : '☽'}
     </button>
   )
 }

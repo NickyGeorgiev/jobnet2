@@ -41,6 +41,7 @@ import { AccountSettings } from './pages/AccountSettings'
 import { ThemeToggle } from './pages/ThemeToggle'
 import { AdminCandidates } from './pages/AdminCandidates'
 import { AdminCompanies } from './pages/AdminCompanies'
+import { AdminSearchLogs } from './pages/AdminSearchLogs'
 import './App.css'
 
 function App() {
@@ -53,14 +54,12 @@ function App() {
 
   useEffect(() => {
     function handleFocusIn(e) {
-      // Само на тесен (мобилен) екран — на desktop няма виртуална клавиатура, няма нужда
+      
       if (window.innerWidth > 768) return
 
       const tag = e.target.tagName
       const type = e.target.type
 
-      // Изключваме чекбоксове и radio бутони — те не отварят клавиатура,
-      // затова скролването само пречи и мести екрана без причина
       if (type === 'checkbox' || type === 'radio') return
 
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
@@ -106,7 +105,6 @@ function App() {
         <Link to="/">
           <img src={logo} alt="Jobstate" className="navbar-logo-img" />
         </Link>
-
         <button className="navbar-mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
           {mobileMenuOpen ? '✕' : '☰'}
         </button>
@@ -147,6 +145,7 @@ function App() {
               <>
                 <Link to="/admin-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Кандидати</Link>
                 <Link to="/admin-companies" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Фирми</Link>
+                <Link to="/admin-search-logs" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Лог търсения</Link>
                 <Link to="/admin-blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог статии</Link>
               </>
             )}
@@ -198,6 +197,7 @@ function App() {
         <Route path="/account-settings" element={<AccountSettings />} />
         <Route path="/admin-candidates" element={<AdminCandidates />} />
         <Route path="/admin-companies" element={<AdminCompanies />} />
+        <Route path="/admin-search-logs" element={<AdminSearchLogs />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />

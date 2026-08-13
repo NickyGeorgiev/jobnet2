@@ -7,6 +7,7 @@ import { WorkExperienceSection } from './WorkExperienceSection'
 import { EducationSection } from './EducationSection'
 import { LanguagesSection } from './LanguagesSection'
 import { CheckboxMultiSelect } from './CheckboxMultiSelect'
+import { convertImageToWebp } from '../imageProcessing'
 import { Spinner } from './Spinner'
 import { useToast } from './Toast'
 import { useSeo } from '../useSeo'
@@ -116,11 +117,20 @@ export function MyCv() {
   }
 
   async function handleAvatarUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
+    const rawFile = e.target.files[0]
+    if (!rawFile) return
 
     setUploadingAvatar(true)
     setMessage('')
+
+    let file
+    try {
+      file = await convertImageToWebp(rawFile)
+    } catch (err) {
+      setMessage('Грешка при обработка на снимката: ' + err.message)
+      setUploadingAvatar(false)
+      return
+    }
 
     const filePath = `${session.user.id}/${Date.now()}_${file.name}`
 

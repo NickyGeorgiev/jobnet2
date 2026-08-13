@@ -27,7 +27,6 @@
   font-size: 0.85rem;
 }
 
-/* Анимиран underline hover ефект за навигационните връзки */
 .nav-link {
   position: relative;
   color: var(--color-text);

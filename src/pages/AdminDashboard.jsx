@@ -114,12 +114,43 @@ export function AdminDashboard() {
     const topSectors = Object.entries(sectorCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
     const topCities = Object.entries(cityCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
 
+    const BUCKET_ORDER = ['<800€', '800-1200€', '1200-1600€', '1600-2000€', '2000-2500€', '2500€+']
+    function bucketSalary(amount) {
+      if (amount < 800) return '<800€'
+      if (amount < 1200) return '800-1200€'
+      if (amount < 1600) return '1200-1600€'
+      if (amount < 2000) return '1600-2000€'
+      if (amount < 2500) return '2000-2500€'
+      return '2500€+'
+    }
+
+    const [candidateSalaries, companySalaries] = await Promise.all([
+      supabase.from('candidates').select('target_salary').not('target_salary', 'is', null),
+      supabase.from('search_logs').select('salary').not('salary', 'is', null),
+    ])
+
+    const candidateBuckets = {}
+    ;(candidateSalaries.data || []).forEach((c) => {
+      const b = bucketSalary(c.target_salary)
+      candidateBuckets[b] = (candidateBuckets[b] || 0) + 1
+    })
+    const companyBuckets = {}
+    ;(companySalaries.data || []).forEach((s) => {
+      const b = bucketSalary(s.salary)
+      companyBuckets[b] = (companyBuckets[b] || 0) + 1
+    })
+
+    const desiredSalaries = BUCKET_ORDER.map((b) => [b, candidateBuckets[b] || 0])
+    const offeredSalaries = BUCKET_ORDER.map((b) => [b, companyBuckets[b] || 0])
+
     setActivity({
       totalSearches: allSearches.length,
       totalProfileViews: viewLogs.count || 0,
       totalMessages: msgLogs.count || 0,
       topSectors,
       topCities,
+      desiredSalaries,
+      offeredSalaries,
     })
   }
 
@@ -258,6 +289,33 @@ export function AdminDashboard() {
                 {activity.topCities.map(([city, count]) => (
                   <div key={city} className="top-list-row">
                     <span>{city}</span>
+                    <span className="top-list-count">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="dashboard-grid" style={{ marginBottom: '2.5rem' }}>
+            <div className="status-card">
+              <p className="status-title" style={{ marginBottom: '1rem' }}>Желани заплати (кандидати)</p>
+              <div className="top-list">
+                {activity.desiredSalaries.every(([, c]) => c === 0) && <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Няма данни още.</p>}
+                {activity.desiredSalaries.map(([bucket, count]) => (
+                  <div key={bucket} className="top-list-row">
+                    <span>{bucket}</span>
+                    <span className="top-list-count">{count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="status-card">
+              <p className="status-title" style={{ marginBottom: '1rem' }}>Търсени заплати (фирми)</p>
+              <div className="top-list">
+                {activity.offeredSalaries.every(([, c]) => c === 0) && <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Няма данни още.</p>}
+                {activity.offeredSalaries.map(([bucket, count]) => (
+                  <div key={bucket} className="top-list-row">
+                    <span>{bucket}</span>
                     <span className="top-list-count">{count}</span>
                   </div>
                 ))}

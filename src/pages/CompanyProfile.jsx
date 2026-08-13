@@ -6,6 +6,7 @@ import { Spinner } from './Spinner'
 import { useToast } from './Toast'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { convertImageToWebp } from '../imageProcessing'
 import './CompanyProfile.css'
 
 const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
@@ -58,11 +59,20 @@ export function CompanyProfile() {
   }
 
   async function handleLogoUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
+    const rawFile = e.target.files[0]
+    if (!rawFile) return
 
     setUploadingLogo(true)
     setMessage('')
+
+    let file
+    try {
+      file = await convertImageToWebp(rawFile)
+    } catch (err) {
+      setMessage('Грешка при обработка на снимката: ' + err.message)
+      setUploadingLogo(false)
+      return
+    }
 
     const filePath = `${session.user.id}/${Date.now()}_${file.name}`
 

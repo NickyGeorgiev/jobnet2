@@ -53,7 +53,7 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
   const vatAmount = total * VAT_RATE / (1 + VAT_RATE)
   const subtotal = total - vatAmount
 
-  // За фактури на фирми, изискваме пълни данни, преди да генерираме документа
+  
   const isCompanyInvoice = payment.user_type === 'company'
   const missingCompanyData = isCompanyInvoice && company &&
     (!company.company_name || !company.bulstat || !company.mol || !company.contact_address)
