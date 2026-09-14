@@ -123,7 +123,7 @@ export function JobListingsManage() {
   }
 
   async function handleDuplicate(job) {
-    const { id, created_at, published_at, view_count, status, tier, tier_rank, slug, ...rest } = job
+    const { id, created_at, applicationCount, published_at, view_count, status, tier, tier_rank, slug, ...rest } = job
     const { error } = await supabase.from('job_listings').insert({
       ...rest,
       slug: null,
@@ -131,6 +131,7 @@ export function JobListingsManage() {
       status: 'draft',
     })
     if (error) {
+      console.error('Duplicate error:', error)
       showToast('Грешка: ' + error.message, 'error')
     } else {
       showToast('Обявата е дублирана като чернова', 'success')

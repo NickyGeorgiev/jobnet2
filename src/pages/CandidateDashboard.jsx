@@ -8,10 +8,11 @@ import { useToast } from './Toast'
 import { calculateCvCompleteness } from '../cvCompleteness'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
-import { IoShareSocialOutline } from "react-icons/io5";
-import { MdOutlineMarkEmailRead } from "react-icons/md";
-import { TbMailOff } from "react-icons/tb";
-import { FaRegEyeSlash } from "react-icons/fa";
+import { IoShareSocialOutline } from "react-icons/io5"
+import { MdOutlineMarkEmailRead } from "react-icons/md"
+import { TbMailOff } from "react-icons/tb"
+import { FaRegEyeSlash } from "react-icons/fa"
+import { FaRegEye } from "react-icons/fa"
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
@@ -101,10 +102,14 @@ export function CandidateDashboard() {
         <div className="toggle-row">
           <div>
             <p className="status-title" style={{ marginBottom: '0.2rem' }}>
-              {cv.active ? ('👁 Профилът е видим за фирмите') 
+              {cv.active ? 
+              <>
+              <FaRegEye size={25} style={{ marginRight: '6px'}}/>
+              Профилът е видим за фирмите
+              </>
               : 
               <>
-              <FaRegEyeSlash style={{ marginRight: '6px'}}/>
+              <FaRegEyeSlash size={25} style={{ marginRight: '6px'}}/>
               Профилът е скрит
               </>
               }
@@ -128,12 +133,12 @@ export function CandidateDashboard() {
             <p className="status-title" style={{ marginBottom: '0.2rem' }}>
               {cv.notify_on_match ? (
                 <>
-                  <MdOutlineMarkEmailRead style={{ marginRight: '6px', verticalAlign: '-2px' }} />
+                  <MdOutlineMarkEmailRead size={25} style={{ marginRight: '6px', verticalAlign: '-2px' }} />
                   Получаваш имейли за подходящи обяви
                 </>
               ) : (
                 <>
-                  <TbMailOff style={{ marginRight: '6px', verticalAlign: '-2px' }} />
+                  <TbMailOff size={25} style={{ marginRight: '6px', verticalAlign: '-2px' }} />
                   Известията са изключени
                 </>
               )}

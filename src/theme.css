@@ -323,6 +323,7 @@ button {
   gap: 0.5rem;
   cursor: pointer;
   text-align: left;
+  padding-right: 1px;
 }
 
 .sector-select-trigger-label {
@@ -337,6 +338,8 @@ button {
 .sector-select-arrow {
   color: var(--color-text-muted);
   flex-shrink: 0;
+ font-weight: bold;
+ justify-content: center;
 }
 
 .sector-select-panel {

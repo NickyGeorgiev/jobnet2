@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { SectorIcon } from './SectorIcon'
+import { IoIosArrowDown } from "react-icons/io"
 
 export function SectorSelect({ value, onChange, options, placeholder = '-- Избери сектор --', disabled, iconSize }) {
   const [open, setOpen] = useState(false)
@@ -31,12 +32,12 @@ export function SectorSelect({ value, onChange, options, placeholder = '-- Из�
         <span className="sector-select-trigger-label">
           {value ? (
             <>
-              <SectorIcon sector={value} size={iconSize} /> {value}            </>
+              <SectorIcon sector={value} size={iconSize} />{value}</>
           ) : (
             <span style={{ color: 'var(--color-text)' }}>{placeholder}</span>
           )}
         </span>
-        <span className="sector-select-arrow">▾</span>
+        <span className="sector-select-arrow"><IoIosArrowDown style={{color: 'var(--color-text)'}}/></span>
       </button>
 
       {open && (

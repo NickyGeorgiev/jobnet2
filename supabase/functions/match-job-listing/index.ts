@@ -83,7 +83,6 @@ Deno.serve(async (req) => {
       .select('id, fname, contact_email, target_salary')
       .eq('active', true)
       .eq('notify_on_match', true)
-      .gte('target_salary', job.salary)
       .lte('target_salary', jobSalaryCeiling)
       .contains('target_sector', [job.sector])
       .contains('target_cities', [job.city])
@@ -142,6 +141,24 @@ Deno.serve(async (req) => {
         else console.error('Resend error for', candidate.contact_email, await emailRes.text())
       } catch (emailErr) {
         console.error('Email send error for', candidate.contact_email, emailErr)
+      }
+    }
+
+    // In-app известие — отделно от имейла, best-effort (не бива да
+    // проваля целия matching процес, ако insert-ването гръмне).
+    if (matched.length > 0) {
+      try {
+        await supabase.from('notifications').insert(
+          matched.map((candidate) => ({
+            user_id: candidate.id,
+            type: 'job_match',
+            title: 'Нова обява за теб',
+            body: `"${job.title}" отговаря на критериите ти.`,
+            link: jobUrl,
+          }))
+        )
+      } catch (notifyErr) {
+        console.error('Notification insert error:', notifyErr)
       }
     }
 
