@@ -1,0 +1,289 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { useAuth } from '../AuthContext'
+import { supabase } from '../supabaseClient'
+import { useToast } from './Toast'
+import { useTierOptions } from '../useTierOptions'
+import './JobListings.css'
+
+// Сайтът с публичните обяви (виж jobstate-jobs-ssr проекта).
+// Локално, ако тестваш и двата сайта едновременно, задай
+// VITE_JOBS_SITE_URL=http://localhost:3000 в .env.local на този проект.
+const JOBS_SITE_URL = import.meta.env.VITE_JOBS_SITE_URL || 'https://jobs.jobstate.net'
+
+const TIER_LABEL = { free: 'Безплатна', silver: 'Silver', gold: 'Gold', platinum: 'Platinum', diamond: 'Diamond' }
+
+const PAGE_SIZE = 15
+
+export function JobListingsManage() {
+  const { session } = useAuth()
+  const { showToast } = useToast()
+  const dbTierOptions = useTierOptions()
+  const TIER_OPTIONS = dbTierOptions || []
+  const [allListings, setAllListings] = useState(null)
+  const [upgradingId, setUpgradingId] = useState(null)
+  const [page, setPage] = useState(0)
+  const [sortBy, setSortBy] = useState('created_desc')
+
+  const STATUS_PRIORITY = { published: 0, draft: 0, closed: 0, expired: 1 }
+
+  const sortedListings = allListings
+    ? [...allListings].sort((a, b) => {
+      switch (sortBy) {
+        case 'created_asc':
+          return new Date(a.created_at) - new Date(b.created_at)
+        case 'tier_desc':
+          return (b.tier_rank || 0) - (a.tier_rank || 0)
+        case 'tier_asc':
+          return (a.tier_rank || 0) - (b.tier_rank || 0)
+        case 'views_desc':
+          return (b.view_count || 0) - (a.view_count || 0)
+        case 'views_asc':
+          return (a.view_count || 0) - (b.view_count || 0)
+        case 'applications_desc':
+          return b.applicationCount - a.applicationCount
+        case 'applications_asc':
+          return a.applicationCount - b.applicationCount
+        case 'status':
+          return (
+            (STATUS_PRIORITY[a.status] ?? 0) - (STATUS_PRIORITY[b.status] ?? 0) ||
+            new Date(b.created_at) - new Date(a.created_at)
+          )
+        case 'created_desc':
+        default:
+          return new Date(b.created_at) - new Date(a.created_at)
+      }
+    })
+    : []
+
+  const totalCount = sortedListings.length
+  const listings = sortedListings.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE)
+
+  useEffect(() => {
+    loadListings()
+  }, [session])
+
+  useEffect(() => {
+    setPage(0)
+  }, [sortBy])
+
+  async function loadListings() {
+    const { data } = await supabase
+      .from('job_listings')
+      .select('*')
+      .eq('company_id', session.user.id)
+
+    const jobs = data || []
+    const jobIds = jobs.map((j) => j.id)
+
+    let applicationCounts = {}
+    if (jobIds.length > 0) {
+      const { data: apps } = await supabase
+        .from('job_applications')
+        .select('job_listing_id')
+        .in('job_listing_id', jobIds)
+
+      applicationCounts = (apps || []).reduce((acc, a) => {
+        acc[a.job_listing_id] = (acc[a.job_listing_id] || 0) + 1
+        return acc
+      }, {})
+    }
+
+    setAllListings(jobs.map((j) => ({ ...j, applicationCount: applicationCounts[j.id] || 0 })))
+  }
+
+  async function handleCloseListing(id) {
+    if (!confirm('Затваряне на обявата — вече няма да се показва публично. Продължи?')) return
+    const { error } = await supabase
+      .from('job_listings')
+      .update({ status: 'closed' })
+      .eq('id', id)
+      .eq('company_id', session.user.id)
+    if (error) {
+      showToast('Грешка: ' + error.message, 'error')
+    } else {
+      showToast('Обявата е затворена', 'success')
+      loadListings()
+    }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Изтриване на обявата завинаги — включително всички кандидатствания по нея. Продължи?')) return
+    const { error } = await supabase
+      .from('job_listings')
+      .delete()
+      .eq('id', id)
+      .eq('company_id', session.user.id)
+    if (error) {
+      showToast('Грешка: ' + error.message, 'error')
+    } else {
+      showToast('Обявата е изтрита', 'success')
+      loadListings()
+    }
+  }
+
+  async function handleDuplicate(job) {
+    const { id, created_at, published_at, view_count, status, tier, tier_rank, slug, ...rest } = job
+    const { error } = await supabase.from('job_listings').insert({
+      ...rest,
+      slug: null,
+      company_id: session.user.id,
+      status: 'draft',
+    })
+    if (error) {
+      showToast('Грешка: ' + error.message, 'error')
+    } else {
+      showToast('Обявата е дублирана като чернова', 'success')
+      loadListings()
+    }
+  }
+
+  async function handleUpgradeTier(job, tierValue) {
+    const tierInfo = TIER_OPTIONS.find((t) => t.value === tierValue)
+    setUpgradingId(job.id)
+
+    const { data, error } = await supabase.functions.invoke(
+      'create-checkout-session',
+      { body: { priceId: tierInfo.priceId, metadata: { jobListingId: job.id } } }
+    )
+
+    setUpgradingId(null)
+
+    if (error || !data?.url) {
+      showToast('Грешка при стартиране на плащането.', 'error')
+    } else {
+      window.location.href = data.url
+    }
+  }
+
+  if (allListings === null) return <div style={{ padding: '2rem' }}>Зареждане...</div>
+
+  const statusLabel = { draft: 'Чернова', published: 'Публикувана', closed: 'Затворена', expired: 'Изтекла' }
+
+  return (
+    <div className="dashboard-shell">
+      <div className="dashboard-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
+        <div>
+          <p className="dashboard-eyebrow">Фирмен профил</p>
+          <h1 className="dashboard-title">Моите обяви</h1>
+        </div>
+        <Link to="/company-jobs/new" className="btn-primary" style={{ textDecoration: 'none' }}>
+          + Нова обява
+        </Link>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+        <select className="input" style={{ width: 'auto' }} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="created_desc">Дата: нови → стари</option>
+          <option value="created_asc">Дата: стари → нови</option>
+          <option value="tier_desc">Ниво: високо → ниско</option>
+          <option value="tier_asc">Ниво: ниско → високо</option>
+          <option value="views_desc">Прегледи: най-много</option>
+          <option value="views_asc">Прегледи: най-малко</option>
+          <option value="applications_desc">Кандидатствания: най-много</option>
+          <option value="applications_asc">Кандидатствания: най-малко</option>
+          <option value="status">Активни → изтекли</option>
+        </select>
+      </div>
+      <div className="blog-admin-list">
+        {listings.length === 0 && <p style={{ color: 'var(--color-text-muted)' }}>Все още нямате създадени обяви.</p>}
+
+        {listings.map((job) => (
+          <div key={job.id} className={`job-admin-row ${job.status === 'expired' ? 'job-admin-row--expired' : ''}`}>
+            <div>
+              <p className="blog-admin-row-title">
+                <span className={`blog-status-badge blog-status-badge--${job.status === 'published' ? 'published' : job.status === 'expired' ? 'closed' : 'draft'}`}>
+                  {statusLabel[job.status]}
+                </span>
+                {job.title}
+              </p>
+              <p className="blog-admin-row-meta">
+                гр: {job.city} · сектор: {job.sector} · заплата: {job.salary}€{!job.salary_visible && '/скрита'}
+                {' · Ниво: '}
+                {job.tier && job.tier !== 'free' ? (
+                  (() => {
+                    const tier = TIER_OPTIONS.find((t) => t.value === job.tier)
+
+                    return tier ? (
+                      <span className={`tier-badge tier-badge--${job.tier}`}>
+                        {tier.icon} {tier.label}
+                      </span>
+                    ) : null
+                  })()
+                ) : (
+                  'Безплатна'
+                )}
+                {job.status === 'published' && job.expires_at && (
+                  <>
+                    {' · Изтича след: '}
+                    {Math.max(0, Math.ceil((new Date(job.expires_at) - new Date()) / (1000 * 60 * 60 * 24)))} дни
+                  </>
+                )}
+                <p className="blog-admin-row-meta" style={{ marginTop: '0.25rem', fontSize: '0.8rem' }}>
+                  👁 {job.view_count || 0} {job.view_count === 1 ? 'преглед' : 'прегледа'} · 📩 {job.applicationCount} {job.applicationCount === 1 ? 'кандидатстване' : 'кандидатствания'}
+                </p>
+              </p>
+            </div>
+            <div className="job-listing-row-actions">
+              {job.status === 'published' && job.tier !== 'diamond' && TIER_OPTIONS.length > 0 && (
+                <select
+                  className="input"
+                  style={{ width: 'auto' }}
+                  value=""
+                  disabled={upgradingId === job.id}
+                  onChange={(e) => e.target.value && handleUpgradeTier(job, e.target.value)}
+                >
+                  <option value="">{upgradingId === job.id ? 'Зареждане...' : 'Ъпгрейд ниво'}</option>
+                  {TIER_OPTIONS.filter((t) => t.rank > (TIER_OPTIONS.find((x) => x.value === job.tier)?.rank || 0)).map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
+              )}
+              {job.status === 'published' && (
+                <a
+                  href={`${JOBS_SITE_URL}/jobs/${job.slug}-${job.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Виж
+                </a>
+              )}
+              <Link to={`/company-jobs/${job.id}/applicants`} className="btn-secondary" style={{ textDecoration: 'none' }}>
+                Кандидати
+              </Link>
+              <Link to={`/company-jobs/${job.id}`} className="btn-secondary" style={{ textDecoration: 'none' }}>
+                Редактирай
+              </Link>
+              <button className="btn-secondary" onClick={() => handleDuplicate(job)}>
+                Дублирай
+              </button>
+              {job.status === 'published' && (
+                <button className="btn-text-danger" onClick={() => handleCloseListing(job.id)}>Затвори</button>
+              )}
+              <button className="btn-text-danger" onClick={() => handleDelete(job.id)}>Изтрий</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {totalCount > PAGE_SIZE && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1.5rem', alignItems: 'center' }}>
+          <button className="btn-secondary" onClick={() => setPage((p) => p - 1)} disabled={page === 0}>
+            ← Предишна
+          </button>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+            Страница {page + 1} от {Math.ceil(totalCount / PAGE_SIZE)}
+          </span>
+          <button
+            className="btn-secondary"
+            onClick={() => setPage((p) => p + 1)}
+            disabled={(page + 1) * PAGE_SIZE >= totalCount}
+          >
+            Следваща →
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

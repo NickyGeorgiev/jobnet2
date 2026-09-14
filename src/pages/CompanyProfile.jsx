@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
@@ -7,18 +8,25 @@ import { useToast } from './Toast'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
 import { convertImageToWebp } from '../imageProcessing'
+import { ImageCropperModal } from './ImageCropperModal'
+import { SectorSelect } from './SectorSelect'
 import './CompanyProfile.css'
 
 const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
 
 export function CompanyProfile() {
   useSeo(seo.companyProfile)
+  const navigate = useNavigate()
+  const [pendingBannerFile, setPendingBannerFile] = useState(null)
   const { showToast } = useToast()
   const { session, refreshProfile } = useAuth()
   const [formData, setFormData] = useState({
     company_name: '', bulstat: '', mol: '', sector: '', founded_year: '',
     employee_count: '', locations_count: '', bio: '',
     contact_phone: '', contact_address: '', contact_email: '', logo_url: '',
+    banner_url: '', video_url: '', perks: [], values: [],
+    social_facebook: '', social_linkedin: '', social_instagram: '', social_website: '',
+    why_work_here: '', video_urls: [],
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -47,6 +55,16 @@ export function CompanyProfile() {
           contact_address: data.contact_address || '',
           contact_email: data.contact_email || '',
           logo_url: data.logo_url || '',
+          banner_url: data.banner_url || '',
+          video_url: data.video_url || '',
+          perks: data.perks || [],
+          values: data.values || [],
+          social_facebook: data.social_facebook || '',
+          social_linkedin: data.social_linkedin || '',
+          social_instagram: data.social_instagram || '',
+          social_website: data.social_website || '',
+          why_work_here: data.why_work_here || '',
+          video_urls: data.video_urls || [],
         })
       }
       setLoading(false)
@@ -91,8 +109,69 @@ export function CompanyProfile() {
     setUploadingLogo(false)
   }
 
+  function handleBannerFileSelected(e) {
+    const rawFile = e.target.files[0]
+    if (!rawFile) return
+    setPendingBannerFile(rawFile)
+    e.target.value = '' // за да може да избереш пак същия файл втори път, ако откажеш
+  }
+
+  async function handleBannerCropSave(croppedFile) {
+    setPendingBannerFile(null)
+    setUploadingLogo(true)
+    setMessage('')
+
+    const filePath = `${session.user.id}/banner_${Date.now()}_${croppedFile.name}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('company-logos')
+      .upload(filePath, croppedFile, { upsert: true })
+
+    if (uploadError) {
+      setMessage('Грешка при качване на банер: ' + uploadError.message)
+      setUploadingLogo(false)
+      return
+    }
+
+    const { data } = supabase.storage.from('company-logos').getPublicUrl(filePath)
+    setFormData((prev) => ({ ...prev, banner_url: data.publicUrl }))
+    setUploadingLogo(false)
+  }
+
+  function addListItem(field) {
+    setFormData((prev) => ({ ...prev, [field]: [...prev[field], ''] }))
+  }
+
+  function updateListItem(field, index, value) {
+    setFormData((prev) => {
+      const next = [...prev[field]]
+      next[index] = value
+      return { ...prev, [field]: next }
+    })
+  }
+
+  function removeListItem(field, index) {
+    setFormData((prev) => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }))
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
+
+    const trimmedEmail = formData.contact_email.trim()
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      showToast('Имейлът за връзка не изглежда валиден.', 'error')
+      return
+    }
+
+    const urlFields = ['social_website', 'social_facebook', 'social_linkedin', 'social_instagram']
+    for (const field of urlFields) {
+      const val = formData[field]?.trim()
+      if (val && !/^https?:\/\//i.test(val)) {
+        showToast(`Полето "${field}" трябва да е линк, започващ с http:// или https://`, 'error')
+        return
+      }
+    }
+
     setSaving(true)
     setMessage('')
 
@@ -109,8 +188,18 @@ export function CompanyProfile() {
         bio: formData.bio,
         contact_phone: formData.contact_phone,
         contact_address: formData.contact_address,
-        contact_email: formData.contact_email,
+        contact_email: formData.contact_email?.trim() || null,
         logo_url: formData.logo_url,
+        banner_url: formData.banner_url,
+        video_url: formData.video_url,
+        perks: formData.perks.filter((p) => p.trim()),
+        values: formData.values.filter((v) => v.trim()),
+        social_facebook: formData.social_facebook?.trim() || null,
+        social_linkedin: formData.social_linkedin?.trim() || null,
+        social_instagram: formData.social_instagram?.trim() || null,
+        social_website: formData.social_website?.trim() || null,
+        why_work_here: formData.why_work_here,
+        video_urls: formData.video_urls.filter((v) => v.trim()),
       })
       .eq('id', session.user.id)
 
@@ -119,6 +208,7 @@ export function CompanyProfile() {
     } else {
       showToast('Профилът е записан успешно!', 'success')
       await refreshProfile()
+      navigate('/')
     }
     setSaving(false)
   }
@@ -130,6 +220,10 @@ export function CompanyProfile() {
   return (
     <div className="company-form-shell">
       <h2 className="company-form-title">Профил на фирмата</h2>
+
+      <Link to={`/companies/${session?.user?.id}`} className="btn-secondary" style={{ display: 'inline-block', marginBottom: '1.5rem', textDecoration: 'none' }}>
+        👁 Виж публичния си профил
+      </Link>
 
       <form onSubmit={handleSubmit}>
         <div className="company-form-section">
@@ -167,10 +261,11 @@ export function CompanyProfile() {
           <div className="form-row-2">
             <div className="field">
               <label>Сектор на дейност</label>
-              <select className="input" name="sector" value={formData.sector} onChange={handleChange}>
-                <option value="">-- Избери сектор --</option>
-                {sectors.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <SectorSelect
+                value={formData.sector}
+                onChange={(val) => setFormData((prev) => ({ ...prev, sector: val }))}
+                options={sectors}
+              />
             </div>
           </div>
 
@@ -220,6 +315,90 @@ export function CompanyProfile() {
           </div>
         </div>
 
+        <div className="company-form-section">
+          <h3 className="company-form-section-title">Витрина на профила</h3>
+
+          <div className="field">
+            <label>Банер (голяма снимка отгоре на публичния профил)</label>
+            {formData.banner_url && (
+              <img src={formData.banner_url} alt="Банер" style={{ width: '100%', maxHeight: '160px', objectFit: 'cover', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem' }} />
+            )}
+            <input type="file" accept="image/*" onChange={handleBannerFileSelected} disabled={uploadingLogo} />
+          </div>
+
+          <div className="field">
+            <label>Линк към видео (YouTube/Vimeo, по избор)</label>
+            <input className="input" name="video_url" value={formData.video_url} onChange={handleChange} placeholder="https://youtube.com/watch?v=..." />
+          </div>
+
+          <div className="field">
+            <label>Придобивки за служителите</label>
+            {formData.perks.map((perk, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input className="input" value={perk} onChange={(e) => updateListItem('perks', i, e.target.value)} placeholder="напр. Гъвкаво работно време" />
+                <button type="button" className="btn-text-danger" onClick={() => removeListItem('perks', i)}>✕</button>
+              </div>
+            ))}
+            <button type="button" className="btn-secondary" onClick={() => addListItem('perks')}>+ Добави придобивка</button>
+          </div>
+
+          <div className="field">
+            <label>Ценности на фирмата</label>
+            {formData.values.map((val, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input className="input" value={val} onChange={(e) => updateListItem('values', i, e.target.value)} placeholder="напр. Иновация" />
+                <button type="button" className="btn-text-danger" onClick={() => removeListItem('values', i)}>✕</button>
+              </div>
+            ))}
+            <button type="button" className="btn-secondary" onClick={() => addListItem('values')}>+ Добави ценност</button>
+          </div>
+
+          <div className="field">
+            <label>Защо да работиш при нас?</label>
+            <textarea
+              className="input"
+              name="why_work_here"
+              value={formData.why_work_here}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Разкажи защо кандидатите биха искали да работят точно при вас..."
+            />
+          </div>
+
+          <div className="field">
+            <label>Допълнителни видеа (по избор)</label>
+            {formData.video_urls.map((url, i) => (
+              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <input className="input" value={url} onChange={(e) => updateListItem('video_urls', i, e.target.value)} placeholder="https://youtube.com/watch?v=..." />
+                <button type="button" className="btn-text-danger" onClick={() => removeListItem('video_urls', i)}>✕</button>
+              </div>
+            ))}
+            <button type="button" className="btn-secondary" onClick={() => addListItem('video_urls')}>+ Добави видео</button>
+          </div>
+
+          <div className="form-row-2">
+            <div className="field">
+              <label>Facebook</label>
+              <input className="input" name="social_facebook" value={formData.social_facebook} onChange={handleChange} placeholder="https://facebook.com/..." />
+            </div>
+            <div className="field">
+              <label>LinkedIn</label>
+              <input className="input" name="social_linkedin" value={formData.social_linkedin} onChange={handleChange} placeholder="https://linkedin.com/company/..." />
+            </div>
+          </div>
+
+          <div className="form-row-2">
+            <div className="field">
+              <label>Instagram</label>
+              <input className="input" name="social_instagram" value={formData.social_instagram} onChange={handleChange} placeholder="https://instagram.com/..." />
+            </div>
+            <div className="field">
+              <label>Уебсайт</label>
+              <input className="input" name="social_website" value={formData.social_website} onChange={handleChange} placeholder="https://..." />
+            </div>
+          </div>
+        </div>
+
         {message && (
           <div className={`company-form-message ${isError ? 'company-form-message--error' : 'company-form-message--success'}`}>
             {message}
@@ -230,6 +409,18 @@ export function CompanyProfile() {
           {saving ? 'Записвам...' : 'Запази профил'}
         </button>
       </form>
+
+      {pendingBannerFile && (
+        <ImageCropperModal
+          imageFile={pendingBannerFile}
+          aspect={732 / 260}
+          outputWidth={1200}
+          outputHeight={426}
+          title="Нагласи банера"
+          onCancel={() => setPendingBannerFile(null)}
+          onSave={handleBannerCropSave}
+        />
+      )}
     </div>
   )
 }

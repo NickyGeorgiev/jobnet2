@@ -64,7 +64,19 @@ export function SavedCandidates() {
               {c.contact_email && <p className="candidate-card-detail">{c.contact_email}</p>}
               <p className="candidate-card-salary">от {c.target_salary} €</p>
 
-              <button className="candidate-card-btn" onClick={() => setSelectedCandidate(c)}>Виж подробности</button>
+              <button
+                className="candidate-card-btn"
+                onClick={async () => {
+                  try {
+                    await supabase.rpc('notify_cv_viewed', { p_candidate_id: c.id })
+                  } catch (err) {
+                    console.error('Failed to send CV view notification:', err)
+                  }
+                  setSelectedCandidate(c)
+                }}
+              >
+                Виж подробности
+              </button>
               <button
                 className="candidate-card-btn"
                 style={{ marginTop: '0.5rem', background: 'var(--color-gold-soft)', color: 'var(--color-gold)' }}

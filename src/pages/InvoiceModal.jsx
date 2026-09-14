@@ -1,11 +1,28 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import logo from '../assets/logo-light.svg'
 
 const VAT_RATE = 0
 
+async function logInvoiceEvent(payment, action) {
+  // Best-effort — грешка тук никога не бива да пречи на потребителя
+  // да си изтегли/разпечата фактурата.
+  try {
+    await supabase.from('invoice_events').insert({
+      payment_id: payment.id,
+      user_id: payment.user_id,
+      user_type: payment.user_type,
+      action,
+    })
+  } catch {
+    // тихо игнорираме — това е само лог за админ видимост
+  }
+}
+
 export function InvoiceModal({ payment, userEmail, onClose }) {
   const invoiceRef = useRef(null)
+  const viewLoggedRef = useRef(false)
   const [downloading, setDownloading] = useState(false)
   const [company, setCompany] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,9 +40,15 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
       setLoading(false)
     }
     loadCompany()
+
+    if (!viewLoggedRef.current) {
+      viewLoggedRef.current = true
+      logInvoiceEvent(payment, 'view')
+    }
   }, [payment])
 
   function handlePrint() {
+    logInvoiceEvent(payment, 'print')
     window.print()
   }
 
@@ -43,6 +66,7 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
       .from(invoiceRef.current)
       .save()
 
+    logInvoiceEvent(payment, 'download')
     setDownloading(false)
   }
 
@@ -106,7 +130,7 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
         <div ref={invoiceRef} className="cv-print-area invoice-print-area">
           <div className="invoice-header">
             <div>
-              <p className="invoice-title">Jobstate</p>
+              <p className="invoice-title"><img src={logo} alt="Jobstate" /></p>
               <p style={{ fontSize: '0.8rem', color: '#777', margin: '0.2rem 0 0' }}>
                 Наименование: [попълни]<br />
                 ЕИК: [попълни]<br />

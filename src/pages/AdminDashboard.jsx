@@ -25,6 +25,10 @@ export function AdminDashboard() {
   const [settings, setSettings] = useState([])
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [invoiceActivity, setInvoiceActivity] = useState(null)
+  const [invoicePage, setInvoicePage] = useState(0)
+  const [invoiceTotalCount, setInvoiceTotalCount] = useState(0)
+  const INVOICE_PAGE_SIZE = 20
 
   useEffect(() => {
     loadStats()
@@ -32,6 +36,10 @@ export function AdminDashboard() {
     loadActivity()
     loadFreeMode()
   }, [])
+
+  useEffect(() => {
+    loadInvoiceActivity()
+  }, [invoicePage])
 
   async function loadStats() {
     const now = new Date().toISOString()
@@ -45,6 +53,13 @@ export function AdminDashboard() {
       trialCount,
       monthPayments,
       allPayments,
+      jobsPublishedCount,
+      jobsAllCount,
+      applicationsCount,
+      applicationsMonthCount,
+      jobTiers,
+      applicationStatuses,
+      companyBalances,
     ] = await Promise.all([
       supabase.from('candidates').select('*', { count: 'exact', head: true }),
       supabase.from('companies').select('*', { count: 'exact', head: true }),
@@ -53,7 +68,22 @@ export function AdminDashboard() {
       supabase.from('companies').select('*', { count: 'exact', head: true }).gt('trial_ends_at', now),
       supabase.from('payments').select('amount').gte('created_at', startOfMonth),
       supabase.from('payments').select('amount'),
+      supabase.from('job_listings').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+      supabase.from('job_listings').select('*', { count: 'exact', head: true }),
+      supabase.from('job_applications').select('*', { count: 'exact', head: true }),
+      supabase.from('job_applications').select('*', { count: 'exact', head: true }).gte('created_at', startOfMonth),
+      supabase.from('job_listings').select('tier').eq('status', 'published'),
+      supabase.from('job_applications').select('status'),
+      supabase.from('companies').select('token_balance'),
     ])
+
+    const tierBuckets = { free: 0, silver: 0, gold: 0, platinum: 0, diamond: 0 }
+      ; (jobTiers.data || []).forEach((j) => { tierBuckets[j.tier] = (tierBuckets[j.tier] || 0) + 1 })
+
+    const appStatusBuckets = { submitted: 0, viewed: 0, approved: 0, rejected: 0 }
+      ; (applicationStatuses.data || []).forEach((a) => { appStatusBuckets[a.status] = (appStatusBuckets[a.status] || 0) + 1 })
+
+    const totalTokensOutstanding = (companyBalances.data || []).reduce((sum, c) => sum + (c.token_balance || 0), 0)
 
     const monthRevenue = (monthPayments.data || []).reduce((sum, p) => sum + Number(p.amount), 0)
     const totalRevenue = (allPayments.data || []).reduce((sum, p) => sum + Number(p.amount), 0)
@@ -66,6 +96,13 @@ export function AdminDashboard() {
       trialing: trialCount.count || 0,
       monthRevenue,
       totalRevenue,
+      jobsPublished: jobsPublishedCount.count || 0,
+      jobsAll: jobsAllCount.count || 0,
+      applications: applicationsCount.count || 0,
+      applicationsMonth: applicationsMonthCount.count || 0,
+      tierBuckets,
+      appStatusBuckets,
+      totalTokensOutstanding,
     })
   }
 
@@ -93,6 +130,30 @@ export function AdminDashboard() {
   }
 
   const [activity, setActivity] = useState(null)
+
+  async function loadInvoiceActivity() {
+    const { data: events, count } = await supabase
+      .from('invoice_events')
+      .select('id, action, created_at, user_id, payments(description, amount, currency)', { count: 'exact' })
+      .eq('user_type', 'company')
+      .order('created_at', { ascending: false })
+      .range(invoicePage * INVOICE_PAGE_SIZE, invoicePage * INVOICE_PAGE_SIZE + INVOICE_PAGE_SIZE - 1)
+
+    const list = events || []
+    const companyIds = [...new Set(list.map((e) => e.user_id))]
+
+    let companiesById = {}
+    if (companyIds.length > 0) {
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('id, company_name')
+        .in('id', companyIds)
+      companiesById = Object.fromEntries((companies || []).map((c) => [c.id, c.company_name]))
+    }
+
+    setInvoiceActivity(list.map((e) => ({ ...e, companyName: companiesById[e.user_id] || 'Фирма' })))
+    setInvoiceTotalCount(count || 0)
+  }
 
   async function loadActivity() {
     const [searchLogs, viewLogs, msgLogs] = await Promise.all([
@@ -130,15 +191,15 @@ export function AdminDashboard() {
     ])
 
     const candidateBuckets = {}
-    ;(candidateSalaries.data || []).forEach((c) => {
-      const b = bucketSalary(c.target_salary)
-      candidateBuckets[b] = (candidateBuckets[b] || 0) + 1
-    })
+      ; (candidateSalaries.data || []).forEach((c) => {
+        const b = bucketSalary(c.target_salary)
+        candidateBuckets[b] = (candidateBuckets[b] || 0) + 1
+      })
     const companyBuckets = {}
-    ;(companySalaries.data || []).forEach((s) => {
-      const b = bucketSalary(s.salary)
-      companyBuckets[b] = (companyBuckets[b] || 0) + 1
-    })
+      ; (companySalaries.data || []).forEach((s) => {
+        const b = bucketSalary(s.salary)
+        companyBuckets[b] = (companyBuckets[b] || 0) + 1
+      })
 
     const desiredSalaries = BUCKET_ORDER.map((b) => [b, candidateBuckets[b] || 0])
     const offeredSalaries = BUCKET_ORDER.map((b) => [b, companyBuckets[b] || 0])
@@ -247,6 +308,58 @@ export function AdminDashboard() {
         </div>
       )}
 
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Обяви и кандидатствания</h2>
+
+      {stats && (
+        <>
+          <div className="admin-stats-grid">
+            <div className="admin-stat-card">
+              <p className="admin-stat-value">{stats.jobsPublished}</p>
+              <p className="admin-stat-label">Активни публикувани обяви</p>
+            </div>
+            <div className="admin-stat-card">
+              <p className="admin-stat-value">{stats.jobsAll}</p>
+              <p className="admin-stat-label">Обяви общо (всички статуси)</p>
+            </div>
+            <div className="admin-stat-card">
+              <p className="admin-stat-value">{stats.applications}</p>
+              <p className="admin-stat-label">Кандидатствания общо</p>
+            </div>
+            <div className="admin-stat-card">
+              <p className="admin-stat-value">{stats.applicationsMonth}</p>
+              <p className="admin-stat-label">Кандидатствания този месец</p>
+            </div>
+            <div className="admin-stat-card" style={{ borderColor: 'var(--color-gold)' }}>
+              <p className="admin-stat-value" style={{ color: 'var(--color-gold)' }}>{stats.totalTokensOutstanding}</p>
+              <p className="admin-stat-label">State Credits в обращение</p>
+            </div>
+          </div>
+
+          <div className="dashboard-grid" style={{ marginBottom: '2.5rem' }}>
+            <div className="status-card">
+              <p className="status-title" style={{ marginBottom: '1rem' }}>Обяви по ниво</p>
+              <div className="top-list">
+                <div className="top-list-row"><span>Безплатна</span><span className="top-list-count">{stats.tierBuckets.free}</span></div>
+                <div className="top-list-row"><span>Silver</span><span className="top-list-count">{stats.tierBuckets.silver}</span></div>
+                <div className="top-list-row"><span>Gold</span><span className="top-list-count">{stats.tierBuckets.gold}</span></div>
+                <div className="top-list-row"><span>Platinum</span><span className="top-list-count">{stats.tierBuckets.platinum}</span></div>
+                <div className="top-list-row"><span>Diamond</span><span className="top-list-count">{stats.tierBuckets.diamond}</span></div>
+              </div>
+            </div>
+
+            <div className="status-card">
+              <p className="status-title" style={{ marginBottom: '1rem' }}>Кандидатствания по статус</p>
+              <div className="top-list">
+                <div className="top-list-row"><span>Изпратени</span><span className="top-list-count">{stats.appStatusBuckets.submitted}</span></div>
+                <div className="top-list-row"><span>Разгледани</span><span className="top-list-count">{stats.appStatusBuckets.viewed}</span></div>
+                <div className="top-list-row"><span>Одобрени</span><span className="top-list-count">{stats.appStatusBuckets.approved}</span></div>
+                <div className="top-list-row"><span>Отхвърлени</span><span className="top-list-count">{stats.appStatusBuckets.rejected}</span></div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Активност на платформата</h2>
 
       {!activity ? (
@@ -323,6 +436,45 @@ export function AdminDashboard() {
             </div>
           </div>
         </>
+      )}
+
+      <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Фактурна активност (фирми)</h2>
+
+      <div className="status-card" style={{ marginBottom: '1rem' }}>
+        {invoiceActivity === null && <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Зареждане...</p>}
+        {invoiceActivity?.length === 0 && <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Няма отваряни/изтегляни фактури още.</p>}
+        {invoiceActivity?.map((e) => (
+          <div key={e.id} className="top-list-row">
+            <span>
+              {e.action === 'download' && '⬇ '}
+              {e.action === 'print' && '🖨 '}
+              {e.action === 'view' && '👁 '}
+              <strong>{e.companyName}</strong> — {e.payments?.description || 'фактура'}
+              {e.payments?.amount != null && ` (${Number(e.payments.amount).toFixed(2)} ${e.payments.currency || 'EUR'})`}
+            </span>
+            <span className="top-list-count" style={{ fontWeight: 400, fontSize: '0.78rem' }}>
+              {new Date(e.created_at).toLocaleString('bg-BG')}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {invoiceTotalCount > INVOICE_PAGE_SIZE && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '2.5rem', alignItems: 'center' }}>
+          <button className="btn-secondary" onClick={() => setInvoicePage((p) => p - 1)} disabled={invoicePage === 0}>
+            ← Предишна
+          </button>
+          <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+            Страница {invoicePage + 1} от {Math.ceil(invoiceTotalCount / INVOICE_PAGE_SIZE)}
+          </span>
+          <button
+            className="btn-secondary"
+            onClick={() => setInvoicePage((p) => p + 1)}
+            disabled={(invoicePage + 1) * INVOICE_PAGE_SIZE >= invoiceTotalCount}
+          >
+            Следваща →
+          </button>
+        </div>
       )}
 
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Цветове на темата</h2>

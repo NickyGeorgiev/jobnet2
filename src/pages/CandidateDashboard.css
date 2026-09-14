@@ -194,7 +194,7 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   margin: 0 0 0.75rem;
 }
 
@@ -219,7 +219,7 @@
 
 .match-group-label {
   font-size: 0.72rem;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 0.5rem;
@@ -267,4 +267,239 @@
   background: var(--color-gold-soft);
   color: var(--color-gold);
   border: 1px solid rgba(212, 162, 76, 0.3);
+}
+
+.cv-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='140' viewBox='0 0 260 140'%3E%3Ctext x='0' y='80' font-family='sans-serif' font-weight='700' font-size='28' fill='%23000' transform='rotate(-28 130 70)'%3EJobstate.net%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+
+/* =========================================================
+   PRINT — CV като истински A4 документ
+   ========================================================= */
+
+/* =========================================================
+   PRINT — CV като истински A4 документ
+   ========================================================= */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media print {
+
+  html,
+  body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Скриваме всичко от приложението,
+     освен самото CV */
+  body * {
+    visibility: hidden;
+  }
+
+  .cv-paper,
+  .cv-paper * {
+    visibility: visible;
+  }
+
+  /* Самото CV става точно A4 */
+  .cv-paper {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+
+    width: 210mm !important;
+    height: 297mm !important;
+
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-radius: 0 !important;
+    box-shadow: none !important;
+
+    display: grid !important;
+    grid-template-columns: 62mm 1fr !important;
+
+    overflow: hidden !important;
+
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Лявата колонка */
+  .cv-sidebar {
+    width: auto !important;
+    min-width: 0 !important;
+
+    padding: 15mm 9mm !important;
+
+    overflow: hidden !important;
+  }
+
+  /* Основното съдържание */
+  .cv-main {
+    min-width: 0 !important;
+
+    padding: 15mm 13mm !important;
+
+    overflow: hidden !important;
+  }
+
+  /* Снимка */
+  .cv-avatar,
+  .cv-avatar-placeholder {
+    width: 30mm !important;
+    height: 30mm !important;
+
+    margin-bottom: 8mm !important;
+  }
+
+  /* Име */
+  .cv-name {
+    font-size: 22pt !important;
+    line-height: 1.15 !important;
+
+    margin: 0 0 4mm !important;
+  }
+
+  /* Описание */
+  .cv-bio {
+    font-size: 9.5pt !important;
+    line-height: 1.45 !important;
+
+    margin: 0 0 8mm !important;
+  }
+
+  /* Заглавия */
+  .cv-section-heading {
+    font-size: 11pt !important;
+
+    margin: 0 0 4mm !important;
+  }
+
+  .cv-sidebar-heading {
+    font-size: 8pt !important;
+    padding-bottom: 2mm !important;
+    margin-bottom: 3mm !important;
+  }
+
+  /* Sidebar текст */
+  .cv-sidebar-item {
+    font-size: 8.5pt !important;
+    line-height: 1.4 !important;
+
+    margin-bottom: 3mm !important;
+  }
+
+  /* Опит */
+  .cv-timeline {
+    padding-left: 5mm !important;
+
+    margin-bottom: 6mm !important;
+
+    border-left-width: 0.5mm !important;
+  }
+
+  .cv-timeline-entry {
+    margin-bottom: 5mm !important;
+
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .cv-timeline-entry::before {
+    left: -6.1mm !important;
+    top: 1.1mm !important;
+
+    width: 2.5mm !important;
+    height: 2.5mm !important;
+  }
+
+  .cv-timeline-date {
+    font-size: 7.5pt !important;
+  }
+
+  .cv-timeline-role {
+    font-size: 9.5pt !important;
+
+    margin: 1mm 0 !important;
+  }
+
+  .cv-timeline-company {
+    font-size: 8.5pt !important;
+
+    margin: 0 0 1.5mm !important;
+  }
+
+  .cv-timeline-desc {
+    font-size: 8.5pt !important;
+    line-height: 1.4 !important;
+  }
+
+  /* Курсове */
+  .cv-main ul {
+    font-size: 8.5pt !important;
+    line-height: 1.4 !important;
+
+    margin-top: 0 !important;
+  }
+
+  .cv-main li {
+    margin-bottom: 1mm !important;
+  }
+
+  /* Не позволяваме отделни елементи да се разцепват */
+  .cv-sidebar-section,
+  .cv-section-heading,
+  .cv-timeline-entry {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Водният знак също се печата */
+  .cv-watermark {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
+  /* Премахваме всички transform-и,
+     използвани само за preview */
+  .cv-paper-scale-wrap {
+    transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+
+.cv-timeline-sector {
+  font-size: 0.8rem;
+  color: #8a8474;
+  margin: 0 0 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }

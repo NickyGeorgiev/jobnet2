@@ -27,7 +27,24 @@ Deno.serve(async (req) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object
     const userId = session.client_reference_id
-    const priceId = session.line_items?.data?.[0]?.price?.id
+
+    // ============================================================
+    // ИДЕМПОТЕНТНОСТ — Stripe може да достави едно и също събитие
+    // повече от веднъж (retry при timeout/мрежов проблем). Ако вече
+    // сме записали плащане за тази сесия, спираме тук — за да не
+    // удвоим токени/дни/tier при повторна доставка.
+    // ============================================================
+    const { data: existingPayment } = await supabaseAdmin
+      .from("payments")
+      .select("id")
+      .eq("stripe_checkout_session_id", session.id)
+      .maybeSingle()
+
+    if (existingPayment) {
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { "Content-Type": "application/json" },
+      })
+    }
 
     // line_items не идва по подразбиране в session обекта — трябва да го изтеглим отделно
     const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
@@ -38,7 +55,7 @@ Deno.serve(async (req) => {
 
     const now = new Date()
 
-if (actualPriceId === goldPriceId) {
+    if (actualPriceId === goldPriceId) {
       const { data: candidateData } = await supabaseAdmin
         .from("candidates")
         .select("gold_until")
@@ -86,6 +103,133 @@ if (actualPriceId === goldPriceId) {
         stripe_payment_intent_id: session.payment_intent,
         stripe_checkout_session_id: session.id,
       })
+    } else {
+      // Не е нито едно от двата стари, hardcoded продукта — проверяваме
+      // новата product_prices таблица (State Credits пакети, нива на обяви).
+      const { data: product } = await supabaseAdmin
+        .from("product_prices")
+        .select("*")
+        .eq("stripe_price_id", actualPriceId)
+        .maybeSingle()
+
+      if (product?.product_type === "credit_bundle") {
+        const { data: companyData } = await supabaseAdmin
+          .from("companies")
+          .select("token_balance")
+          .eq("id", userId)
+          .single()
+
+        const newBalance = (companyData?.token_balance || 0) + product.credits
+
+        await supabaseAdmin
+          .from("companies")
+          .update({ token_balance: newBalance })
+          .eq("id", userId)
+
+        await supabaseAdmin.from("payments").insert({
+          user_id: userId,
+          user_type: "company",
+          amount: session.amount_total / 100,
+          description: `${product.label} (+${product.credits} State Credits)`,
+          stripe_payment_intent_id: session.payment_intent,
+          stripe_checkout_session_id: session.id,
+        })
+      } else if (product?.product_type === "job_tier") {
+        const jobListingId = session.metadata?.jobListingId
+        const tierRank = { silver: 1, gold: 2, platinum: 3, diamond: 4 }[product.tier] || 0
+
+        if (jobListingId) {
+          const { data: jobListing } = await supabaseAdmin
+            .from("job_listings")
+            .select("published_at, post_to_facebook, company_id")
+            .eq("id", jobListingId)
+            .single()
+
+          // ============================================================
+          // ПРОВЕРКА ЗА СОБСТВЕНОСТ — jobListingId идва от client-side
+          // metadata и НЕ е верифициран от Stripe. Без тази проверка
+          // всяка фирма би могла да плати за ниво и да го насочи към
+          // ЧУЖДА обява (metadata.jobListingId = произволен UUID).
+          // ============================================================
+          if (!jobListing || jobListing.company_id !== userId) {
+            console.error(
+              `job_tier webhook: ownership mismatch — jobListingId=${jobListingId}, ` +
+              `expected company=${jobListing?.company_id}, got userId=${userId}`
+            )
+            // Плащането реално е станало в Stripe, но НЕ прилагаме
+            // ъпдейт към чужда/несъществуваща обява. Записваме плащането
+            // за проследимост, за да можеш да го обработиш ръчно (refund
+            // или контакт с потребителя), вместо тихо да изчезне.
+            await supabaseAdmin.from("payments").insert({
+              user_id: userId,
+              user_type: "company",
+              amount: session.amount_total / 100,
+              description: `${product.label} за обява — ГРЕШКА: невалиден jobListingId (${jobListingId})`,
+              stripe_payment_intent_id: session.payment_intent,
+              stripe_checkout_session_id: session.id,
+            })
+          } else {
+            // Обявата е чакала като чернова, докато плащането се потвърди
+            // (само при ПЪРВО публикуване — при ъпгрейд на вече публикувана
+            // обява статусът остава непроменен от самото начало).
+            const isFirstPublish = !jobListing.published_at
+
+            await supabaseAdmin
+              .from("job_listings")
+              .update({
+                tier: product.tier,
+                tier_rank: tierRank,
+                status: "published",
+                // published_at винаги се рестартира при потвърдено плащане —
+                // и при първо публикуване, и при ъпгрейд — за да изкача
+                // обявата най-отгоре сред връстниците си в новия tier.
+                published_at: new Date().toISOString(),
+                // Ъпгрейд на ниво рестартира валидността — пресни 30 дни
+                // от момента на плащането, независимо дали е първо
+                // публикуване или по-късен ъпгрейд.
+                expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+              })
+              .eq("id", jobListingId)
+
+            // Само при първо публикуване — matching имейли + Facebook пост.
+            if (isFirstPublish) {
+              const functionsBase = `${Deno.env.get("SUPABASE_URL")}/functions/v1`
+              const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+
+              try {
+                await fetch(`${functionsBase}/match-job-listing`, {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({ jobListingId }),
+                })
+              } catch (err) {
+                console.error("match-job-listing call failed:", err)
+              }
+
+              if (jobListing?.post_to_facebook) {
+                try {
+                  await fetch(`${functionsBase}/post-job-to-facebook`, {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ jobListingId }),
+                  })
+                } catch (err) {
+                  console.error("post-job-to-facebook call failed:", err)
+                }
+              }
+            }
+
+            await supabaseAdmin.from("payments").insert({
+              user_id: userId,
+              user_type: "company",
+              amount: session.amount_total / 100,
+              description: `${product.label} за обява`,
+              stripe_payment_intent_id: session.payment_intent,
+              stripe_checkout_session_id: session.id,
+            })
+          }
+        }
+      }
     }
   }
 

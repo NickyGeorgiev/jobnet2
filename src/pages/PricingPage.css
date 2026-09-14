@@ -1,0 +1,222 @@
+.pricing-intro {
+  color: var(--color-text-muted);
+  max-width: 720px;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.pricing-section-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.pricing-explainer {
+  color: var(--color-text-muted);
+  max-width: 720px;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+}
+
+/* ===== Tier cards ===== */
+
+.pricing-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.pricing-tier-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.25rem;
+  overflow: hidden;
+}
+
+.pricing-tier-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+}
+
+.pricing-tier-card--silver::before { background: linear-gradient(135deg, #e0e0e0 0%, #f8f9fa 50%, #a8a9ad 100%); }
+.pricing-tier-card--gold::before { 
+  background: linear-gradient(180deg, #fcf6ba, #bf953f); 
+  box-shadow: 0 0 10px rgba(191, 149, 63, 0.5); 
+}
+
+.pricing-tier-card--platinum::before { 
+  background: linear-gradient(180deg, #ffffff, #e5e4e2, #707070); 
+  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6);
+ }
+
+.pricing-tier-card--diamond::before { 
+  background: linear-gradient(180deg, #b9f2ff, #f0b9ff, #b9ffdb); 
+  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8); 
+ }
+
+.pricing-tier-icon {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pricing-tier-card--free{
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+.pricing-tier-icon--silver { 
+  background: rgba(224, 224, 224, 0.2); 
+  color: #d4d4d4; 
+  border: 1px solid #a8a9ad; 
+  box-shadow: 0 0 8px rgba(168, 169, 173, 0.4); 
+}
+
+.pricing-tier-icon--gold { 
+  background: rgba(191, 149, 63, 0.2); 
+  color: #fcf6ba; 
+  border: 1px solid #bf953f; 
+  box-shadow: 0 0 10px rgba(191, 149, 63, 0.6);
+}
+
+.pricing-tier-icon--platinum { 
+  background: rgba(229, 228, 226, 0.2); 
+  color: #e5e4e2; 
+  border: 1px solid #e5e4e2; 
+  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6);
+}
+
+.pricing-tier-icon--diamond { 
+  background: rgba(185, 242, 255, 0.2); 
+  color: #b9f2ff; 
+  border: 1px solid #b9f2ff; 
+  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8), inset 0 0 6px rgba(240, 185, 255, 0.3);
+}
+/* 
+.pricing-tier-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin: 0 0 0.35rem;
+} */
+
+.pricing-tier-price {
+  font-family: var(--font-mono);
+  color: var(--color-gold);
+  font-weight: 600;
+  margin: 0 0 0.85rem;
+}
+
+.pricing-tier-perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pricing-tier-perks li {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.pricing-tier-perks li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-success);
+}
+
+/* ===== Credit bundle cards ===== */
+
+.pricing-credit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.pricing-credit-card {
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1rem;
+}
+
+.pricing-credit-amount {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 0 0 0.4rem;
+}
+
+.pricing-credit-amount span {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.pricing-credit-price {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--color-gold);
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.pricing-credit-detail {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ===== FAQ ===== */
+
+.pricing-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  max-width: 720px;
+}
+
+.pricing-faq-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.pricing-faq-q {
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.pricing-faq-a {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .pricing-tier-grid,
+  .pricing-credit-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

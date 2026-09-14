@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 
+const ACTION_LABELS = { view: 'отворена', download: 'изтеглена', print: 'разпечатана' }
+
 export function AdminCompanies() {
   const [companies, setCompanies] = useState(null)
   const [selected, setSelected] = useState(null)
+  const [invoiceEvents, setInvoiceEvents] = useState(null)
+
+  async function loadInvoiceEvents(companyId) {
+    setInvoiceEvents(null)
+    const { data } = await supabase
+      .from('invoice_events')
+      .select('action, created_at, payments(description, amount, currency)')
+      .eq('user_id', companyId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+    setInvoiceEvents(data || [])
+  }
 
   function exportCsv() {
     const rows = companies.map(c => [
@@ -46,17 +60,18 @@ export function AdminCompanies() {
         {companies.map((c) => {
           const isInTrial = c.trial_ends_at && new Date(c.trial_ends_at) > new Date()
           const isPaid = c.paid_until && new Date(c.paid_until) > new Date()
+
           return (
             <div key={c.id} className="blog-admin-row">
               <div>
                 <p className="blog-admin-row-title">
                   {isPaid && <span className="blog-status-badge blog-status-badge--published">платено</span>}
                   {!isPaid && isInTrial && <span className="blog-status-badge blog-status-badge--draft">trial</span>}
-                  {c.company_name || '(без име)'}
+                  {c.company_name || c.email}
                 </p>
                 <p className="blog-admin-row-meta">{c.contact_email || '—'} · {c.sector || 'без сектор'} · рег. {new Date(c.created_at).toLocaleDateString('bg-BG')}</p>
               </div>
-              <button className="btn-secondary" onClick={() => setSelected(c)}>Виж профил</button>
+              <button className="btn-secondary" onClick={() => { setSelected(c); loadInvoiceEvents(c.id) }}>Виж профил</button>
             </div>
           )
         })}
@@ -94,6 +109,22 @@ export function AdminCompanies() {
                   {selected.contact_address && <span>📍 {selected.contact_address}</span>}
                 </div>
               )}
+
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em', margin: '0 0 0.6rem' }}>
+                  Активност с фактури
+                </p>
+                {invoiceEvents === null && <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Зареждам...</p>}
+                {invoiceEvents?.length === 0 && <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>Няма отваряни/изтегляни фактури още.</p>}
+                {invoiceEvents?.map((e, i) => (
+                  <p key={i} style={{ fontSize: '0.85rem', margin: '0.25rem 0' }}>
+                    {e.action === 'download' && '⬇'} {e.action === 'print' && '🖨'} {e.action === 'view' && '👁'}{' '}
+                    <strong>{e.payments?.description || 'Фактура'}</strong>
+                    {e.payments?.amount != null && ` — ${Number(e.payments.amount).toFixed(2)} ${e.payments.currency || 'EUR'}`}
+                    {' '}({ACTION_LABELS[e.action]}, {new Date(e.created_at).toLocaleString('bg-BG')})
+                  </p>
+                ))}
+              </div>
             </div>
           </div>
         </div>

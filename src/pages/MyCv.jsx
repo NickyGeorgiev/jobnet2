@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { sectors } from '../data/sectors'
@@ -12,6 +13,7 @@ import { Spinner } from './Spinner'
 import { useToast } from './Toast'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { SectorIcon } from './SectorIcon'
 import './MyCv.css'
 
 const LEVEL_OPTIONS = [
@@ -49,6 +51,7 @@ function emptyLanguage() {
 
 export function MyCv() {
   useSeo(seo.myCv)
+  const navigate = useNavigate()
   const { session, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [formData, setFormData] = useState({
@@ -200,6 +203,13 @@ export function MyCv() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+
+    const trimmedEmail = formData.contact_email.trim()
+    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      showToast('Имейлът за връзка не изглежда валиден.', 'error')
+      return
+    }
+
     setMessage('')
 
     const missing = validate()
@@ -223,7 +233,7 @@ export function MyCv() {
         skills: formData.skills,
         computer_skills: formData.computer_skills,
         driver_license: formData.driver_license,
-        contact_email: formData.contact_email,
+        contact_email: trimmedEmail,
         avatar_url: formData.avatar_url,
         target_salary: formData.target_salary ? parseInt(formData.target_salary) : null,
         target_sector: formData.target_sector,
@@ -243,6 +253,7 @@ export function MyCv() {
     } else {
       showToast('CV-то е записано успешно!', 'success')
       await refreshProfile()
+      navigate('/')
     }
     setSaving(false)
   }
@@ -284,17 +295,17 @@ export function MyCv() {
           </div>
 
           <div className="field">
-          <label>Дата на раждане</label>
-          <input
-            type="date"
-            className="input"
-            name="birth_date"
-            value={formData.birth_date}
-            onChange={handleChange}
-            min="1940-01-01"
-            max={new Date().toISOString().split('T')[0]}
-          />
-        </div>
+            <label>Дата на раждане</label>
+            <input
+              type="date"
+              className="input"
+              name="birth_date"
+              value={formData.birth_date}
+              onChange={handleChange}
+              min="1940-01-01"
+              max={new Date().toISOString().split('T')[0]}
+            />
+          </div>
 
           <div className="field">
             <label>Пол</label>
@@ -388,7 +399,7 @@ export function MyCv() {
 
           <div className="field">
             <label>Желана нетна заплата (лв) *</label>
-            <input type="number" className="input" name="target_salary" value={formData.target_salary} onChange={handleChange} required />
+            <input type="number" className="input" name="target_salary" value={formData.target_salary} onChange={handleChange} required onWheel={(e) => e.target.blur()} />
           </div>
 
           <CheckboxMultiSelect
@@ -396,6 +407,7 @@ export function MyCv() {
             options={sectors}
             selected={formData.target_sector}
             onChange={(values) => setFormData({ ...formData, target_sector: values })}
+            getIcon={(s) => <SectorIcon sector={s} />}
           />
 
           <CheckboxMultiSelect

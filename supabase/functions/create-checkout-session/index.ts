@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { priceId } = await req.json()
+    const { priceId, metadata, autoClose } = await req.json()
 
     const authHeader = req.headers.get("Authorization")!
     const supabaseClient = createClient(
@@ -36,14 +36,17 @@ Deno.serve(async (req) => {
     }
 
     // Всичко вече е one-time плащане — никакъв subscription mode, никакъв trial.
+    // metadata (по избор) — напр. { jobListingId: "..." } за да знае webhook-ът
+    // за коя обява е плащането, ако е за ниво на обява.
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${req.headers.get("origin")}/payment-success`,
+      success_url: `${req.headers.get("origin")}/payment-success${autoClose ? '?autoclose=1' : ''}`,
       cancel_url: `${req.headers.get("origin")}/payment-cancelled`,
       client_reference_id: user.id,
       customer_email: user.email,
+      metadata: metadata || {},
     })
 
     return new Response(JSON.stringify({ url: session.url }), {

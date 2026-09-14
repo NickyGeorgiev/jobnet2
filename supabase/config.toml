@@ -533,3 +533,36 @@ entrypoint = "./functions/og-meta-blog/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/og-meta-blog/*.html" ]
+
+[functions.match-job-listing]
+enabled = true
+verify_jwt = false
+import_map = "./functions/match-job-listing/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/match-job-listing/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/match-job-listing/*.html" ]
+
+[functions.check-registration-status]
+enabled = true
+verify_jwt = false
+import_map = "./functions/check-registration-status/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/check-registration-status/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/check-registration-status/*.html" ]
+
+[functions.post-job-to-facebook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/post-job-to-facebook/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/post-job-to-facebook/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/post-job-to-facebook/*.html" ]

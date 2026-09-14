@@ -1,0 +1,916 @@
+
+.job-status-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  margin-right: 0.5rem;
+}
+
+.job-status-badge--draft {
+  background: var(--color-surface-raised);
+  color: var(--color-text-muted);
+}
+
+.job-status-badge--published {
+  background: rgba(111, 207, 151, 0.15);
+  color: var(--color-success);
+}
+
+.job-status-badge--closed {
+  /* background: rgba(248, 42, 1, 0.15); */
+  background: yellow;
+  color: var(--color-danger);
+}
+
+.job-listing-row-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.job-admin-row {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 1rem;
+  position: relative; 
+  overflow: hidden;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.job-admin-row:hover {
+  border-color: var(--color-teal);
+  transform: translateY(-1px);
+}
+
+.job-filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.job-filters .input {
+  width: auto;
+  min-width: 160px;
+}
+
+.job-admin-row--with-logo {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.job-card-logo {
+  width: 92px;
+  height: 92px;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.job-card-logo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-teal-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--color-teal);
+  flex-shrink: 0;
+}
+
+.job-card-fav-icon {
+  position: absolute;
+  right: 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.job-card-fav-icon:hover {
+  transform: scale(1.1);
+}
+
+.job-card-salary {
+  font-family: var(--font-body);
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: rgba(111, 207, 151, 0.2);
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+}
+
+.job-card-date {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 640px) {
+  .job-admin-row--with-logo {
+    flex-direction: row;
+  }
+
+  .job-card-logo,
+  .job-card-logo-placeholder {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.tier-option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-text);
+  gap: 0.3rem;
+  padding: 0.8rem 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.tier-option-card:hover {
+  border-color: var(--color-teal);
+}
+
+.tier-option-card--selected {
+  border-color: var(--color-gold-soft);
+  background: var(--color-gold);
+
+  .tier-option-name {
+    color: var(--color-bg)
+  }
+
+
+  .tier-option-price {
+    color: var(--color-border)
+  }
+
+}
+
+.tier-option-name {
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.tier-option-price {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
+
+.tier-payment-active {
+  border-color: var(--color-gold) !important;
+  color: var(--color-gold) !important;
+}
+
+
+
+/* Базови стилове за акцентната линия отляво (увеличена на 6px) */
+.job-admin-row[class*="tier-card-"]::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px; /* По-широка и забележима лента */
+}
+
+/* Базов клас за значката */
+.tier-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 1. SILVER TIER */
+.tier-card-silver::before { 
+  background: linear-gradient(180deg, #e0e0e0, #8b8d91); 
+}
+.tier-badge--silver { 
+  background: rgba(224, 224, 224, 0.4); 
+  color: #d4d4d4; 
+  border: 1px solid #a8a9ad; 
+  box-shadow: 0 0 8px rgba(168, 169, 173, 0.4); /* Нежно сребърно сияние */
+}
+
+/* 2. GOLD TIER */
+.tier-card-gold::before { 
+  background: linear-gradient(180deg, #fcf6ba, #bf953f); 
+  box-shadow: 0 0 10px rgba(191, 149, 63, 0.4); 
+}
+.tier-badge--gold { 
+  background: rgba(191, 149, 63, 0.5); 
+  color: #fcf6ba; 
+  border: 1px solid #bf953f; 
+  box-shadow: 0 0 10px rgba(191, 149, 63, 0.6); /* Топъл златен отблясък */
+}
+
+/* 3. PLATINUM TIER */
+.tier-card-platinum::before { 
+  background: linear-gradient(180deg, #ffffff, #e5e4e2, #707070); 
+  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6); 
+}
+.tier-badge--platinum { 
+  background: rgba(229, 228, 226, 0.4); 
+  color: #e5e4e2; 
+  border: 1px solid #e5e4e2; 
+  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6); /* Ярък платинен блясък */
+}
+
+/* 4. DIAMOND TIER */
+.tier-card-diamond::before { 
+  background: linear-gradient(180deg, #b9f2ff, #f0b9ff, #b9ffdb); 
+  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8); 
+}
+.tier-badge--diamond { 
+  background: rgba(185, 242, 255, 0.4); 
+  color: #b9f2ff; 
+  border: 1px solid #b9f2ff; 
+  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8), inset 0 0 6px rgba(240, 185, 255, 0.3); /* Двойно сияние */
+}
+
+/* ===== По-компактен мобилен изглед на списъка с обяви ===== */
+@media (max-width: 640px) {
+  .job-admin-row {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .job-admin-row--with-logo {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .job-card-logo,
+  .job-card-logo-placeholder {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+
+  .blog-admin-row-title { font-size: 0.92rem; }
+  .blog-admin-row-meta { font-size: 0.76rem; }
+
+  .job-card-salary,
+  .job-card-date {
+    font-size: 0.74rem;
+  }
+
+  .job-listing-row-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .job-listing-row-actions > a,
+  .job-listing-row-actions > button {
+    flex: 1 1 auto;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .job-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .job-filters select.input,
+  .job-filters input.input,
+  .job-filters .sector-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .job-filters .sector-select-trigger {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .job-card-fav-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+
+
+
+/* Мрежа за избор на тиъри */
+.tier-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+/* Външна рамка (Картата) - създава 3px дебелата преливаща рамка */
+.tier-card-wrapper {
+  position: relative;
+  padding: 3px; /* Дебелина на преливащата рамка */
+  border-radius: 12px;
+  background: #333333; /* По подразбиране за Free */
+  border: none;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.tier-card-wrapper:hover {
+  transform: translateY(-5px);
+}
+
+/* Избрано състояние (Selected State) */
+.tier-card-wrapper.is-selected {
+  transform: translateY(-6px) scale(1.02);
+}
+
+/* Вътрешно съдържание на картата */
+.tier-card-content {
+  background: #1a1e28;
+  border-radius: 9px;
+  padding: 1.2rem 1rem;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+}
+
+/* Заглавие и отметка */
+.tier-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.tier-title {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: #a0a8b6;
+}
+
+.tier-check-badge {
+  background: rgba(5, 228, 42, 0.8);
+  color: #fff;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* Цени */
+.tier-card-body {
+  margin-bottom: 1rem;
+}
+
+.tier-price-display {
+  display: flex;
+  flex-direction: column;
+}
+
+.price-free {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.price-amount {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.price-sub {
+  font-size: 0.75rem;
+  color: #8a94a6;
+  margin-top: 2px;
+}
+
+/* Бутон за потвърждение най-долу на картата */
+.tier-select-btn {
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a0a8b6;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.tier-select-btn.active {
+  background: rgba(5, 228, 42, 0.6);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* =========================================
+   ГРАДИЕНТИ И СИЯНИЯ ПО ТИЪРИ
+   ========================================= */
+
+/* FREE TIER */
+.free-tier {
+  background: #2a3241;
+}
+.free-tier.is-selected {
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* 1. SILVER TIER */
+.silver-tier {
+  background: linear-gradient(135deg, #e0e0e0 0%, #f8f9fa 50%, #a8a9ad 100%);
+}
+.silver-tier .tier-title { color: #d4d4d4; }
+.silver-tier.is-selected {
+  box-shadow: 0 0 20px rgba(168, 169, 173, 0.5);
+}
+
+/* 2. GOLD TIER */
+.gold-tier {
+  background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+}
+.gold-tier .tier-title { color: #fcf6ba; }
+.gold-tier.is-selected {
+  box-shadow: 0 0 25px rgba(191, 149, 63, 0.6);
+}
+
+/* 3. PLATINUM TIER */
+.platinum-tier {
+  background: linear-gradient(135deg, #e5e4e2 0%, #ffffff 20%, #d3d3d3 50%, #e5e4e2 80%, #b5b6b5 100%);
+}
+.platinum-tier .tier-title { color: #ffffff; }
+.platinum-tier.is-selected {
+  box-shadow: 0 0 30px rgba(229, 228, 226, 0.7);
+}
+
+/* 4. DIAMOND TIER */
+.diamond-tier {
+  background: linear-gradient(135deg, #b9f2ff 0%, #ffffff 20%, #f0b9ff 50%, #ffffff 80%, #b9ffdb 100%);
+}
+.diamond-tier .tier-title { 
+  background: linear-gradient(135deg, #b9f2ff, #f0b9ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.diamond-tier.is-selected {
+  box-shadow: 0 0 35px rgba(185, 242, 255, 0.8);
+}
+
+
+
+
+
+.payment-method-container {
+  margin-top: 1.5rem;
+  background: rgba(22, 27, 38, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.payment-method-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: #a0a8b6;
+  margin-bottom: 0.9rem;
+}
+
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.8rem;
+}
+
+/* Карта за опция за плащане */
+.payment-option-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  background: rgba(15, 21, 30, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.25s ease;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.payment-option-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Избран начин на плащане (Златист акцент) */
+.payment-option-card.active {
+  background: rgba(220, 176, 89, 0.08);
+  border-color: rgba(5, 228, 42);
+  box-shadow: 0 0 15px rgba(191, 149, 63, 0.25);
+}
+
+.payment-option-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.payment-option-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.15rem;
+}
+
+.payment-option-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.payment-option-sub {
+  font-size: 0.72rem;
+  color: #7e8b9b;
+}
+
+.payment-token-badge {
+  font-size: 0.72rem;
+  color: #a0a8b6;
+}
+
+.payment-token-badge strong {
+  color: #fcf6ba;
+  font-weight: 700;
+}
+
+/* Радио индикатор */
+.payment-radio-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.payment-option-card.active .payment-radio-indicator {
+  border-color: rgba(5, 228, 42);
+  background: rgba(5, 228, 42);
+  box-shadow: 0 0 4px rgba(5, 228, 42, 0.6);
+}
+
+.payment-option-card.active .payment-radio-indicator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  background: #111111;
+  border-radius: 50%;
+}
+
+/* =========================================
+   СТИЛОВЕ ЗА ИНФОРМАЦИОННИТЕ СЪОБЩЕНИЯ
+   ========================================= */
+
+.payment-info-box {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  line-height: 1.4;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.payment-info-box p {
+  margin: 0;
+}
+
+.info-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Синьо информационно съобщение (Карта) */
+.payment-info-box.info {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+}
+
+/* Червено/Кехлибарено предупреждение (Недостатъчно токени) */
+.payment-info-box.warning {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.payment-info-box.warning strong {
+  color: #ffffff;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.job-admin-row--expired {
+  opacity: 0.55;
+  background: rgba(248, 42, 1, 0.15);
+  color: var(--color-danger);
+}
+
+.btn-apply {
+    --border_thickness: 3px;
+    --bg_color: transparent;
+    color: var(--color);
+    outline: none;
+    border: none;
+    font-size: 0.8rem;
+    position: relative;
+    background: var(--bg_color);
+    font-family: Arial, Helvetica, sans-serif;
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+.btn-apply a{
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-weight: 700;
+
+    text-transform: uppercase;
+ 
+    color: var(--color-text);
+    padding: 0.6rem;
+}
+
+.btn-apply:active {
+    transform: scale(.98);
+}
+
+.btn-apply span {
+    position: absolute;
+    background: var(--color-gold);
+    transition: .5s;
+    width: var(--border_thickness);
+    height: var(--border_thickness);
+}
+
+.btn-apply .bdr-left {
+    top: 0;
+    left: 0;
+    height: 40%;
+}
+
+.btn-apply .bdr-top {
+    top: 0;
+    left: 0;
+    width: 25%;
+}
+
+.btn-apply .bdr-right {
+    bottom: 0;
+    right: 0;
+    height: 40%;
+}
+
+.btn-apply .bdr-bottom {
+    bottom: 0;
+    right: 0;
+    width: 25%;
+}
+
+.btn-apply:hover .bdr-left {
+    height: 100%;
+}
+
+.btn-apply:hover .bdr-top {
+    width: 100%;
+}
+
+.btn-apply:hover .bdr-right {
+    height: 100%;
+}
+
+.btn-apply:hover .bdr-bottom {
+    width: 100%;
+}
+
+.btn-apply:disabled {
+    pointer-events: none;
+    opacity: .65;
+    color: #7e7e7e;
+    background: #dcdcdc;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+
+
+
+.job-card-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.job-card-logo-small {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  flex-shrink: 0;
+}
+
+.job-card-logo-placeholder--small {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.job-card-top-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding-right: 2rem;
+}
+
+.job-card-company-line {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0;
+}
+
+.job-card-description {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0.2rem 0 0.3rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.job-card-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0.85rem 0 0.2rem;
+}
+
+.job-card-bottom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.job-card-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.job-pill {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.job-card-status-pill {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+}
+
+.job-card-status-pill--applied {
+  color: var(--color-success);
+  background: rgba(111, 207, 151, 0.12);
+  border: 1px solid var(--color-success);
+}
+
+.job-card-status-pill--closed {
+  color: var(--color-text-muted);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+
+@media (max-width: 700px) {
+  .job-card-description {
+    display: none;
+  }
+
+  .job-card-header-row {
+    gap: 0.5rem;
+  }
+
+  .job-card-logo-small,
+  .job-card-logo-placeholder--small {
+    width: 36px;
+    height: 36px;
+  }
+
+  .job-card-divider {
+    margin: 0.5rem 0 0.5rem;
+  }
+
+  .job-card-top-row {
+    padding-right: 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .job-card-company-line {
+    font-size: 0.8rem;
+  }
+
+  .job-pill {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .job-card-salary {
+    font-size: 0.9rem;
+  }
+}

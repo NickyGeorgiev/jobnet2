@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export function CheckboxMultiSelect({ options, selected, onChange, label }) {
+export function CheckboxMultiSelect({ options, selected, onChange, label, getIcon }) {
   const [search, setSearch] = useState('')
 
   const filteredOptions = options.filter((opt) =>
@@ -28,7 +28,7 @@ export function CheckboxMultiSelect({ options, selected, onChange, label }) {
               border: '1px solid rgba(79, 184, 174, 0.35)', borderRadius: '999px',
               padding: '0.25rem 0.7rem', marginRight: '0.4rem', marginBottom: '0.4rem', fontSize: '0.82rem'
             }}>
-              {s}
+              {getIcon?.(s)} {s}
               <button type="button" onClick={() => toggle(s)}
                 style={{ marginLeft: '0.45rem', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-teal)', fontWeight: 'bold' }}>
                 ✕
@@ -60,7 +60,7 @@ export function CheckboxMultiSelect({ options, selected, onChange, label }) {
               checked={selected.includes(option)}
               onChange={() => toggle(option)}
             />
-            {option}
+            {getIcon?.(option)} {option}
           </label>
         ))}
       </div>

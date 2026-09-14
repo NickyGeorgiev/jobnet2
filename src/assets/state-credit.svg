@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Златен градиент за външния ръб на монетата -->
+    <linearGradient id="outerEdge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B6508" />
+      <stop offset="30%" stop-color="#D4AF37" />
+      <stop offset="70%" stop-color="#FDE08B" />
+      <stop offset="100%" stop-color="#8B6508" />
+    </linearGradient>
+
+    <!-- Златен градиент за вътрешната част (изглежда вдлъбната) -->
+    <linearGradient id="innerFace" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#B8860B" />
+      <stop offset="50%" stop-color="#FDE08B" />
+      <stop offset="100%" stop-color="#D4AF37" />
+    </linearGradient>
+
+    <!-- По-тъмен, гравиран градиент за текста (тъмно бронзово до почти черно) -->
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3A2200" />
+      <stop offset="50%" stop-color="#5C3A00" />
+      <stop offset="100%" stop-color="#241400" />
+    </linearGradient>
+
+    <!-- Мека сянка под монетата -->
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Сянка -->
+  <circle cx="50" cy="50" r="45" fill="none" filter="url(#dropShadow)" />
+
+  <!-- Външен ръб на монетата -->
+  <circle cx="50" cy="50" r="45" fill="url(#outerEdge)" />
+
+  <!-- Тънък тъмен контур за открояване -->
+  <circle cx="50" cy="50" r="44" fill="none" stroke="#5C3A00" stroke-width="1.5" />
+
+  <!-- Вътрешна част на монетата (основа) -->
+  <circle cx="50" cy="50" r="35" fill="url(#innerFace)" />
+
+  <!-- Тънък вътрешен пръстен -->
+  <circle cx="50" cy="50" r="34" fill="none" stroke="#5C3A00" stroke-width="1" opacity="0.5" />
+
+  <!-- Текст "SC" - По-голям и по-тъмен -->
+  <text x="50" y="53" text-anchor="middle" dominant-baseline="middle" font-family="'Segoe UI', Arial, sans-serif" font-weight="bold" font-size="42" letter-spacing="1" fill="url(#textGradient)" stroke="#1A0D00" stroke-width="0.5">
+    SC
+  </text>
+
+  <!-- Блясък (елипса в горния ляв ъгъл за 3D ефект) -->
+  <ellipse cx="38" cy="30" rx="15" ry="8" fill="#FFFFFF" opacity="0.2" transform="rotate(-30 38 30)" />
+</svg>

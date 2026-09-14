@@ -1,0 +1,223 @@
+.company-public-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.company-public-banner {
+  height: 260px;
+  margin: 0 -1.5rem 0;
+  background: linear-gradient(135deg, var(--color-surface-raised), var(--color-surface));
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  overflow: hidden;
+}
+
+.company-public-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(16,22,29,0) 40%, rgba(16,22,29,0.85) 100%);
+}
+
+.company-public-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  margin-top: -60px;
+  position: relative;
+  z-index: 2;
+  padding: 0 0.5rem;
+}
+
+.company-public-logo,
+.company-public-logo-placeholder {
+  width: 110px;
+  height: 110px;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 3px solid var(--color-bg);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.company-public-logo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+
+.company-public-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.3rem;
+}
+
+.company-public-sector {
+  color: var(--color-teal);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.company-public-facts {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin: 2rem 0 1.5rem;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.company-public-facts .fact-value {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.company-public-facts .fact-label {
+  display: block;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+}
+
+.company-public-socials {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.company-public-socials a {
+  text-decoration: none;
+}
+
+.company-public-bio {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin-bottom: 2rem;
+  white-space: pre-wrap;
+}
+
+.company-public-video {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.company-public-video-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .company-public-video-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.company-public-video iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.company-public-section {
+  margin-bottom: 2.5rem;
+}
+
+.company-public-section h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.company-public-tag-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.company-public-tag {
+  background: var(--color-teal-soft);
+  color: var(--color-teal);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+.company-public-tag--value {
+  background: rgba(191, 149, 63, 0.12);
+  color: var(--color-gold);
+}
+
+.company-public-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.company-public-job-link {
+  display: block;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.company-public-job-link:hover {
+  border-color: var(--color-teal);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .company-public-shell { padding: 0 1rem 3rem; }
+  .company-public-banner { margin: 0 -1rem 0; }
+  .company-public-header { flex-direction: column; align-items: center; text-align: center; margin-top: -50px; }
+  .company-public-logo, .company-public-logo-placeholder { width: 84px; height: 84px; }
+  .company-public-name { font-size: 1.4rem; }
+  .company-public-facts { justify-content: center; gap: 1.25rem; }
+}
+
+.company-public-map-section {
+  margin-bottom: 1.5rem;
+}
+
+.company-public-address {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  margin-bottom: 0.6rem;
+}
+
+.company-public-map-embed {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.company-public-map-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}

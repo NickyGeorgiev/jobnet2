@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 export function useSeo({ title, description } = {}) {
   useEffect(() => {
-    document.title = title ? `${title} — Jobstate` : 'Jobstate — Работата те намира'
+    document.title = title ? `${title} — Jobstate: намери следващата си работа` : 'Jobstate — Открий нови възможности'
 
     if (description) {
       let tag = document.querySelector('meta[name="description"]')

@@ -69,7 +69,6 @@ export function AccountSettings() {
         <button
           onClick={handleDelete}
           disabled={deleting || confirmText !== 'ИЗТРИЙ'}
-          className="btn-primary"
           style={{ background: 'var(--color-danger)', color: '#fff' }}
         >
           {deleting ? 'Изтривам...' : 'Изтрий акаунта завинаги'}

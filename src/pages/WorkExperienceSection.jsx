@@ -2,6 +2,7 @@ import { sectors } from '../data/sectors'
 import { allCities } from '../data/citiesByRegion'
 import { months } from '../data/months'
 import { years } from '../data/years'
+import { SectorSelect } from './SectorSelect'
 
 export function WorkExperienceSection({ workExperience, onChange, onAdd, onRemove }) {
   return (
@@ -23,17 +24,39 @@ export function WorkExperienceSection({ workExperience, onChange, onAdd, onRemov
           <div className="cv-entry-row">
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.4rem' }}>Сектор</label>
-              <select className="input" value={exp.sector} onChange={(e) => onChange(exp.id, 'sector', e.target.value)}>
-                <option value="">-- Избери сектор --</option>
-                {sectors.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+              <SectorSelect
+                value={exp.sector}
+                onChange={(val) => onChange(exp.id, 'sector', val)}
+                options={sectors}
+                iconSize={20}
+              />
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.4rem' }}>Град</label>
-              <select className="input" value={exp.city} onChange={(e) => onChange(exp.id, 'city', e.target.value)}>
+              <select
+                className="input"
+                value={exp.city && !allCities.includes(exp.city) ? '__abroad__' : exp.city}
+                onChange={(e) => {
+                  if (e.target.value === '__abroad__') {
+                    onChange(exp.id, 'city', ' ')
+                  } else {
+                    onChange(exp.id, 'city', e.target.value)
+                  }
+                }}
+              >
                 <option value="">-- Избери град --</option>
+                <option value="__abroad__">🌍 Извън България</option>
                 {allCities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
+              {exp.city && !allCities.includes(exp.city) && (
+                <input
+                  className="input"
+                  style={{ marginTop: '0.5rem' }}
+                  placeholder="Град и държава (напр. Берлин, Германия)"
+                  value={exp.city.trim()}
+                  onChange={(e) => onChange(exp.id, 'city', e.target.value || ' ')}
+                />
+              )}
             </div>
           </div>
 

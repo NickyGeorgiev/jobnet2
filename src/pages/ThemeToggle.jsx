@@ -1,13 +1,26 @@
 import { useState, useEffect } from 'react'
 import { loadTheme } from '../loadTheme'
+import { FiSun } from "react-icons/fi";
+import { GoMoon } from "react-icons/go";
+
 
 const LIGHT_COLORS = {
-  'color-bg': '#f5f6f8',
-  'color-surface': '#ffffff',
-  'color-surface-raised': '#eef0f3',
-  'color-border': '#dde1e6',
-  'color-text': '#1a1d23',
-  'color-text-muted': '#5c6270',
+  'color-bg': '#e4e5f1',
+  'color-surface': '#9394a5',
+  'color-surface-raised': '#d2d3db',
+  'color-border': '#616269',
+  'color-text': '#000000',
+  'color-text-muted': '#172033',
+  'color-gold': 'linear-gradient(120deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%)',
+  'color-gold-soft': 'rgba(239,191,4, 0.7)',
+  'color-teal': '#1f2a44',
+  'color-teal-soft': 'rgba(134, 197, 216, 0.20)',
+  'color-danger': '#c94b3c',
+  'color-success': '#34845b',
+}
+
+function setThemeCookie(theme) {
+  document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`
 }
 
 function applyLight() {
@@ -20,21 +33,36 @@ function applyDark() {
   Object.keys(LIGHT_COLORS).forEach((key) => {
     document.documentElement.style.removeProperty(`--${key}`)
   })
+
   loadTheme()
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('theme') || 'dark'
+  )
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('theme', theme)
-    theme === 'light' ? applyLight() : applyDark()
+
+    // Това е важното за Next.js
+    setThemeCookie(theme)
+
+    if (theme === 'light') {
+      applyLight()
+    } else {
+      applyDark()
+    }
   }, [theme])
 
   return (
-    <button className="theme-toggle-btn" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-label="Смени темата">
-      {theme === 'dark' ? '✹' : '☽'}
+    <button
+      className="theme-toggle-btn"
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      aria-label="Смени темата"
+    >
+      {theme === 'dark' ?<><FiSun size={20} /></> : <><GoMoon size={20}/></>}
     </button>
   )
 }

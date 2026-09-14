@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 550 150" width="100%" height="100%">
+    <defs>
+        <!-- Дефиниране на златния цвят, за да е единен навсякъде -->
+        <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#BF953F;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#FCF6BA;stop-opacity:1" />
+	    <stop offset="100%" style="stop-color:#B38728;stop-opacity:1" />
+        </linearGradient>
+        
+        <!-- Стилове за линиите на иконата -->
+        <style>
+            .icon-line {
+                fill: none;
+                stroke: url(#goldGradient);
+                stroke-width: 4;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+            }
+            .icon-filled {
+                fill: url(#goldGradient);
+            }
+            .text-white {
+                fill: #0b132b;
+                font-family: Arial, Helvetica, sans-serif;
+                font-weight: 700;
+                font-size: 72px;
+            }
+            .text-gold {
+                fill: url(#goldGradient);
+		stroke: #0b132b;
+        	stroke-width: 2px;
+                font-family: Arial, Helvetica, sans-serif;
+                font-weight: 700;
+                font-size: 72px;
+            }
+            .tagline {
+                fill: url(#goldGradient);
+		stroke: #0b132b;
+        	stroke-width: 1px;
+                font-family: Arial, Helvetica, sans-serif;
+                font-weight: 500;
+                font-size: 20px;
+                letter-spacing: 1px;
+            }
+        </style>
+    </defs>
+
+    <!-- ИКОНА: Куфарче (Портфейл) -->
+    <g transform="translate(40, 35)">
+        <!-- Заоблена рамка около иконата -->
+        <rect x="0" y="0" width="90" height="90" rx="15" ry="15" class="icon-line" />
+        
+        <!-- Куфарче (тяло) -->
+        <rect x="18" y="30" width="54" height="40" rx="6" ry="6" class="icon-line" />
+        
+        <!-- Дръжка на куфарчето -->
+        <path d="M 30 30 L 30 22 C 30 18 34 15 45 15 C 56 15 60 18 60 22 L 60 30" class="icon-line" />
+        
+        <!-- Катарама на куфарчето -->
+        <line x1="32" y1="50" x2="58" y2="50" class="icon-line" />
+        <circle cx="45" cy="50" r="6" class="icon-line" />
+        
+        <!-- Малък акцентен правоъгълник под катарамата (както е на оригинала) -->
+        <rect x="38" y="56" width="14" height="3" rx="1.5" class="icon-filled" />
+    </g>
+
+    <!-- ТЕКСТОВЕ -->
+    <!-- "JOB" в бяло -->
+    <text x="150" y="100" class="text-white">JOB</text>
+    
+    <!-- "STATE" в златисто -->
+    <text x="305" y="100" class="text-gold">STATE</text>
+
+    <!-- Подзаглавие (Кирилица) -->
+    <text x="152" y="132" class="tagline">ОТКРИЙ НОВИ ВЪЗМОЖНОСТИ</text>
+</svg>

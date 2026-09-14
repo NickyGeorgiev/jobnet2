@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 
-export function CheckoutButton({ priceId, label }) {
+export function CheckoutButton({ priceId, label, metadata, newTab }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -11,16 +11,21 @@ export function CheckoutButton({ priceId, label }) {
 
     const { data, error: invokeError } = await supabase.functions.invoke(
       'create-checkout-session',
-      { body: { priceId } }
+      { body: { priceId, metadata, autoClose: !!newTab } }
     )
+
+    setLoading(false)
 
     if (invokeError) {
       setError('Грешка: ' + invokeError.message)
-      setLoading(false)
       return
     }
 
-    window.location.href = data.url
+    if (newTab) {
+      window.open(data.url, '_blank', 'noopener,noreferrer')
+    } else {
+      window.location.href = data.url
+    }
   }
 
   return (

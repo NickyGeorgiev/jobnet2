@@ -1,4 +1,5 @@
 import { months } from '../data/months'
+import { SectorIcon } from './SectorIcon'
 import './CandidateDashboard.css'
 
 function formatRange(startMonth, startYear, endMonth, endYear, current) {
@@ -8,7 +9,7 @@ function formatRange(startMonth, startYear, endMonth, endYear, current) {
   return `${start} — ${end}`
 }
 
-export function CvPaper({ cv }) {
+export function CvPaper({ cv, watermark = false }) {
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Кандидат'
   const workExperience = cv.work_experience || []
   const education = cv.education || []
@@ -16,7 +17,8 @@ export function CvPaper({ cv }) {
   const moreCourses = (cv.more_courses || []).filter(Boolean)
 
   return (
-    <div className="cv-paper">
+    <div className="cv-paper" style={{ position: 'relative' }}>
+      {watermark && <div className="cv-watermark" aria-hidden="true" />}
       <div className="cv-sidebar">
         {cv.avatar_url ? (
           <img src={cv.avatar_url} alt="аватар" className="cv-avatar" />
@@ -91,6 +93,11 @@ export function CvPaper({ cv }) {
                 </p>
                 <p className="cv-timeline-role">{exp.position}</p>
                 <p className="cv-timeline-company">{exp.company}{exp.city ? ` · ${exp.city}` : ''}</p>
+                {exp.sector && (
+                  <p className="cv-timeline-sector">
+                    <SectorIcon sector={exp.sector} /> {exp.sector}
+                  </p>
+                )}
                 {exp.responsibilities && <p className="cv-timeline-desc">{exp.responsibilities}</p>}
               </div>
             ))}

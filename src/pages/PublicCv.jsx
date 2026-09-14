@@ -41,11 +41,11 @@ export function PublicCv() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2.5rem 1.5rem 4rem' }}>
-      <CvPaper cv={cv} />
+      <CvPaper cv={cv} watermark={true} />
 
       <div style={{ textAlign: 'center', marginTop: '2rem', padding: '1.5rem', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)' }}>
         <p style={{ color: 'var(--color-text-muted)', marginBottom: '1rem' }}>
-          Това CV е създадено в Jobstate — платформата, където кандидатите казват каква заплата търсят.
+          Това CV е създадено в Jobstate — платформа за търсене на работа.
         </p>
         <Link to="/register?role=candidate" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
           Създай своя профил безплатно

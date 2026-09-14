@@ -6,6 +6,8 @@ import { useDocumentTitle } from '../useDocumentTitle'
 import { TurnstileWidget } from './TurnstileWidget'
 import { PasswordInput } from './PasswordInput'
 import { validatePassword } from '../passwordValidation'
+import { IoBusiness } from "react-icons/io5"
+import { FaUser } from "react-icons/fa"
 import './AuthForm.css'
 
 export function Register() {
@@ -17,6 +19,7 @@ export function Register() {
 
   const initialRole =
     searchParams.get('role') === 'company' ? 'company' : 'candidate'
+  const redirect = searchParams.get('redirect') || '/'
 
   const [role, setRole] = useState(initialRole)
   const [email, setEmail] = useState('')
@@ -27,6 +30,8 @@ export function Register() {
   const [loading, setLoading] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState('')
   const [registrationSent, setRegistrationSent] = useState(false)
+  const [pendingRegistration, setPendingRegistration] = useState(null) // { hoursRemaining } | null
+  const [resendingEmail, setResendingEmail] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -58,6 +63,29 @@ export function Register() {
 
     setLoading(true)
 
+    const { data: statusData, error: statusError } = await supabase.functions.invoke(
+      'check-registration-status',
+      { body: { email } }
+    )
+
+    if (statusError) {
+      setError('Възникна грешка при проверката. Опитайте отново.')
+      setLoading(false)
+      return
+    }
+
+    if (statusData?.status === 'confirmed') {
+      setError('Вече има регистриран акаунт с този имейл. Влезте в профила си вместо да се регистрирате отново.')
+      setLoading(false)
+      return
+    }
+
+    if (statusData?.status === 'pending') {
+      setPendingRegistration({ hoursRemaining: statusData.hoursRemaining })
+      setLoading(false)
+      return
+    }
+
     const { data: verifyData } = await supabase.functions.invoke(
       'verify-turnstile',
       {
@@ -88,15 +116,6 @@ export function Register() {
       return
     }
 
-    /*
-      Маркираме, че този браузър е започнал регистрация.
-
-      ВАЖНО:
-      Тук НЕ изпращаме CompleteRegistration към Facebook.
-
-      Ако email confirmation е включен, чакаме потребителят
-      първо да потвърди email-а си.
-    */
     sessionStorage.setItem(
       'pending_registration',
       JSON.stringify({
@@ -107,15 +126,9 @@ export function Register() {
 
     setLoading(false)
 
-    /*
-      Ако Supabase е настроен без email confirmation,
-      ще има session веднага.
-      AuthContext ще прихване това и ще изпрати
-      CompleteRegistration.
-    */
     if (authData.session) {
       await refreshProfile()
-      navigate('/')
+      navigate(redirect)
     } else {
       setRegistrationSent(true)
     }
@@ -136,10 +149,7 @@ export function Register() {
           ? 'linkedin'
           : provider
 
-    /*
-      Запомняме, че OAuth процесът е стартиран
-      от страницата за регистрация.
-    */
+
     sessionStorage.setItem(
       'pending_registration',
       JSON.stringify({
@@ -151,7 +161,7 @@ export function Register() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: window.location.origin + '/',
+        redirectTo: window.location.origin + redirect,
       },
     })
 
@@ -159,6 +169,33 @@ export function Register() {
       sessionStorage.removeItem('pending_registration')
       setError(oauthError.message)
     }
+  }
+
+  async function handleResendConfirmation() {
+    setResendingEmail(true)
+    const { error: resendError } = await supabase.auth.resend({ type: 'signup', email })
+    setResendingEmail(false)
+    if (resendError) {
+      setError(resendError.message)
+    }
+  }
+
+  if (pendingRegistration) {
+    return (
+      <div className="auth-shell">
+        <h2 className="auth-title">Вече има чакаща регистрация</h2>
+        <p style={{ color: 'var(--color-text-muted)' }}>
+          Вече си започнал регистрация с този имейл, но още не си потвърдил акаунта си.
+          Провери пощата си (включително папка "Спам") за линка за потвърждение.
+        </p>
+        <button className="btn-secondary" onClick={handleResendConfirmation} disabled={resendingEmail} style={{ marginTop: '1rem' }}>
+          {resendingEmail ? 'Изпращане...' : 'Изпрати отново имейла за потвърждение'}
+        </button>
+        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', marginTop: '1rem' }}>
+          Ако не потвърдиш до 24 часа от първоначалната регистрация, ще можеш да опиташ пак с този имейл.
+        </p>
+      </div>
+    )
   }
 
   if (registrationSent) {
@@ -202,7 +239,7 @@ export function Register() {
               onChange={(e) => setRole(e.target.value)}
             />
 
-            👤 Кандидат
+            <FaUser size={22}/> Кандидат
           </label>
 
           <label
@@ -219,7 +256,7 @@ export function Register() {
               onChange={(e) => setRole(e.target.value)}
             />
 
-            🏢 Фирма
+            <IoBusiness size={22}/> Фирма
           </label>
         </div>
 

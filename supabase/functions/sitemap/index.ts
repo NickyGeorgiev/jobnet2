@@ -36,9 +36,23 @@ Deno.serve(async (req) => {
     <priority>0.6</priority>
   </url>`).join("")
 
+  // Фирмени профили — публично видими страници, всяка с уникално съдържание
+  const { data: companies } = await supabaseAdmin
+    .from('company_directory')
+    .select('id')
+
+  const companyUrls = (companies || [])
+    .map((c) => `
+    <url>
+      <loc>https://jobstate.net/companies/${c.id}</loc>
+      <changefreq>weekly</changefreq>
+      <priority>0.6</priority>
+    </url>`)
+    .join('')
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticUrls}${blogUrls}
-</urlset>`
+  <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticUrls}${blogUrls}${companyUrls}
+  </urlset>`
 
   return new Response(xml, {
     headers: { "Content-Type": "application/xml; charset=utf-8" },

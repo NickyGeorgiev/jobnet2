@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { CvPaper } from './CvPaper'
 
 export function CvModal({ cv, onClose, showDownload }) {
+  
   const paperRef = useRef(null)
   const [downloading, setDownloading] = useState(false)
 
@@ -41,7 +42,7 @@ export function CvModal({ cv, onClose, showDownload }) {
         </div>
         <div ref={paperRef} className="cv-print-area">
           <div className="cv-paper-scale-wrap">
-            <CvPaper cv={cv} />
+            <CvPaper cv={cv} watermark={true} />
           </div>
         </div>
       </div>

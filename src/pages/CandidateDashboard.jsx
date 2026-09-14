@@ -2,26 +2,27 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
-import { CheckoutButton } from './CheckoutButton'
-import { StatusRing } from './StatusRing'
 import { CvPaper } from './CvPaper'
 import { CvModal } from './CvModal'
-import { useFreeMode } from '../FreeModeContext'
 import { useToast } from './Toast'
 import { calculateCvCompleteness } from '../cvCompleteness'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { IoShareSocialOutline } from "react-icons/io5";
+import { MdOutlineMarkEmailRead } from "react-icons/md";
+import { TbMailOff } from "react-icons/tb";
+import { FaRegEyeSlash } from "react-icons/fa";
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
   useSeo(seo.candidateDashboard)
   const { session } = useAuth()
   const { showToast } = useToast()
-  const { freeMode } = useFreeMode()
   const [cv, setCv] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showCvModal, setShowCvModal] = useState(false)
   const [togglingActive, setTogglingActive] = useState(false)
+  const [togglingNotifications, setTogglingNotifications] = useState(false)
 
   useEffect(() => {
     loadCv()
@@ -52,6 +53,21 @@ export function CandidateDashboard() {
     setTogglingActive(false)
   }
 
+  async function handleToggleNotifications() {
+    setTogglingNotifications(true)
+    const newState = !cv.notify_on_match
+
+    const { error } = await supabase
+      .from('candidates')
+      .update({ notify_on_match: newState })
+      .eq('id', session.user.id)
+
+    if (!error) {
+      setCv((prev) => ({ ...prev, notify_on_match: newState }))
+    }
+    setTogglingNotifications(false)
+  }
+
   function handleCopyPublicLink() {
     const url = `${window.location.origin}/cv/${session.user.id}`
     navigator.clipboard.writeText(url)
@@ -63,11 +79,6 @@ export function CandidateDashboard() {
   const fullName = [cv.fname, cv.lname].filter(Boolean).join(' ') || 'Твоето име'
 
   const { percent: completenessPercent, missing: missingFields } = calculateCvCompleteness(cv)
-
-  const isGoldActive = cv.gold_until && new Date(cv.gold_until) > new Date()
-  const goldDaysLeft = isGoldActive
-    ? Math.round((new Date(cv.gold_until) - new Date()) / (1000 * 60 * 60 * 24))
-    : 0
 
   return (
     <div className="dashboard-shell">
@@ -86,11 +97,17 @@ export function CandidateDashboard() {
         </div>
       </div>
 
-      <div className="status-card" style={{ marginBottom: '1.5rem' }}>
+      <div className="status-card" style={{ marginBottom: '1rem' }}>
         <div className="toggle-row">
           <div>
             <p className="status-title" style={{ marginBottom: '0.2rem' }}>
-              {cv.active ? '👁 Профилът е видим за фирмите' : '🙈 Профилът е скрит'}
+              {cv.active ? ('👁 Профилът е видим за фирмите') 
+              : 
+              <>
+              <FaRegEyeSlash style={{ marginRight: '6px'}}/>
+              Профилът е скрит
+              </>
+              }
             </p>
             <p className="status-sub">
               {cv.active
@@ -105,45 +122,35 @@ export function CandidateDashboard() {
         </div>
       </div>
 
-      {!freeMode && (
-        <div className="status-card" style={{ marginBottom: '1.5rem' }}>
-          <div className="status-card-top">
-            <StatusRing state={cv.is_gold ? 'gold' : 'expired'} daysLeft={0} />
-            <div>
-              {isGoldActive ? (
+      <div className="status-card" style={{ marginBottom: '1rem' }}>
+        <div className="toggle-row">
+          <div>
+            <p className="status-title" style={{ marginBottom: '0.2rem' }}>
+              {cv.notify_on_match ? (
                 <>
-                  <span className="badge badge--gold" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Gold статус</span>
-                  <p className="status-title">Излизаш най-отгоре</p>
-                  <p className="status-sub">
-                    Валиден до {new Date(cv.gold_until).toLocaleDateString('bg-BG')} ({goldDaysLeft} {goldDaysLeft === 1 ? 'ден' : 'дни'})
-                  </p>
+                  <MdOutlineMarkEmailRead style={{ marginRight: '6px', verticalAlign: '-2px' }} />
+                  Получаваш имейли за подходящи обяви
                 </>
               ) : (
                 <>
-                  <span className="badge badge--muted" style={{ marginBottom: '0.5rem', display: 'inline-block' }}>Стандартен профил</span>
-                  <p className="status-title">Стани Gold кандидат</p>
-                  <p className="status-sub">10€ за 30 дни — CV-то ти излиза първо в резултатите.</p>
+                  <TbMailOff style={{ marginRight: '6px', verticalAlign: '-2px' }} />
+                  Известията са изключени
                 </>
               )}
-            </div>
-          </div>
-
-          {!isGoldActive && (
-            <div className="status-actions">
-              <CheckoutButton
-                priceId={import.meta.env.VITE_STRIPE_GOLD_PRICE_ID}
-                label="Стани Gold — 10€"
-              />
-            </div>
-          )}
-
-          {isGoldActive && (
-            <p className="status-sub" style={{ marginTop: '0.75rem' }}>
-              Можеш да платиш отново по всяко време — новите 30 дни ще се добавят след изтичане на текущите.
             </p>
-          )}
+            <p className="status-sub">
+              {cv.notify_on_match
+                ? 'Пращаме ти имейл, когато се публикува обява, отговаряща на критериите ти.'
+                : 'Няма да получаваш имейли за нови обяви, дори да съвпадат с критериите ти.'}
+            </p>
+          </div>
+          <label className="toggle-switch">
+            <input type="checkbox" checked={cv.notify_on_match} onChange={handleToggleNotifications} disabled={togglingNotifications} />
+            <span className="toggle-slider"></span>
+          </label>
         </div>
-      )}
+      </div>
+
       <div className="action-grid" style={{ marginBottom: '1.5rem' }}>
         <Link to="/my-cv" className="action-tile">
           <span className="action-tile-icon">✎</span>
@@ -168,7 +175,7 @@ export function CandidateDashboard() {
           className="action-tile"
           style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit' }}
         >
-          <span className="action-tile-icon">🔗</span>
+          <span className="action-tile-icon"><IoShareSocialOutline /></span>
           <div>
             <p className="action-tile-title">Сподели CV-то си</p>
             <p className="action-tile-sub">Копирай публичен линк</p>
@@ -221,7 +228,7 @@ export function CandidateDashboard() {
           <div className="match-group">
             <p className="match-group-label">Желана заплата</p>
             <div className="tag-row">
-              <span className="tag tag--salary">от {cv.target_salary} евро нетно</span>
+              <span className="tag tag--salary">минимум {cv.target_salary} € нетно</span>
             </div>
           </div>
         )}

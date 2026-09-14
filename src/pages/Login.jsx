@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
@@ -9,6 +9,8 @@ import './AuthForm.css'
 export function Login() {
   useSeo(seo.login)
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -28,13 +30,13 @@ export function Login() {
     }
 
     setLoading(false)
-    navigate('/')
+    navigate(redirect)
   }
 
   async function handleOAuth(provider) {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: window.location.origin + '/' },
+      options: { redirectTo: window.location.origin + redirect },
     })
     if (oauthError) setError(oauthError.message)
   }
@@ -64,7 +66,7 @@ export function Login() {
           <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && <p className="auth-error">Грешно потребителско име или парола!</p>}
 
         <button type="submit" className="btn-primary" disabled={loading} style={{ width: '100%' }}>
           {loading ? 'Влизам...' : 'Влез'}
