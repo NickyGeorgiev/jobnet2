@@ -6,12 +6,7 @@ import { useToast } from './Toast'
 import { useTierOptions } from '../useTierOptions'
 import './JobListings.css'
 
-// Сайтът с публичните обяви (виж jobstate-jobs-ssr проекта).
-// Локално, ако тестваш и двата сайта едновременно, задай
-// VITE_JOBS_SITE_URL=http://localhost:3000 в .env.local на този проект.
 const JOBS_SITE_URL = import.meta.env.VITE_JOBS_SITE_URL || 'https://jobs.jobstate.net'
-
-const TIER_LABEL = { free: 'Безплатна', silver: 'Silver', gold: 'Gold', platinum: 'Platinum', diamond: 'Diamond' }
 
 const PAGE_SIZE = 15
 
@@ -61,9 +56,11 @@ export function JobListingsManage() {
 
   useEffect(() => {
     loadListings()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0)
   }, [sortBy])
 
@@ -123,6 +120,7 @@ export function JobListingsManage() {
   }
 
   async function handleDuplicate(job) {
+    // eslint-disable-next-line no-unused-vars
     const { id, created_at, applicationCount, published_at, view_count, status, tier, tier_rank, slug, ...rest } = job
     const { error } = await supabase.from('job_listings').insert({
       ...rest,
@@ -198,8 +196,8 @@ export function JobListingsManage() {
                 {job.title}
               </p>
               <p className="blog-admin-row-meta">
-                гр: {job.city} · сектор: {job.sector} · заплата: {job.salary}€{!job.salary_visible && '/скрита'}
-                {' · Ниво: '}
+                гр: {job.city} / сектор: {job.sector} / заплата: {job.salary}{job.salary_max ? ` - ${job.salary_max}` : ''}€{!job.salary_visible && '/скрита'}
+                {' / Ниво: '}
                 {job.tier && job.tier !== 'free' ? (
                   (() => {
                     const tier = TIER_OPTIONS.find((t) => t.value === job.tier)
@@ -215,8 +213,8 @@ export function JobListingsManage() {
                 )}
                 {job.status === 'published' && job.expires_at && (
                   <>
-                    {' · Изтича след: '}
-                    {Math.max(0, Math.ceil((new Date(job.expires_at) - new Date()) / (1000 * 60 * 60 * 24)))} дни
+                    {' / Изтича на: '}
+                    {new Date(job.expires_at).toLocaleDateString('bg-BG')}
                   </>
                 )}
                 <p className="blog-admin-row-meta" style={{ marginTop: '0.25rem', fontSize: '0.8rem' }}>
