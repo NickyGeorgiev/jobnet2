@@ -35,6 +35,12 @@
 .blog-status-badge--draft { background: var(--color-surface-raised); color: var(--color-text-muted); }
 .blog-status-badge--published { background: rgba(111, 207, 151, 0.15); color: var(--color-success); }
 
+
+.blog-status-badge--submitted { background-color: rgba(97, 101, 107, 0.5); }
+.blog-status-badge--viewed { background-color: rgb(72, 202, 228, 0.5); }
+.blog-status-badge--approved { background-color: rgb(111, 207, 151, 0.5); }
+.blog-status-badge--rejected { background-color: rgb(221, 65, 34, 0.5); }
+
 .blog-editor-toolbar {
   display: flex;
   gap: 0.6rem;

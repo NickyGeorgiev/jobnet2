@@ -16,10 +16,10 @@ const STATUS_LABEL = {
 }
 
 const STATUS_CLASS = {
-  submitted: 'draft',
-  viewed: 'published',
-  approved: 'published',
-  rejected: 'closed',
+  submitted: 'submited',
+  viewed: 'viewed',
+  approved: 'approved',
+  rejected: 'rejected',
 }
 
 export function MyApplications() {

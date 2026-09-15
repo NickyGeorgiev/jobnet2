@@ -70,7 +70,7 @@ export function CompanyDashboard() {
         <Link to="/company-jobs" className="action-tile">
           <span className="action-tile-icon"><GoChecklist /></span>
           <div>
-            <p className="action-tile-title">Преглед и редакция на обяви</p>
+            <p className="action-tile-title">Моите обяви</p>
             <p className="action-tile-sub">Меню за администриране на обяви</p>
           </div>
         </Link>
