@@ -1,7 +1,7 @@
 import { SectorIcon } from './SectorIcon'
-import { FaLocationDot } from "react-icons/fa6";
-import { SiClockify } from "react-icons/si";
-import { BsCalendarDay } from "react-icons/bs";
+import { FaLocationDot } from "react-icons/fa6"
+import { SiClockify } from "react-icons/si"
+import { BsCalendarDay } from "react-icons/bs"
 
 
 const JOBS_SITE_URL = import.meta.env.VITE_JOBS_SITE_URL || 'https://jobs.jobstate.net'
@@ -102,7 +102,7 @@ export function JobListingCard({
 
       <div className="job-card-bottom-row">
         <div className="job-card-tags">
-          {job.city && <span className="job-pill"><FaLocationDot /> {job.city}</span>}
+          {job.city && <span className="job-pill"><FaLocationDot style={{color: 'var(--color-danger)'}}/> {job.city}</span>}
           {job.sector && (
             <span className="job-pill">
               <SectorIcon sector={job.sector} /> {job.sector}

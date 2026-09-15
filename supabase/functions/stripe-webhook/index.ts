@@ -180,14 +180,9 @@ Deno.serve(async (req) => {
                 tier: product.tier,
                 tier_rank: tierRank,
                 status: "published",
-                // published_at винаги се рестартира при потвърдено плащане —
-                // и при първо публикуване, и при ъпгрейд — за да изкача
-                // обявата най-отгоре сред връстниците си в новия tier.
                 published_at: new Date().toISOString(),
-                // Ъпгрейд на ниво рестартира валидността — пресни 30 дни
-                // от момента на плащането, независимо дали е първо
-                // публикуване или по-късен ъпгрейд.
                 expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                expiry_reminder_sent: false,
               })
               .eq("id", jobListingId)
 

@@ -113,6 +113,7 @@ export function JobListingForm() {
     setPendingBannerFile(null)
     setUploadingBanner(true)
 
+    // eslint-disable-next-line react-hooks/purity
     const filePath = `${session.user.id}/banner_${Date.now()}_${croppedFile.name}`
 
     const { error: uploadError } = await supabase.storage
@@ -157,6 +158,7 @@ export function JobListingForm() {
   useEffect(() => {
     // Нова обява - няма какво да зареждаме.
     if (isNew) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false)
       return
     }
