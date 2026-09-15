@@ -79,6 +79,14 @@ Deno.serve(async (req) => {
         stripe_payment_intent_id: session.payment_intent,
         stripe_checkout_session_id: session.id,
       })
+
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        type: "payment_confirmed",
+        title: "Плащането е потвърдено",
+        body: "Gold статус активиран за 30 дни.",
+        link: "/payments",
+      })
     } else if (actualPriceId === companyPriceId) {
       const { data: companyData } = await supabaseAdmin
         .from("companies")
@@ -102,6 +110,14 @@ Deno.serve(async (req) => {
         description: "Достъп до търсене — 30 дни",
         stripe_payment_intent_id: session.payment_intent,
         stripe_checkout_session_id: session.id,
+      })
+
+      await supabaseAdmin.from("notifications").insert({
+        user_id: userId,
+        type: "payment_confirmed",
+        title: "Плащането е потвърдено",
+        body: "Достъп до търсене на кандидати активиран за 30 дни.",
+        link: "/payments",
       })
     } else {
       // Не е нито едно от двата стари, hardcoded продукта — проверяваме
@@ -133,6 +149,14 @@ Deno.serve(async (req) => {
           description: `${product.label} (+${product.credits} State Credits)`,
           stripe_payment_intent_id: session.payment_intent,
           stripe_checkout_session_id: session.id,
+        })
+
+        await supabaseAdmin.from("notifications").insert({
+          user_id: userId,
+          type: "payment_confirmed",
+          title: "Плащането е потвърдено",
+          body: `+${product.credits} State Credits добавени към баланса ти.`,
+          link: "/payments",
         })
       } else if (product?.product_type === "job_tier") {
         const jobListingId = session.metadata?.jobListingId
@@ -221,6 +245,14 @@ Deno.serve(async (req) => {
               description: `${product.label} за обява`,
               stripe_payment_intent_id: session.payment_intent,
               stripe_checkout_session_id: session.id,
+            })
+
+            await supabaseAdmin.from("notifications").insert({
+              user_id: userId,
+              type: "payment_confirmed",
+              title: "Плащането е потвърдено",
+              body: `Обявата "${job.title}" вече е ${product.label}.`,
+              link: "/company-jobs",
             })
           }
         }

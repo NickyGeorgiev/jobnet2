@@ -56,6 +56,16 @@ export function JobApplicants() {
     const { error } = await supabase.from('job_applications').update({ status: newStatus }).eq('id', appId)
     if (!error) {
       setApplications((prev) => prev.map((a) => (a.id === appId ? { ...a, status: newStatus } : a)))
+
+      // Известие само при реално значимо решение (одобрена/отхвърлена) —
+      // не и при "viewed", което се случва автоматично и тихо.
+      if (newStatus === 'approved' || newStatus === 'rejected') {
+        try {
+          await supabase.rpc('notify_application_status', { p_application_id: appId, p_new_status: newStatus })
+        } catch (err) {
+          console.error('Failed to send status notification:', err)
+        }
+      }
     }
   }
 
