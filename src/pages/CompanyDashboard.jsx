@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
@@ -86,6 +87,13 @@ export function CompanyDashboard() {
           <div>
             <p className="action-tile-title">Търси кандидати</p>
             <p className="action-tile-sub">Филтрирай по заплата, сектор, град</p>
+          </div>
+        </Link>
+        <Link to="/payments" className="action-tile">
+          <span className="action-tile-icon">€</span>
+          <div>
+            <p className="action-tile-title">История на плащанията</p>
+            <p className="action-tile-sub">История на плащанията и генериране на фактури</p>
           </div>
         </Link>
       </div>

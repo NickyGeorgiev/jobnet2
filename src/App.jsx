@@ -182,8 +182,8 @@ function App() {
             )}
 
             <div className="navbar-links">
-              <Link to="/jobs" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търси обяви</Link>
               <Link to="/blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог</Link>
+              <Link to="/jobs" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търси обяви</Link>
 
               {session && profile?.role === 'candidate' && (
                 <NavDropdown label="Моето табло">

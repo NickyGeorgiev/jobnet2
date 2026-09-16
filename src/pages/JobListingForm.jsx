@@ -49,12 +49,6 @@ const INITIAL_FORM_DATA = {
   slug: '',
 }
 
-// ============================================================
-// SLUG GENERATION (кирилица -> латиница, за четими и стабилни
-// публични URL-и на обявите). Генерира се САМО веднъж, при
-// първото запазване — виж handleSave.
-// ============================================================
-
 const CYR_TO_LAT = {
   а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ж: 'zh', з: 'z',
   и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p',
@@ -79,10 +73,6 @@ function generateSlug(title) {
 export function JobListingForm() {
   const { id } = useParams()
 
-  // ВАЖНО:
-  // При /company-jobs/new id е undefined.
-  // Това означава НОВА обява.
-  // При /company-jobs/:id id съдържа UUID на обявата.
   const isNew = !id
 
   const navigate = useNavigate()
@@ -151,20 +141,13 @@ export function JobListingForm() {
     }
   }, [session])
 
-  // ============================================================
-  // LOAD EXISTING LISTING
-  // ============================================================
-
   useEffect(() => {
-    // Нова обява - няма какво да зареждаме.
     if (isNew) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false)
       return
     }
 
-    // Ако не е нова, но по някаква причина няма ID,
-    // не правим заявка към Supabase.
     if (!id) {
       console.error('JobListingForm: Missing listing ID')
       showToast('Липсва ID на обявата.', 'error')
@@ -184,7 +167,6 @@ export function JobListingForm() {
           .eq('id', id)
           .single()
 
-        // Компонентът вече не съществува.
         if (cancelled) return
 
         if (error) {
@@ -209,8 +191,6 @@ export function JobListingForm() {
           return
         }
 
-        // Нормализираме данните от DB.
-        // Така null стойности няма да чупят input/select.
         setFormData({
           title: data.title ?? '',
           description: data.description ?? '',
@@ -253,16 +233,10 @@ export function JobListingForm() {
 
     loadListing()
 
-    // Ако потребителят напусне страницата,
-    // докато заявката още върви.
     return () => {
       cancelled = true
     }
   }, [id, isNew, showToast])
-
-  // ============================================================
-  // FORM CHANGE
-  // ============================================================
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target
@@ -273,15 +247,9 @@ export function JobListingForm() {
     }))
   }
 
-  // ============================================================
-  // SAVE
-  // ============================================================
-
   async function handleSave(newStatus) {
-    // Защита от двойно натискане.
     if (saving) return
 
-    // Защита при липсваща authentication сесия.
     if (!session?.user?.id) {
       showToast(
         'Сесията ви е изтекла. Моля, влезте отново.',
@@ -290,10 +258,6 @@ export function JobListingForm() {
 
       return
     }
-
-    // ============================================================
-    // VALIDATION
-    // ============================================================
 
     const title = formData.title?.trim() || ''
     const description = formData.description?.trim() || ''
@@ -370,12 +334,6 @@ export function JobListingForm() {
       }
     }
 
-    // ============================================================
-    // TIER PAYMENT (само при ПЪРВОНАЧАЛНО публикуване с платено ниво —
-    // при редакция на съществуваща обява selectedTier никога не се
-    // променя от потребителя вече, значи тук няма как да гръмне
-    // повторно плащане при обикновена редакция).
-    // ============================================================
     let tierForSave = formData.tier || 'free'
     let tierRankForSave = formData.tier_rank || 0
 
@@ -395,22 +353,16 @@ export function JobListingForm() {
           showToast('Нямаш достатъчно кредити за това ниво. Купи бъндъл от "State Credits", или плати директно с карта.', 'error')
           return
         }
-        // Реалното удържане на кредити + вдигане на нивото се случва
-        // ПОСЛЕ, през сигурна SQL функция (redeem_tier_with_tokens) —
-        // виж малко по-надолу, след успешния insert/update.
+
         pendingTokenTier = tierInfo
       } else {
-        // Само НОВА обява отива в чернова, докато чака плащане.
+
         if (isNew) {
           effectiveStatus = 'draft'
         }
         pendingCardTier = tierInfo
       }
     }
-
-    // ============================================================
-    // PREPARE DATA
-    // ============================================================
 
     setSaving(true)
 
@@ -477,16 +429,9 @@ export function JobListingForm() {
         post_to_facebook: selectedTier !== 'free' ? formData.post_to_facebook : false,
       }
 
-      // ============================================================
-      // INSERT / UPDATE
-      // ============================================================
-
       let result
 
       if (isNew) {
-        // --------------------------------------------------------
-        // NEW LISTING
-        // --------------------------------------------------------
 
         result = await supabase
           .from('job_listings')
@@ -494,9 +439,6 @@ export function JobListingForm() {
           .select()
           .single()
       } else {
-        // --------------------------------------------------------
-        // EDIT EXISTING LISTING
-        // --------------------------------------------------------
 
         if (!id) {
           showToast(
@@ -515,10 +457,6 @@ export function JobListingForm() {
           .select()
           .single()
       }
-
-      // ============================================================
-      // DATABASE ERROR
-      // ============================================================
 
       if (result.error) {
         console.error(
@@ -548,11 +486,6 @@ export function JobListingForm() {
         return
       }
 
-      // ============================================================
-      // ПЛАЩАНЕ С КРЕДИТИ — удържа токените и вдига нивото на сървъра
-      // (сигурна RPC функция, клиентът вече не пипа token_balance/tier
-      // директно).
-      // ============================================================
       if (pendingTokenTier) {
         const { error: redeemError } = await supabase.rpc('redeem_tier_with_tokens', {
           p_job_id: result.data.id,
@@ -565,10 +498,6 @@ export function JobListingForm() {
           setTokenBalance((prev) => prev - pendingTokenTier.price)
         }
       }
-
-      // ============================================================
-      // AUTO MATCHING
-      // ============================================================
 
       if (
         effectiveStatus === 'published' &&
@@ -599,9 +528,6 @@ export function JobListingForm() {
           )
         }
 
-        // ============================================================
-        // AUTO POST TO FACEBOOK (само ако е избрано, и само платени нива)
-        // ============================================================
         if (selectedTier !== 'free' && formData.post_to_facebook) {
           try {
             const { error: fbError } = await supabase.functions.invoke(
@@ -617,9 +543,6 @@ export function JobListingForm() {
         }
       }
 
-      // ============================================================
-      // ПЛАЩАНЕ С КАРТА — пренасочва към Stripe, обявата чака в чернова
-      // ============================================================
       if (pendingCardTier) {
         const { data: checkoutData, error: checkoutError } = await supabase.functions.invoke(
           'create-checkout-session',
@@ -641,10 +564,6 @@ export function JobListingForm() {
         return
       }
 
-      // ============================================================
-      // SUCCESS
-      // ============================================================
-
       showToast(
         effectiveStatus === 'published'
           ? (isNew ? 'Обявата е публикувана!' : 'Промените са запазени!')
@@ -664,14 +583,9 @@ export function JobListingForm() {
         'error'
       )
     } finally {
-      // ВИНАГИ отключваме бутоните.
       setSaving(false)
     }
   }
-
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -681,10 +595,6 @@ export function JobListingForm() {
     )
   }
 
-  // ============================================================
-  // FORM
-  // ============================================================
-
   return (
     <div className="cv-form-shell">
 
@@ -693,10 +603,6 @@ export function JobListingForm() {
           ? 'Нова обява'
           : 'Редакция на обява'}
       </h2>
-
-      {/* ======================================================
-          BASIC INFORMATION
-      ====================================================== */}
 
       <div className="cv-form-section">
 
@@ -924,10 +830,6 @@ export function JobListingForm() {
 
       </div>
 
-      {/* ======================================================
-          APPLICATION
-      ====================================================== */}
-
       <div className="cv-form-section">
 
         <h3 className="cv-form-section-title">
@@ -981,12 +883,6 @@ export function JobListingForm() {
 
       </div>
 
-      {/* ======================================================
-          TIER SELECTION — само при ПЪРВО публикуване. При редакция
-          на съществуваща обява нивото вече не се сменя оттук —
-          само от бутона "Ъпгрейд" в "Моите обяви" (JobListingsManage.jsx).
-      ====================================================== */}
-
       <div className="field" style={{ marginTop: '2rem' }}>
         <label>Ниво на обявата</label>
 
@@ -1030,10 +926,8 @@ export function JobListingForm() {
                           )}
                         </div>
 
-                        {/* Отметката при избор */}
                         {isSelected && <span className="tier-check-badge">✓</span>}
                       </div>
-                      {/* КРАЙ НА ОБНОВЕНИЯ ХЕДЪР */}
 
                       <div className="tier-card-body">
                         <div className="tier-price-display">
@@ -1095,7 +989,6 @@ export function JobListingForm() {
                   </button>
                 </div>
 
-                {/* Динамичен стилизиран информационен / предупредителен блок */}
                 {paymentMethod === 'card' && (
                   <div className="payment-info-box info">
                     <span className="info-icon">ℹ️</span>
@@ -1124,10 +1017,6 @@ export function JobListingForm() {
           </>
         )}
       </div>
-
-      {/* ======================================================
-          ACTIONS
-      ====================================================== */}
 
       <div className="blog-editor-toolbar">
 

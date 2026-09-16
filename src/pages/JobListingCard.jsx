@@ -86,7 +86,7 @@ export function JobListingCard({
             {showCompany && (job.company?.company_name || 'Фирма')}
             {job.published_at && (
               <>
-                {showCompany &&  <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px' }}/>} 
+                {showCompany &&  <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px', color: 'var(--color-gold-soft)' }}/>} 
                 {formatRelativeDate(job.published_at)}
               </>
             )}
@@ -102,13 +102,13 @@ export function JobListingCard({
 
       <div className="job-card-bottom-row">
         <div className="job-card-tags">
-          {job.city && <span className="job-pill"><FaLocationDot style={{color: 'var(--color-danger)'}}/> {job.city}</span>}
+          {job.city && <span className="job-pill"><FaLocationDot style={{color: 'var(--color-gold-soft)'}}/> {job.city}</span>}
           {job.sector && (
             <span className="job-pill">
               <SectorIcon sector={job.sector} /> {job.sector}
             </span>
           )}
-          {job.duration && <span className="job-pill"><SiClockify /> {job.duration}</span>}
+          {job.duration && <span className="job-pill"><SiClockify style={{color: 'var(--color-gold-soft)'}} /> {job.duration}</span>}
         </div>
 
         {job.salary_visible && job.salary && (
