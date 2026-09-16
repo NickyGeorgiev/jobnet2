@@ -238,7 +238,7 @@ export function JobListingsManage() {
         {listings.length === 0 && <p style={{ color: 'var(--color-text-muted)' }}>Все още нямате създадени обяви.</p>}
 
         {listings.map((job) => (
-          <div key={job.id} className={`job-admin-row ${job.status === 'expired' ? 'job-admin-row--expired' : ''}`}>
+          <div key={job.id} className={`tier-card-${job.tier} job-admin-row ${job.status === 'expired' ? 'job-admin-row--expired' : ''}`}>
             <div>
               <p className="blog-admin-row-title">
                 <span className={`blog-status-badge blog-status-badge--${job.status === 'published' ? 'published' : job.status === 'expired' ? 'closed' : 'draft'}`}>
@@ -246,7 +246,7 @@ export function JobListingsManage() {
                 </span>
                 {job.title}
               </p>
-              <p className="blog-admin-row-meta">
+              <div className="blog-admin-row-meta">
                 гр: {job.city} / сектор: {job.sector} / заплата: {job.salary}{job.salary_max ? ` - ${job.salary_max}` : ''}€{!job.salary_visible && '/скрита'}
                 {' / Ниво: '}
                 {job.tier && job.tier !== 'free' ? (
@@ -271,7 +271,7 @@ export function JobListingsManage() {
                 <p className="blog-admin-row-meta" style={{ marginTop: '0.25rem', fontSize: '0.8rem' }}>
                   👁 {job.view_count || 0} {job.view_count === 1 ? 'преглед' : 'прегледа'} · 📩 {job.applicationCount} {job.applicationCount === 1 ? 'кандидатстване' : 'кандидатствания'}
                 </p>
-              </p>
+              </div>
             </div>
             <div className="job-listing-row-actions">
               {job.status === 'published' && job.tier !== 'diamond' && TIER_OPTIONS.length > 0 && (
