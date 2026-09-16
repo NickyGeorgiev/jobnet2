@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext'
 import { supabase } from '../supabaseClient'
 import { useToast } from './Toast'
 import { useTierOptions } from '../useTierOptions'
+import { BuyCreditsModal } from './BuyCreditsModal'
 import './JobListings.css'
 
 const JOBS_SITE_URL = import.meta.env.VITE_JOBS_SITE_URL || 'https://jobs.jobstate.net'
@@ -19,6 +20,12 @@ export function JobListingsManage() {
   const [upgradingId, setUpgradingId] = useState(null)
   const [page, setPage] = useState(0)
   const [sortBy, setSortBy] = useState('created_desc')
+
+  const [tokenBalance, setTokenBalance] = useState(0)
+  const [pendingUpgrade, setPendingUpgrade] = useState(null) // { job, tierInfo }
+  const [upgradePaymentMethod, setUpgradePaymentMethod] = useState('card')
+  const [confirmingUpgrade, setConfirmingUpgrade] = useState(false)
+  const [showBuyCreditsModal, setShowBuyCreditsModal] = useState(false)
 
   const STATUS_PRIORITY = { published: 0, draft: 0, closed: 0, expired: 1 }
 
@@ -56,7 +63,8 @@ export function JobListingsManage() {
 
   useEffect(() => {
     loadListings()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadTokenBalance()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 
   useEffect(() => {
@@ -87,6 +95,16 @@ export function JobListingsManage() {
     }
 
     setAllListings(jobs.map((j) => ({ ...j, applicationCount: applicationCounts[j.id] || 0 })))
+  }
+
+  async function loadTokenBalance() {
+    if (!session) return
+    const { data } = await supabase
+      .from('companies')
+      .select('token_balance')
+      .eq('id', session.user.id)
+      .single()
+    setTokenBalance(data?.token_balance || 0)
   }
 
   async function handleCloseListing(id) {
@@ -137,21 +155,54 @@ export function JobListingsManage() {
     }
   }
 
-  async function handleUpgradeTier(job, tierValue) {
+  // Отваря избор на начин на плащане, вместо директно да пренасочва
+  // към карта — точно както при първоначалното публикуване.
+  function handleUpgradeTier(job, tierValue) {
     const tierInfo = TIER_OPTIONS.find((t) => t.value === tierValue)
-    setUpgradingId(job.id)
+    if (!tierInfo) return
+    setUpgradePaymentMethod(tokenBalance >= tierInfo.price ? 'credits' : 'card')
+    setPendingUpgrade({ job, tierInfo })
+  }
 
-    const { data, error } = await supabase.functions.invoke(
-      'create-checkout-session',
-      { body: { priceId: tierInfo.priceId, metadata: { jobListingId: job.id } } }
-    )
+  async function handleConfirmUpgrade() {
+    if (!pendingUpgrade) return
+    const { job, tierInfo } = pendingUpgrade
 
-    setUpgradingId(null)
+    if (upgradePaymentMethod === 'credits') {
+      if (tokenBalance < tierInfo.price) {
+        showToast('Нямаш достатъчно State Credits за това ниво.', 'error')
+        return
+      }
 
-    if (error || !data?.url) {
-      showToast('Грешка при стартиране на плащането.', 'error')
+      setConfirmingUpgrade(true)
+      const { error } = await supabase.rpc('redeem_tier_with_tokens', {
+        p_job_id: job.id,
+        p_tier: tierInfo.value,
+      })
+      setConfirmingUpgrade(false)
+
+      if (error) {
+        showToast('Грешка при плащане с кредити: ' + error.message, 'error')
+        return
+      }
+
+      showToast(`Обявата е вдигната на ${tierInfo.label}!`, 'success')
+      setPendingUpgrade(null)
+      loadListings()
+      loadTokenBalance()
     } else {
-      window.location.href = data.url
+      setUpgradingId(job.id)
+      const { data, error } = await supabase.functions.invoke(
+        'create-checkout-session',
+        { body: { priceId: tierInfo.priceId, metadata: { jobListingId: job.id } } }
+      )
+      setUpgradingId(null)
+
+      if (error || !data?.url) {
+        showToast('Грешка при стартиране на плащането.', 'error')
+      } else {
+        window.location.href = data.url
+      }
     }
   }
 
@@ -282,6 +333,89 @@ export function JobListingsManage() {
             Следваща →
           </button>
         </div>
+      )}
+
+      {pendingUpgrade && (
+        <div className="cv-modal-backdrop" onClick={() => !confirmingUpgrade && setPendingUpgrade(null)}>
+          <div
+            className="cv-modal-inner"
+            style={{ maxWidth: '440px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', padding: '1.5rem' }}>
+              <h3 style={{ marginTop: 0 }}>
+                Ъпгрейд до {pendingUpgrade.tierInfo.label}
+              </h3>
+              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem' }}>
+                "{pendingUpgrade.job.title}"
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1rem' }}>
+                <button
+                  type="button"
+                  className={`btn-secondary ${upgradePaymentMethod === 'card' ? 'is-selected' : ''}`}
+                  style={{
+                    textAlign: 'left',
+                    borderColor: upgradePaymentMethod === 'card' ? 'var(--color-teal)' : undefined,
+                  }}
+                  onClick={() => setUpgradePaymentMethod('card')}
+                >
+                  💳 Плати с карта — {pendingUpgrade.tierInfo.priceEur ?? pendingUpgrade.tierInfo.price} €
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  style={{
+                    textAlign: 'left',
+                    borderColor: upgradePaymentMethod === 'credits' ? 'var(--color-teal)' : undefined,
+                    opacity: tokenBalance < pendingUpgrade.tierInfo.price ? 0.6 : 1,
+                  }}
+                  onClick={() => setUpgradePaymentMethod('credits')}
+                >
+                  🪙 Плати с State Credits — {pendingUpgrade.tierInfo.price} SC
+                  <span style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Наличен баланс: {tokenBalance} SC
+                  </span>
+                </button>
+              </div>
+
+              {upgradePaymentMethod === 'credits' && tokenBalance < pendingUpgrade.tierInfo.price && (
+                <p style={{ fontSize: '0.85rem', color: 'var(--color-danger)', marginBottom: '1rem' }}>
+                  Нямаш достатъчно кредити за това ниво.{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowBuyCreditsModal(true)}
+                    style={{ color: 'inherit', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    Купи бъндъл от тук
+                  </button>
+                  , или плати с карта.
+                </p>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+                <button className="btn-secondary" onClick={() => setPendingUpgrade(null)} disabled={confirmingUpgrade}>
+                  Отказ
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={handleConfirmUpgrade}
+                  disabled={confirmingUpgrade || (upgradePaymentMethod === 'credits' && tokenBalance < pendingUpgrade.tierInfo.price)}
+                >
+                  {confirmingUpgrade ? 'Обработва се...' : 'Потвърди'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBuyCreditsModal && (
+        <BuyCreditsModal
+          onClose={() => setShowBuyCreditsModal(false)}
+          onBalanceUpdate={(newBalance) => setTokenBalance(newBalance)}
+        />
       )}
     </div>
   )

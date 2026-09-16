@@ -196,8 +196,7 @@ function App() {
                   </button>
                 </NavDropdown>
               )}
-              <Link to="/how-it-works" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Как работи?</Link>
-
+              
               {session && profile?.role === 'admin' && (
                 <NavDropdown label="Админ">
                   <Link to="/admin-reports" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Отчети</Link>
