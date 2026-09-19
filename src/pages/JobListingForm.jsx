@@ -314,19 +314,21 @@ export function JobListingForm() {
     if (newStatus === 'published') {
       const { data: company } = await supabase
         .from('companies')
-        .select('company_name, bulstat, sector, contact_phone, contact_email')
+        .select('company_name, bulstat, mol, contact_address, sector, contact_phone, contact_email')
         .eq('id', session.user.id)
         .single()
 
       const profileComplete =
         company?.company_name?.trim() &&
         company?.bulstat?.trim() &&
+        company?.mol?.trim() &&
+        company?.contact_address?.trim() &&
         company?.sector?.trim() &&
         (company?.contact_phone?.trim() || company?.contact_email?.trim())
 
       if (!profileComplete) {
         showToast(
-          'За да публикувате обяви, трябва първо да попълните фирмения си профил (име, ЕИК, сектор, и телефон или имейл за контакт).',
+          'За да публикувате обяви, трябва първо да попълните фирмения си профил (име, ЕИК, МОЛ, адрес, сектор, и телефон или имейл за контакт).',
           'error'
         )
 
@@ -363,6 +365,10 @@ export function JobListingForm() {
         pendingCardTier = tierInfo
       }
     }
+    // TODO (бъдеща промяна): когато решим само платените нива да
+    // могат да публикуват във Facebook, смени долния ред на:
+    // const canPostToFacebook = selectedTier !== 'free'
+    const canPostToFacebook = true
 
     setSaving(true)
 
@@ -426,7 +432,7 @@ export function JobListingForm() {
         tier: tierForSave,
         tier_rank: tierRankForSave,
         banner_url: formData.banner_url || null,
-        post_to_facebook: selectedTier !== 'free' ? formData.post_to_facebook : false,
+        post_to_facebook: canPostToFacebook ? formData.post_to_facebook : false,
       }
 
       let result
@@ -528,7 +534,7 @@ export function JobListingForm() {
           )
         }
 
-        if (selectedTier !== 'free' && formData.post_to_facebook) {
+        if (canPostToFacebook && formData.post_to_facebook) {
           try {
             const { error: fbError } = await supabase.functions.invoke(
               'post-job-to-facebook',

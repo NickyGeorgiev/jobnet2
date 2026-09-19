@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
         if (jobListingId) {
           const { data: jobListing } = await supabaseAdmin
             .from("job_listings")
-            .select("published_at, post_to_facebook, company_id")
+            .select("title, published_at, post_to_facebook, company_id")
             .eq("id", jobListingId)
             .single()
 
@@ -251,7 +251,7 @@ Deno.serve(async (req) => {
               user_id: userId,
               type: "payment_confirmed",
               title: "Плащането е потвърдено",
-              body: `Обявата "${job.title}" вече е ${product.label}.`,
+              body: `Обявата "${jobListing.title}" вече е ${product.label}.`,
               link: "/company-jobs",
             })
           }

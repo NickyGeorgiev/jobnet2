@@ -83,6 +83,8 @@
 .btn-logout:hover {
   border-color: var(--color-danger);
   color: var(--color-danger);
+  box-shadow: 0px 0px 25px 2px rgba(221, 65, 34, 0.8);
+  -webkit-box-shadow: 0px 0px 25px 2px rgba(221, 65, 34, 0.8);
 }
 
 .navbar-mobile-toggle {
