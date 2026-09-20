@@ -10,4 +10,4 @@ jobs:
     steps:
       - name: Test Registry Agency
         run: |
-          curl -i "https://portal.registryagency.bg/CR/api/Deeds/Summary?page=1&pageSize=25&count=1&name=&ident=205159453&selectedSearchFilter=1&includeHistory=true"
+          curl -i "https://portal.registryagency.bg/CR/api/Deeds/205159453?entryDate=2026-09-19T20%3A59%3A59.999Z&loadFieldsFromAllLegalForms=false"
