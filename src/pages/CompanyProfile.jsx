@@ -16,26 +16,51 @@ const EMPLOYEE_COUNT_OPTIONS = ['1-10', '11-50', '51-200', '201-500', '500+']
 
 export function CompanyProfile() {
   useSeo(seo.companyProfile)
+
   const navigate = useNavigate()
-  const [pendingBannerFile, setPendingBannerFile] = useState(null)
   const { showToast } = useToast()
   const { session, refreshProfile } = useAuth()
-  const [formData, setFormData] = useState({
-    company_name: '', bulstat: '', mol: '', sector: '', founded_year: '',
-    employee_count: '', locations_count: '', bio: '',
-    contact_phone: '', contact_address: '', contact_email: '', logo_url: '',
-    banner_url: '', video_url: '', perks: [], values: [],
-    social_facebook: '', social_linkedin: '', social_instagram: '', social_website: '',
-    why_work_here: '', video_urls: [],
-  })
+
+  const [pendingBannerFile, setPendingBannerFile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
-  const [message, setMessage] = useState('')
   const [verifying, setVerifying] = useState(false)
+  const [eikVerified, setEikVerified] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const [formData, setFormData] = useState({
+    company_name: '',
+    bulstat: '',
+    mol: '',
+    sector: '',
+    founded_year: '',
+    employee_count: '',
+    locations_count: '',
+    bio: '',
+    contact_phone: '',
+    contact_address: '',
+    contact_email: '',
+    logo_url: '',
+    banner_url: '',
+    video_url: '',
+    perks: [],
+    values: [],
+    social_facebook: '',
+    social_linkedin: '',
+    social_instagram: '',
+    social_website: '',
+    why_work_here: '',
+    video_urls: [],
+  })
 
   useEffect(() => {
     async function loadCompany() {
+      if (!session?.user?.id) {
+        setLoading(false)
+        return
+      }
+
       const { data } = await supabase
         .from('companies')
         .select('*')
@@ -43,6 +68,8 @@ export function CompanyProfile() {
         .single()
 
       if (data) {
+        setEikVerified(Boolean(data.eik_verified))
+
         setFormData({
           company_name: data.company_name || '',
           bulstat: data.bulstat || '',
@@ -68,13 +95,18 @@ export function CompanyProfile() {
           video_urls: data.video_urls || [],
         })
       }
+
       setLoading(false)
     }
+
     loadCompany()
   }, [session?.user?.id])
 
   function handleChange(e) {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    })
   }
 
   async function handleLogoUpload(e) {
@@ -85,6 +117,7 @@ export function CompanyProfile() {
     setMessage('')
 
     let file
+
     try {
       file = await convertImageToWebp(rawFile)
     } catch (err) {
@@ -105,16 +138,26 @@ export function CompanyProfile() {
       return
     }
 
-    const { data } = supabase.storage.from('company-logos').getPublicUrl(filePath)
-    setFormData((prev) => ({ ...prev, logo_url: data.publicUrl }))
+    const { data } = supabase.storage
+      .from('company-logos')
+      .getPublicUrl(filePath)
+
+    setFormData((prev) => ({
+      ...prev,
+      logo_url: data.publicUrl,
+    }))
+
     setUploadingLogo(false)
   }
 
   function handleBannerFileSelected(e) {
     const rawFile = e.target.files[0]
     if (!rawFile) return
+
     setPendingBannerFile(rawFile)
-    e.target.value = '' // за да може да избереш пак същия файл втори път, ако откажеш
+
+    // Позволява избор на същия файл отново при отказ от crop-а.
+    e.target.value = ''
   }
 
   async function handleBannerCropSave(croppedFile) {
@@ -134,12 +177,19 @@ export function CompanyProfile() {
       return
     }
 
-    const { data } = supabase.storage.from('company-logos').getPublicUrl(filePath)
-    setFormData((prev) => ({ ...prev, banner_url: data.publicUrl }))
+    const { data } = supabase.storage
+      .from('company-logos')
+      .getPublicUrl(filePath)
+
+    setFormData((prev) => ({
+      ...prev,
+      banner_url: data.publicUrl,
+    }))
+
     setUploadingLogo(false)
   }
 
-    function normalizeCompanyName(name) {
+  function normalizeCompanyName(name) {
     return (name || '')
       .toUpperCase()
       .replace(/["\u201E\u201C]/g, '')
@@ -148,84 +198,104 @@ export function CompanyProfile() {
   }
 
   async function handleVerifyCompany() {
+    if (eikVerified) return
+
     const eik = formData.bulstat?.trim()
+    const companyName = formData.company_name?.trim()
 
     if (!eik || !/^\d{9}$/.test(eik)) {
       showToast('ЕИК трябва да е точно 9 цифри.', 'error')
       return
     }
 
+    if (!companyName) {
+      showToast('Моля, въведи име на фирмата преди проверката на ЕИК.', 'error')
+      return
+    }
+
     setVerifying(true)
 
-    const { data, error } = await supabase.functions.invoke(`check-company?eik=${eik}`, {
-      method: 'GET',
+    const { data, error } = await supabase.functions.invoke('check-company', {
+      body: {
+        eik,
+        companyName,
+      },
     })
 
     setVerifying(false)
 
     if (error || !data?.valid) {
-      showToast('Не открихме фирма с този ЕИК в Търговския регистър.', 'error')
-      return
-    }
-
-    const registryName = normalizeCompanyName(data.registry?.fullName)
-    const enteredName = normalizeCompanyName(formData.company_name)
-
-    const nameMatches =
-      registryName.includes(enteredName) || enteredName.includes(registryName)
-
-    if (!nameMatches) {
       showToast(
-        `ЕИК-ът съществува, но името не съвпада с регистъра ("${data.registry?.fullName}"). Провери дали си въвел коректното име.`,
+        data?.error || 'Не открихме фирма с този ЕИК в Търговския регистър.',
         'error'
       )
       return
     }
 
-    const { error: updateError } = await supabase
-      .from('companies')
-      .update({ eik_verified: true, eik_verified_name: data.registry?.fullName })
-      .eq('id', session.user.id)
-
-    if (updateError) {
-      showToast('Грешка при запазване: ' + updateError.message, 'error')
-      return
-    }
-
+    setEikVerified(true)
     showToast('ЕИК потвърден успешно!', 'success')
     await refreshProfile()
   }
 
   function addListItem(field) {
-    setFormData((prev) => ({ ...prev, [field]: [...prev[field], ''] }))
+    setFormData((prev) => ({
+      ...prev,
+      [field]: [...prev[field], ''],
+    }))
   }
 
   function updateListItem(field, index, value) {
     setFormData((prev) => {
       const next = [...prev[field]]
       next[index] = value
-      return { ...prev, [field]: next }
+
+      return {
+        ...prev,
+        [field]: next,
+      }
     })
   }
 
   function removeListItem(field, index) {
-    setFormData((prev) => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }))
+    setFormData((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index),
+    }))
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
 
+    if (!eikVerified) {
+      showToast('Първо трябва да потвърдите ЕИК на фирмата.', 'error')
+      return
+    }
+
     const trimmedEmail = formData.contact_email.trim()
-    if (trimmedEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+
+    if (
+      trimmedEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)
+    ) {
       showToast('Имейлът за връзка не изглежда валиден.', 'error')
       return
     }
 
-    const urlFields = ['social_website', 'social_facebook', 'social_linkedin', 'social_instagram']
+    const urlFields = [
+      'social_website',
+      'social_facebook',
+      'social_linkedin',
+      'social_instagram',
+    ]
+
     for (const field of urlFields) {
       const val = formData[field]?.trim()
+
       if (val && !/^https?:\/\//i.test(val)) {
-        showToast(`Полето "${field}" трябва да е линк, започващ с http:// или https://`, 'error')
+        showToast(
+          `Полето "${field}" трябва да е линк, започващ с http:// или https://`,
+          'error'
+        )
         return
       }
     }
@@ -240,9 +310,13 @@ export function CompanyProfile() {
         bulstat: formData.bulstat,
         mol: formData.mol,
         sector: formData.sector,
-        founded_year: formData.founded_year ? parseInt(formData.founded_year) : null,
+        founded_year: formData.founded_year
+          ? parseInt(formData.founded_year)
+          : null,
         employee_count: formData.employee_count,
-        locations_count: formData.locations_count ? parseInt(formData.locations_count) : null,
+        locations_count: formData.locations_count
+          ? parseInt(formData.locations_count)
+          : null,
         bio: formData.bio,
         contact_phone: formData.contact_phone,
         contact_address: formData.contact_address,
@@ -250,14 +324,14 @@ export function CompanyProfile() {
         logo_url: formData.logo_url,
         banner_url: formData.banner_url,
         video_url: formData.video_url,
-        perks: formData.perks.filter((p) => p.trim()),
-        values: formData.values.filter((v) => v.trim()),
+        perks: formData.perks.filter((perk) => perk.trim()),
+        values: formData.values.filter((value) => value.trim()),
         social_facebook: formData.social_facebook?.trim() || null,
         social_linkedin: formData.social_linkedin?.trim() || null,
         social_instagram: formData.social_instagram?.trim() || null,
         social_website: formData.social_website?.trim() || null,
         why_work_here: formData.why_work_here,
-        video_urls: formData.video_urls.filter((v) => v.trim()),
+        video_urls: formData.video_urls.filter((url) => url.trim()),
       })
       .eq('id', session.user.id)
 
@@ -268,18 +342,29 @@ export function CompanyProfile() {
       await refreshProfile()
       navigate('/')
     }
+
     setSaving(false)
   }
 
-  if (loading) return <Spinner label="Зареждам профила..." />
+  if (loading) {
+    return <Spinner label="Зареждам профила..." />
+  }
 
   const isError = message.startsWith('Грешка')
-  
+
   return (
     <div className="company-form-shell">
       <h2 className="company-form-title">Профил на фирмата</h2>
 
-      <Link to={`/companies/${session?.user?.id}`} className="btn-secondary" style={{ display: 'inline-block', marginBottom: '1.5rem', textDecoration: 'none' }}>
+      <Link
+        to={`/companies/${session?.user?.id}`}
+        className="btn-secondary"
+        style={{
+          display: 'inline-block',
+          marginBottom: '1.5rem',
+          textDecoration: 'none',
+        }}
+      >
         👁 Виж публичния си профил
       </Link>
 
@@ -289,44 +374,127 @@ export function CompanyProfile() {
 
           <div className="company-logo-upload-row">
             {formData.logo_url ? (
-              <img src={formData.logo_url} alt="лого" className="company-logo-preview" />
+              <img
+                src={formData.logo_url}
+                alt="лого"
+                className="company-logo-preview"
+              />
             ) : (
               <div className="company-logo-preview-placeholder">🏢</div>
             )}
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--color-text-muted)', marginBottom: '0.4rem' }}>Лого на фирмата</label>
-              <input type="file" accept="image/*" onChange={handleLogoUpload} />
-              {uploadingLogo && <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Качвам...</p>}
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.85rem',
+                  color: 'var(--color-text-muted)',
+                  marginBottom: '0.4rem',
+                }}
+              >
+                Лого на фирмата
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+              />
+
+              {uploadingLogo && (
+                <p
+                  style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--color-text-muted)',
+                  }}
+                >
+                  Качвам...
+                </p>
+              )}
             </div>
           </div>
 
           <div className="field">
             <label>Име на фирмата</label>
-            <input className="input" name="company_name" value={formData.company_name} onChange={handleChange} required />
+            <input
+              className="input"
+              name="company_name"
+              value={formData.company_name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           <div className="form-row-2">
             <div className="field">
               <label>ЕИК</label>
-              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-                <input className="input" name="bulstat" value={formData.bulstat} onChange={handleChange} />
-                <button type="button" className="btn-secondary" onClick={handleVerifyCompany} disabled={verifying} style={{ whiteSpace: 'nowrap' }}>
-                  {verifying ? '...' : 'Провери'}
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.6rem',
+                  alignItems: 'center',
+                }}
+              >
+                <input
+                  className="input"
+                  name="bulstat"
+                  value={formData.bulstat}
+                  onChange={handleChange}
+                  disabled={eikVerified || verifying}
+                  placeholder="Въведи 9-цифрен ЕИК"
+                />
+
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleVerifyCompany}
+                  disabled={eikVerified || verifying}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  {eikVerified
+                    ? '✔ Потвърден'
+                    : verifying
+                      ? 'Проверявам...'
+                      : 'Провери'}
                 </button>
               </div>
+
+              {eikVerified && (
+                <small
+                  style={{
+                    display: 'block',
+                    marginTop: '0.4rem',
+                    color: 'var(--color-success, #198754)',
+                  }}
+                >
+                  ✓ ЕИК е потвърден и не може да бъде променян.
+                </small>
+              )}
             </div>
           </div>
-            <div className="field">
-              <label>МОЛ (Материално отговорно лице)</label>
-              <input className="input" name="mol" value={formData.mol} onChange={handleChange} />
-            </div>
-          
+
+          <div className="field">
+            <label>МОЛ (Материално отговорно лице)</label>
+            <input
+              className="input"
+              name="mol"
+              value={formData.mol}
+              onChange={handleChange}
+            />
+          </div>
+
           <div className="form-row-2">
             <div className="field">
               <label>Сектор на дейност</label>
               <SectorSelect
                 value={formData.sector}
-                onChange={(val) => setFormData((prev) => ({ ...prev, sector: val }))}
+                onChange={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    sector: value,
+                  }))
+                }
                 options={sectors}
               />
             </div>
@@ -335,27 +503,59 @@ export function CompanyProfile() {
           <div className="form-row-2">
             <div className="field">
               <label>Година на основаване</label>
-              <input type="number" className="input" name="founded_year" value={formData.founded_year} onChange={handleChange}
-                placeholder="напр. 2015" min="1800" max={new Date().getFullYear()} />
+              <input
+                type="number"
+                className="input"
+                name="founded_year"
+                value={formData.founded_year}
+                onChange={handleChange}
+                placeholder="напр. 2015"
+                min="1800"
+                max={new Date().getFullYear()}
+              />
             </div>
+
             <div className="field">
               <label>Брой служители</label>
-              <select className="input" name="employee_count" value={formData.employee_count} onChange={handleChange}>
+              <select
+                className="input"
+                name="employee_count"
+                value={formData.employee_count}
+                onChange={handleChange}
+              >
                 <option value="">-- Избери --</option>
-                {EMPLOYEE_COUNT_OPTIONS.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+
+                {EMPLOYEE_COUNT_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className="field">
             <label>Брой обекти</label>
-            <input type="number" className="input" name="locations_count" value={formData.locations_count} onChange={handleChange} min="1" />
+            <input
+              type="number"
+              className="input"
+              name="locations_count"
+              value={formData.locations_count}
+              onChange={handleChange}
+              min="1"
+            />
           </div>
 
           <div className="field">
             <label>За фирмата</label>
-            <textarea className="input" name="bio" value={formData.bio} onChange={handleChange}
-              rows={4} placeholder="Кратко описание на дейността на фирмата..." />
+            <textarea
+              className="input"
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Кратко описание на дейността на фирмата..."
+            />
           </div>
         </div>
 
@@ -364,17 +564,33 @@ export function CompanyProfile() {
 
           <div className="field">
             <label>Телефон за контакт</label>
-            <input className="input" name="contact_phone" value={formData.contact_phone} onChange={handleChange} />
+            <input
+              className="input"
+              name="contact_phone"
+              value={formData.contact_phone}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="field">
             <label>Имейл за контакт</label>
-            <input type="email" className="input" name="contact_email" value={formData.contact_email} onChange={handleChange} />
+            <input
+              type="email"
+              className="input"
+              name="contact_email"
+              value={formData.contact_email}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="field">
             <label>Адрес</label>
-            <input className="input" name="contact_address" value={formData.contact_address} onChange={handleChange} />
+            <input
+              className="input"
+              name="contact_address"
+              value={formData.contact_address}
+              onChange={handleChange}
+            />
           </div>
         </div>
 
@@ -383,37 +599,118 @@ export function CompanyProfile() {
 
           <div className="field">
             <label>Банер (голяма снимка отгоре на публичния профил)</label>
+
             {formData.banner_url && (
-              <img src={formData.banner_url} alt="Банер" style={{ width: '100%', maxHeight: '160px', objectFit: 'cover', borderRadius: 'var(--radius-md)', marginBottom: '0.5rem' }} />
+              <img
+                src={formData.banner_url}
+                alt="Банер"
+                style={{
+                  width: '100%',
+                  maxHeight: '160px',
+                  objectFit: 'cover',
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: '0.5rem',
+                }}
+              />
             )}
-            <input type="file" accept="image/*" onChange={handleBannerFileSelected} disabled={uploadingLogo} />
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBannerFileSelected}
+              disabled={uploadingLogo}
+            />
           </div>
 
           <div className="field">
             <label>Линк към видео (YouTube/Vimeo, по избор)</label>
-            <input className="input" name="video_url" value={formData.video_url} onChange={handleChange} placeholder="https://youtube.com/watch?v=..." />
+            <input
+              className="input"
+              name="video_url"
+              value={formData.video_url}
+              onChange={handleChange}
+              placeholder="https://youtube.com/watch?v=..."
+            />
           </div>
 
           <div className="field">
             <label>Придобивки за служителите</label>
-            {formData.perks.map((perk, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <input className="input" value={perk} onChange={(e) => updateListItem('perks', i, e.target.value)} placeholder="напр. Гъвкаво работно време" />
-                <button type="button" className="btn-text-danger" onClick={() => removeListItem('perks', i)}>✕</button>
+
+            {formData.perks.map((perk, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <input
+                  className="input"
+                  value={perk}
+                  onChange={(e) =>
+                    updateListItem('perks', index, e.target.value)
+                  }
+                  placeholder="напр. Гъвкаво работно време"
+                />
+
+                <button
+                  type="button"
+                  className="btn-text-danger"
+                  onClick={() => removeListItem('perks', index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
-            <button type="button" className="btn-secondary" onClick={() => addListItem('perks')}>+ Добави придобивка</button>
+
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => addListItem('perks')}
+            >
+              + Добави придобивка
+            </button>
           </div>
 
           <div className="field">
             <label>Ценности на фирмата</label>
-            {formData.values.map((val, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <input className="input" value={val} onChange={(e) => updateListItem('values', i, e.target.value)} placeholder="напр. Иновация" />
-                <button type="button" className="btn-text-danger" onClick={() => removeListItem('values', i)}>✕</button>
+
+            {formData.values.map((value, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <input
+                  className="input"
+                  value={value}
+                  onChange={(e) =>
+                    updateListItem('values', index, e.target.value)
+                  }
+                  placeholder="напр. Иновация"
+                />
+
+                <button
+                  type="button"
+                  className="btn-text-danger"
+                  onClick={() => removeListItem('values', index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
-            <button type="button" className="btn-secondary" onClick={() => addListItem('values')}>+ Добави ценност</button>
+
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => addListItem('values')}
+            >
+              + Добави ценност
+            </button>
           </div>
 
           <div className="field">
@@ -430,47 +727,128 @@ export function CompanyProfile() {
 
           <div className="field">
             <label>Допълнителни видеа (по избор)</label>
-            {formData.video_urls.map((url, i) => (
-              <div key={i} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                <input className="input" value={url} onChange={(e) => updateListItem('video_urls', i, e.target.value)} placeholder="https://youtube.com/watch?v=..." />
-                <button type="button" className="btn-text-danger" onClick={() => removeListItem('video_urls', i)}>✕</button>
+
+            {formData.video_urls.map((url, index) => (
+              <div
+                key={index}
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <input
+                  className="input"
+                  value={url}
+                  onChange={(e) =>
+                    updateListItem('video_urls', index, e.target.value)
+                  }
+                  placeholder="https://youtube.com/watch?v=..."
+                />
+
+                <button
+                  type="button"
+                  className="btn-text-danger"
+                  onClick={() => removeListItem('video_urls', index)}
+                >
+                  ✕
+                </button>
               </div>
             ))}
-            <button type="button" className="btn-secondary" onClick={() => addListItem('video_urls')}>+ Добави видео</button>
+
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => addListItem('video_urls')}
+            >
+              + Добави видео
+            </button>
           </div>
 
           <div className="form-row-2">
             <div className="field">
               <label>Facebook</label>
-              <input className="input" name="social_facebook" value={formData.social_facebook} onChange={handleChange} placeholder="https://facebook.com/..." />
+              <input
+                className="input"
+                name="social_facebook"
+                value={formData.social_facebook}
+                onChange={handleChange}
+                placeholder="https://facebook.com/..."
+              />
             </div>
+
             <div className="field">
               <label>LinkedIn</label>
-              <input className="input" name="social_linkedin" value={formData.social_linkedin} onChange={handleChange} placeholder="https://linkedin.com/company/..." />
+              <input
+                className="input"
+                name="social_linkedin"
+                value={formData.social_linkedin}
+                onChange={handleChange}
+                placeholder="https://linkedin.com/company/..."
+              />
             </div>
           </div>
 
           <div className="form-row-2">
             <div className="field">
               <label>Instagram</label>
-              <input className="input" name="social_instagram" value={formData.social_instagram} onChange={handleChange} placeholder="https://instagram.com/..." />
+              <input
+                className="input"
+                name="social_instagram"
+                value={formData.social_instagram}
+                onChange={handleChange}
+                placeholder="https://instagram.com/..."
+              />
             </div>
+
             <div className="field">
               <label>Уебсайт</label>
-              <input className="input" name="social_website" value={formData.social_website} onChange={handleChange} placeholder="https://..." />
+              <input
+                className="input"
+                name="social_website"
+                value={formData.social_website}
+                onChange={handleChange}
+                placeholder="https://..."
+              />
             </div>
           </div>
         </div>
 
         {message && (
-          <div className={`company-form-message ${isError ? 'company-form-message--error' : 'company-form-message--success'}`}>
+          <div
+            className={`company-form-message ${isError
+                ? 'company-form-message--error'
+                : 'company-form-message--success'
+              }`}
+          >
             {message}
           </div>
         )}
 
-        <button type="submit" className="btn-primary" disabled={saving}>
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={saving || !eikVerified}
+          title={
+            !eikVerified
+              ? 'Първо потвърдете ЕИК на фирмата.'
+              : undefined
+          }
+        >
           {saving ? 'Записвам...' : 'Запази профил'}
         </button>
+
+        {!eikVerified && (
+          <p
+            style={{
+              marginTop: '0.75rem',
+              color: 'var(--color-text-muted)',
+              fontSize: '0.9rem',
+            }}
+          >
+            За да запазите профила, първо въведете и потвърдете валиден ЕИК.
+          </p>
+        )}
       </form>
 
       {pendingBannerFile && (
