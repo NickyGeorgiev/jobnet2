@@ -1,3 +1,5 @@
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 const WORKER_URL = "https://jobstate-registry-test.n-georrgiev.workers.dev";
 
 Deno.serve(async (req) => {
@@ -9,6 +11,22 @@ Deno.serve(async (req) => {
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
+  }
+
+  // Само логнат потребител може да вика тази функция — иначе всеки
+  // в интернет би могъл да спамва Cloudflare Worker-а безкрайно.
+  const supabaseAuth = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: req.headers.get("Authorization") || "" } } }
+  );
+  const { data: { user } } = await supabaseAuth.auth.getUser();
+
+  if (!user) {
+    return new Response(JSON.stringify({ valid: false, error: "Не сте логнати." }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
+    });
   }
 
   try {

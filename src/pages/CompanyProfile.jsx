@@ -32,6 +32,7 @@ export function CompanyProfile() {
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [message, setMessage] = useState('')
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
     async function loadCompany() {
@@ -138,6 +139,63 @@ export function CompanyProfile() {
     setUploadingLogo(false)
   }
 
+    function normalizeCompanyName(name) {
+    return (name || '')
+      .toUpperCase()
+      .replace(/["\u201E\u201C]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  async function handleVerifyCompany() {
+    const eik = formData.bulstat?.trim()
+
+    if (!eik || !/^\d{9}$/.test(eik)) {
+      showToast('ЕИК трябва да е точно 9 цифри.', 'error')
+      return
+    }
+
+    setVerifying(true)
+
+    const { data, error } = await supabase.functions.invoke(`check-company?eik=${eik}`, {
+      method: 'GET',
+    })
+
+    setVerifying(false)
+
+    if (error || !data?.valid) {
+      showToast('Не открихме фирма с този ЕИК в Търговския регистър.', 'error')
+      return
+    }
+
+    const registryName = normalizeCompanyName(data.registry?.fullName)
+    const enteredName = normalizeCompanyName(formData.company_name)
+
+    const nameMatches =
+      registryName.includes(enteredName) || enteredName.includes(registryName)
+
+    if (!nameMatches) {
+      showToast(
+        `ЕИК-ът съществува, но името не съвпада с регистъра ("${data.registry?.fullName}"). Провери дали си въвел коректното име.`,
+        'error'
+      )
+      return
+    }
+
+    const { error: updateError } = await supabase
+      .from('companies')
+      .update({ eik_verified: true, eik_verified_name: data.registry?.fullName })
+      .eq('id', session.user.id)
+
+    if (updateError) {
+      showToast('Грешка при запазване: ' + updateError.message, 'error')
+      return
+    }
+
+    showToast('ЕИК потвърден успешно!', 'success')
+    await refreshProfile()
+  }
+
   function addListItem(field) {
     setFormData((prev) => ({ ...prev, [field]: [...prev[field], ''] }))
   }
@@ -216,7 +274,7 @@ export function CompanyProfile() {
   if (loading) return <Spinner label="Зареждам профила..." />
 
   const isError = message.startsWith('Грешка')
-
+  
   return (
     <div className="company-form-shell">
       <h2 className="company-form-title">Профил на фирмата</h2>
@@ -249,15 +307,20 @@ export function CompanyProfile() {
 
           <div className="form-row-2">
             <div className="field">
-              <label>Булстат</label>
-              <input className="input" name="bulstat" value={formData.bulstat} onChange={handleChange} />
+              <label>ЕИК</label>
+              <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
+                <input className="input" name="bulstat" value={formData.bulstat} onChange={handleChange} />
+                <button type="button" className="btn-secondary" onClick={handleVerifyCompany} disabled={verifying} style={{ whiteSpace: 'nowrap' }}>
+                  {verifying ? '...' : 'Провери'}
+                </button>
+              </div>
             </div>
+          </div>
             <div className="field">
               <label>МОЛ (Материално отговорно лице)</label>
               <input className="input" name="mol" value={formData.mol} onChange={handleChange} />
             </div>
-          </div>
-
+          
           <div className="form-row-2">
             <div className="field">
               <label>Сектор на дейност</label>
