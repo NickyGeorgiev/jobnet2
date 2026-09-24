@@ -129,35 +129,38 @@ Deno.serve(async (req) => {
         .maybeSingle()
 
       if (product?.product_type === "credit_bundle") {
-        const { data: companyData } = await supabaseAdmin
-          .from("companies")
-          .select("token_balance")
-          .eq("id", userId)
-          .single()
+        // Плащането се записва и кредитите се добавят в ЕДНА транзакция в базата
+        // (RPC apply_credit_purchase). Уникалният индекс върху
+        // stripe_checkout_session_id гарантира, че една сесия се начислява веднъж,
+        // дори Stripe да я достави два пъти едновременно.
+        const { data: creditResult, error: creditError } = await supabaseAdmin.rpc(
+          "apply_credit_purchase",
+          {
+            p_user_id: userId,
+            p_session_id: session.id,
+            p_payment_intent_id: session.payment_intent,
+            p_amount: session.amount_total / 100,
+            p_description: `${product.label} (+${product.credits} State Credits)`,
+            p_credits: product.credits,
+          }
+        )
 
-        const newBalance = (companyData?.token_balance || 0) + product.credits
+        if (creditError) {
+          console.error("apply_credit_purchase failed:", creditError)
+          // 500 => Stripe ще опита отново. Безопасно е, защото RPC-то е атомарно.
+          return new Response("Грешка при начисляване на кредити", { status: 500 })
+        }
 
-        await supabaseAdmin
-          .from("companies")
-          .update({ token_balance: newBalance })
-          .eq("id", userId)
-
-        await supabaseAdmin.from("payments").insert({
-          user_id: userId,
-          user_type: "company",
-          amount: session.amount_total / 100,
-          description: `${product.label} (+${product.credits} State Credits)`,
-          stripe_payment_intent_id: session.payment_intent,
-          stripe_checkout_session_id: session.id,
-        })
-
-        await supabaseAdmin.from("notifications").insert({
-          user_id: userId,
-          type: "payment_confirmed",
-          title: "Плащането е потвърдено",
-          body: `+${product.credits} State Credits добавени към баланса ти.`,
-          link: "/payments",
-        })
+        // "duplicate" => вече обработено; не пращаме второ известие.
+        if (creditResult === "applied") {
+          await supabaseAdmin.from("notifications").insert({
+            user_id: userId,
+            type: "payment_confirmed",
+            title: "Плащането е потвърдено",
+            body: `+${product.credits} State Credits добавени към баланса ти.`,
+            link: "/payments",
+          })
+        }
       } else if (product?.product_type === "job_tier") {
         const jobListingId = session.metadata?.jobListingId
         const tierRank = { silver: 1, gold: 2, platinum: 3, diamond: 4 }[product.tier] || 0

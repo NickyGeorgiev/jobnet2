@@ -108,8 +108,7 @@ export function JobApplicants() {
           })
 
           return (
-            <div key={app.id} className={`candidate-card ${c.is_gold ? 'candidate-card--gold' : ''}`}>
-              {c.is_gold && <span className="candidate-gold-ribbon">GOLD</span>}
+            <div key={app.id} className="candidate-card">
 
               {c.avatar_url ? (
                 <img src={c.avatar_url} alt={fullName} className="candidate-card-avatar" />

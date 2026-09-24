@@ -19,12 +19,26 @@ function jsonResponse(body: unknown, status = 200) {
   })
 }
 
+// Правни форми, които не се броят за част от името при сравнението.
+const LEGAL_FORMS = ['ЕООД', 'ООД', 'ЕАД', 'АД', 'КДА', 'КД', 'СД', 'ЕТ', 'СНЦ', 'ДЗЗД']
+
+// Латински букви, изглеждащи като кирилски (напр. "TECT" вместо "ТЕСТ").
+const LATIN_TO_CYRILLIC: Record<string, string> = {
+  A: 'А', B: 'В', E: 'Е', K: 'К', M: 'М', H: 'Н',
+  O: 'О', P: 'Р', C: 'С', T: 'Т', X: 'Х', Y: 'У',
+}
+
+// Връща "ядрото" на името: без кавички, пунктуация, интервали и правна форма.
+// "ТЕСТ ГРУП" ЕООД  ->  ТЕСТГРУП
 function normalizeCompanyName(name: string) {
   return (name || '')
     .toUpperCase()
-    .replace(/["\u201E\u201C]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
+    .replace(/[A-Z]/g, (ch) => LATIN_TO_CYRILLIC[ch] ?? ch)
+    .replace(/\./g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter((word) => word && !LEGAL_FORMS.includes(word))
+    .join('')
 }
 
 Deno.serve(async (req) => {
@@ -153,14 +167,21 @@ Deno.serve(async (req) => {
     const registryName = normalizeCompanyName(registry.fullName)
     const enteredName = normalizeCompanyName(companyName)
 
-    const nameMatches =
-      registryName.includes(enteredName) ||
-      enteredName.includes(registryName)
-
-    if (!nameMatches) {
+    // Ако след изчистването не е останало име (напр. въведено само "ЕООД"
+    // или една буква), не можем да сравним смислено.
+    if (enteredName.length < 2) {
       return jsonResponse({
         valid: false,
-        error: `Въведеният ЕИК не е на тази фирма!`,
+        error: 'Въведете името на фирмата, а не само правната форма.',
+      })
+    }
+
+    // Точно съвпадение на ядрото на името — не "съдържа".
+    if (!registryName || registryName !== enteredName) {
+      return jsonResponse({
+        valid: false,
+        error:
+          'Въведеното име не съвпада с името в Търговския регистър за този ЕИК. Въведете го точно както е вписано (правната форма не е задължителна).',
       })
     }
 

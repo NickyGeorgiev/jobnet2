@@ -48,7 +48,6 @@ export function AdminDashboard() {
     const [
       candidatesCount,
       companiesCount,
-      goldActiveCount,
       companiesPaidCount,
       trialCount,
       monthPayments,
@@ -63,7 +62,6 @@ export function AdminDashboard() {
     ] = await Promise.all([
       supabase.from('candidates').select('*', { count: 'exact', head: true }),
       supabase.from('companies').select('*', { count: 'exact', head: true }),
-      supabase.from('candidates').select('*', { count: 'exact', head: true }).gt('gold_until', now),
       supabase.from('companies').select('*', { count: 'exact', head: true }).gt('paid_until', now),
       supabase.from('companies').select('*', { count: 'exact', head: true }).gt('trial_ends_at', now),
       supabase.from('payments').select('amount').gte('created_at', startOfMonth),
@@ -91,7 +89,6 @@ export function AdminDashboard() {
     setStats({
       candidates: candidatesCount.count || 0,
       companies: companiesCount.count || 0,
-      goldActive: goldActiveCount.count || 0,
       companiesPaid: companiesPaidCount.count || 0,
       trialing: trialCount.count || 0,
       monthRevenue,
@@ -258,8 +255,8 @@ export function AdminDashboard() {
             </p>
             <p className="status-sub">
               {freeMode
-                ? 'Company search и Gold статус са безплатни за всички потребители.'
-                : 'Company search и Gold статус изискват плащане, както обичайно.'}
+                ? 'Company search е безплатен за всички потребители.'
+                : 'Company search изисква плащане, както обичайно.'}
             </p>
           </div>
           {freeMode !== null && (
@@ -284,10 +281,6 @@ export function AdminDashboard() {
           <div className="admin-stat-card">
             <p className="admin-stat-value">{stats.companies}</p>
             <p className="admin-stat-label">Регистрирани фирми</p>
-          </div>
-          <div className="admin-stat-card">
-            <p className="admin-stat-value">{stats.goldActive}</p>
-            <p className="admin-stat-label">Активни Gold кандидати</p>
           </div>
           <div className="admin-stat-card">
             <p className="admin-stat-value">{stats.companiesPaid}</p>

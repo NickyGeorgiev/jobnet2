@@ -53,7 +53,6 @@ export function AdminCandidates() {
             <div key={c.id} className="blog-admin-row">
               <div>
                 <p className="blog-admin-row-title">
-                  {c.is_gold && <span className="blog-status-badge blog-status-badge--published">GOLD</span>}
                   {!c.active && <span className="blog-status-badge blog-status-badge--draft">скрит</span>}
                   {fullName}
                 </p>

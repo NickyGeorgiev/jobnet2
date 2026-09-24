@@ -51,8 +51,7 @@ export function SavedCandidates() {
           if (!c) return null
           const fullName = [c.fname, c.lname].filter(Boolean).join(' ') || 'Кандидат'
           return (
-            <div key={c.id} className={`candidate-card ${c.is_gold ? 'candidate-card--gold' : ''}`}>
-              {c.is_gold && <span className="candidate-gold-ribbon">GOLD</span>}
+            <div key={c.id} className="candidate-card">
 
               {c.avatar_url ? (
                 <img src={c.avatar_url} alt={fullName} className="candidate-card-avatar" />
