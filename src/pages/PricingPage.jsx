@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo';
 import stateCreditSvg from '../assets/state-credit.svg'
-import './PricingPage.css'
 
 const TIERS = [
   {

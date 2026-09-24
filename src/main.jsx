@@ -7,7 +7,6 @@ import { FreeModeProvider } from './FreeModeContext.jsx'
 import './theme.css'
 import { loadTheme } from './loadTheme.js'
 import App from './App.jsx'
-import './theme.css'
 import './App.css'
 import './pages/AdminBlog.css'
 import './pages/AdminDashboard.css'
@@ -26,13 +25,16 @@ import './pages/JobListings.css'
 import './pages/LegalPage.css'
 import './pages/MyCv.css'
 import './pages/PaymentHistory.css'
+import './pages/PricingPage.css'
 import './pages/AdminReports.css'
 
 
 
 const savedTheme = localStorage.getItem('theme') || 'dark'
 document.documentElement.setAttribute('data-theme', savedTheme)
-document.cookie = `theme=${savedTheme}; path=/; max-age=31536000; SameSite=Lax`
+// domain=.jobstate.net, за да е достъпна и от jobs.jobstate.net (Next.js SSR)
+const themeCookieDomain = window.location.hostname.endsWith('jobstate.net') ? '; domain=.jobstate.net' : ''
+document.cookie = `theme=${savedTheme}; path=/; max-age=31536000; SameSite=Lax${themeCookieDomain}`
 if (savedTheme === 'dark') {
   loadTheme()
 }

@@ -10,6 +10,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Ескейпва текст, който влиза в HTML на имейла — иначе заглавие/град/име,
+// въведени от потребител, биха се интерпретирали като HTML (напр. фалшив линк).
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -98,7 +109,7 @@ Deno.serve(async (req) => {
     }
 
     const matched = candidates || []
-    const jobUrl = `https://jobs.jobstate.net/jobs/${job.slug}-${job.id}`
+    const jobUrl = `https://jobs.jobstate.net/jobs/${job.slug || 'obiava'}-${job.id}`
 
     // 3. Изпратете имейл на всеки подходящ кандидат
     let sentCount = 0
@@ -119,12 +130,12 @@ Deno.serve(async (req) => {
             subject: `Нова обява, отговаряща на критериите ти: ${job.title}`,
             html: `
               <div style="font-family: sans-serif; max-width: 500px;">
-                <p>Здравей${candidate.fname ? ', ' + candidate.fname : ''},</p>
+                <p>Здравей${candidate.fname ? ', ' + escapeHtml(candidate.fname) : ''},</p>
                 <p>Има нова обява, която отговаря на зададените от теб критерии за работа:</p>
-                <h3 style="margin-bottom: 0.3rem;">${job.title}</h3>
-                <p style="color: #666; margin-top: 0;">${job.city} · ${job.sector}</p>
+                <h3 style="margin-bottom: 0.3rem;">${escapeHtml(job.title)}</h3>
+                <p style="color: #666; margin-top: 0;">${escapeHtml(job.city)} · ${escapeHtml(job.sector)}</p>
                 <p>
-                  <a href="${jobUrl}" style="display:inline-block;background:#BF953F;color:#201608;padding:0.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;">
+                  <a href="${escapeHtml(jobUrl)}" style="display:inline-block;background:#BF953F;color:#201608;padding:0.75rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:600;">
                     Виж обявата и кандидатствай
                   </a>
                 </p>

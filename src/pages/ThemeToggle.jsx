@@ -20,7 +20,9 @@ const LIGHT_COLORS = {
 }
 
 function setThemeCookie(theme) {
-  document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax`
+  // domain=.jobstate.net, за да е достъпна и от jobs.jobstate.net (Next.js SSR)
+  const domain = window.location.hostname.endsWith('jobstate.net') ? '; domain=.jobstate.net' : ''
+  document.cookie = `theme=${theme}; path=/; max-age=31536000; SameSite=Lax${domain}`
 }
 
 function applyLight() {

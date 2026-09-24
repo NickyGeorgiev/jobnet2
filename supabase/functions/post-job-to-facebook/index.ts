@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const jobUrl = `https://jobs.jobstate.net/jobs/${job.slug}-${job.id}`
+    const jobUrl = `https://jobs.jobstate.net/jobs/${job.slug || 'obiava'}-${job.id}`
     const salaryLine = job.salary_visible && job.salary ? `\n💰 от ${job.salary} € / месец` : ''
     const message = buildMessage(job.title, job.city, salaryLine)
 
