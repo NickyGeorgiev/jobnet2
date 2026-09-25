@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import logo from '../assets/logo-light.svg'
 
-const VAT_RATE = 0
+const VAT_RATE = 0.2
 
 async function logInvoiceEvent(payment, action) {
   // Best-effort — грешка тук никога не бива да пречи на потребителя
@@ -132,9 +132,10 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
             <div>
               <p className="invoice-title"><img src={logo} alt="Jobstate" /></p>
               <p style={{ fontSize: '0.8rem', color: '#777', margin: '0.2rem 0 0' }}>
-                Наименование: [попълни]<br />
+                Наименование: ЕН ДИ ЕМ ДЖИ ЕООД<br />
                 ЕИК: [попълни]<br />
-                Адрес: [попълни]<br />
+                ИН по ДДС: BG<br />
+                Адрес: гр. Русе, ул. Родопи 4, вх.А<br />
                 jobstate.net · info@jobstate.net
               </p>
             </div>

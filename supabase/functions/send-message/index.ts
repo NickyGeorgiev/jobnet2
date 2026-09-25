@@ -7,6 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
+// Ескейпва текст, който влиза в HTML на имейла — съобщението и името на фирмата
+// ги пише потребителят, а без това те биха се интерпретирали като HTML
+// (напр. фалшив линк в текста на съобщението).
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -88,13 +100,13 @@ Deno.serve(async (req) => {
         from: "Jobstate <info@jobstate.net>",
         to: [candidate.contact_email],
         reply_to: user.email,
-        subject:`Съобщение от ${company?.company_name || "фирма"} през Jobstate`,
+        subject: `Съобщение от ${escapeHtml(company?.company_name || "фирма")} през Jobstate`,
         html: `
           <div style="font-family: sans-serif; max-width: 500px;">
-            <p>${message.replace(/\n/g, "<br>")}</p>
+            <p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>
             <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #ddd;" />
             <p style="color: #888; font-size: 0.85rem;">
-              Изпратено от <strong>${company?.company_name || "фирма"}</strong> през Jobstate.
+              Изпратено от <strong>${escapeHtml(company?.company_name || "фирма")}</strong> през Jobstate.
               Можете да отговорите директно на този имейл.
             </p>
           </div>
