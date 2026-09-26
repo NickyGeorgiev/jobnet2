@@ -5,16 +5,18 @@ import { seo } from '../seo'
 import './AdminDashboard.css'
 
 const SETTING_LABELS = {
-  'color-bg': 'Фон на страницата',
-  'color-surface': 'Фон на карти/панели',
-  'color-surface-raised': 'По-светла повърхност (вложени елементи)',
-  'color-border': 'Рамки/разделители',
-  'color-text': 'Основен текст',
-  'color-text-muted': 'Второстепенен текст',
-  'color-gold': 'Gold акцент',
-  'color-teal': 'Company/бизнес акцент',
-  'color-danger': 'Грешки/опасност',
-  'color-success': 'Успех',
+  'color-bg': 'color-bg: Фон на страницата',
+  'color-surface': 'color-surface: Фон на карти/панели (status-card, action-tile, candidate-card)',
+  'color-surface-raised': 'color-surface-raised: По-светла повърхност (плейсхолдър лого/аватар, tag фон)',
+  'color-border': 'color-border: Рамки/разделители (карти, полета, hr линии)',
+  'color-text': 'color-text: Основен текст',
+  'color-text-muted': 'color-text-muted: Второстепенен текст (описания, labels, дати)',
+  'color-gold': 'color-gold: Gold акцент',
+  'color-gold-soft':'color-gold-soft: Полупрозрачен златен фон зад badge/tag за заплата',
+  'color-teal': 'color-teal: Company/бизнес акцент (линкове, action-tile hover)',
+  'color-teal-soft':'color-teal-soft: Полупрозрачен тюркоазен фон зад иконки/tag-ове',
+  'color-danger': 'color-danger: Грешки/опасност',
+  'color-success': 'color-success: Успех',
 }
 
 export function AdminDashboard() {

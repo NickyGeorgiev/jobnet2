@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../AuthContext'
 import { useToast } from './Toast'
+import { ImageCropperModal } from './ImageCropperModal'
 import './AdminBlog.css'
 
 function slugify(text) {
@@ -26,6 +27,7 @@ export function AdminBlogEditor() {
   const [loading, setLoading] = useState(!isNew)
   const [saving, setSaving] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [coverFileToCrop, setCoverFileToCrop] = useState(null)
 
   useEffect(() => {
     if (!isNew) loadPost()
@@ -70,9 +72,15 @@ export function AdminBlogEditor() {
     setFormData({ ...formData, title: e.target.value, slug: slugify(e.target.value) })
   }
 
-  async function handleCoverUpload(e) {
+  // Отваря кропъра вместо да качва директно — реалното качване е в uploadCoverImage.
+  function handleCoverFileSelected(e) {
     const file = e.target.files[0]
+    e.target.value = '' // за да сработи избор на същия файл повторно
     if (!file) return
+    setCoverFileToCrop(file)
+  }
+
+  async function uploadCoverImage(file) {
     setUploadingCover(true)
 
     const filePath = `${Date.now()}_${file.name}`
@@ -87,6 +95,11 @@ export function AdminBlogEditor() {
     const { data } = supabase.storage.from('blog-images').getPublicUrl(filePath)
     setFormData((prev) => ({ ...prev, cover_image_url: data.publicUrl }))
     setUploadingCover(false)
+  }
+
+  async function handleCoverCropSave(croppedFile) {
+    setCoverFileToCrop(null)
+    await uploadCoverImage(croppedFile)
   }
 
   async function handleSave(newStatus) {
@@ -144,8 +157,20 @@ export function AdminBlogEditor() {
           {formData.cover_image_url && (
             <img src={formData.cover_image_url} alt="корица" style={{ width: '200px', borderRadius: '8px', display: 'block', marginBottom: '0.5rem' }} />
           )}
-          <input type="file" accept="image/*" onChange={handleCoverUpload} />
+          <input type="file" accept="image/*" onChange={handleCoverFileSelected} />
           {uploadingCover && <p style={{ fontSize: '0.8rem' }}>Качвам...</p>}
+
+          {coverFileToCrop && (
+            <ImageCropperModal
+              imageFile={coverFileToCrop}
+              aspect={900 / 600}
+              outputWidth={900}
+              outputHeight={600}
+              title="Изрежи корицата на статията"
+              onCancel={() => setCoverFileToCrop(null)}
+              onSave={handleCoverCropSave}
+            />
+          )}
         </div>
 
         <div className="field">

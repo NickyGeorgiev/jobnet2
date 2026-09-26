@@ -13,9 +13,9 @@ const LIGHT_COLORS = {
   'color-text-muted': '#172033',
   'color-gold': 'linear-gradient(120deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%)',
   'color-gold-soft': 'rgba(239,191,4, 0.7)',
-  'color-teal': '#1f2a44',
+  'color-teal': '#48cae4',
   'color-teal-soft': 'rgba(134, 197, 216, 0.20)',
-  'color-danger': '#c94b3c',
+  'color-danger': '#070606',
   'color-success': '#34845b',
 }
 

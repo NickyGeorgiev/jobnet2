@@ -1,0 +1,45 @@
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js|avif|png|jpg|jpeg)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.google-analytics.com https://challenges.cloudflare.com https://*.clarity.ms https://c.bing.com https://connect.facebook.net https://analytics.tiktok.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://*.clarity.ms data:; img-src 'self' data: https://bfyugufkxajywdxnzbjs.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://cdn.simpleicons.org https://www.facebook.com https://*.clarity.ms; connect-src 'self' https://bfyugufkxajywdxnzbjs.supabase.co https://*.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://*.clarity.ms https://c.bing.com https://www.facebook.com https://analytics.tiktok.com; frame-src https://challenges.cloudflare.com https://www.youtube.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; form-action 'self'"
+</IfModule>
+
+RewriteEngine On
+
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteRule ^sitemap\.xml$ https://bfyugufkxajywdxnzbjs.supabase.co/functions/v1/sitemap [R=301,L]
+RewriteRule ^rss\.xml$ https://bfyugufkxajywdxnzbjs.supabase.co/functions/v1/rss-feed [R=301,L]
+
+# Само за social media crawler ботове — вече не пренасочваме към друг домейн
+# (LinkedIn отказваше redirect към supabase.co заради техния robots.txt) —
+# вместо това jobstate.net сам "донася" съдържанието вътрешно, ботът никога
+# не напуска нашия домейн, никакъв redirect не се случва
+RewriteCond %{HTTP_USER_AGENT} facebookexternalhit|LinkedInBot|Twitterbot|WhatsApp|TelegramBot|Slackbot [NC]
+RewriteRule ^blog/([^/]+)/?$ /blog-bot.php?slug=$1 [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]
