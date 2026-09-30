@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 import { CvModal } from './CvModal'
 import { calculateCvCompleteness } from '../cvCompleteness'
@@ -6,6 +6,7 @@ import { calculateCvCompleteness } from '../cvCompleteness'
 export function AdminCandidates() {
   const [candidates, setCandidates] = useState(null)
   const [selected, setSelected] = useState(null)
+  const [search, setSearch] = useState('')
 
   function exportCsv() {
     const rows = candidates.map(c => [
@@ -36,17 +37,39 @@ export function AdminCandidates() {
     load()
   }, [])
 
+  const filtered = useMemo(() => {
+    if (!candidates) return null
+    const q = search.trim().toLowerCase()
+    if (!q) return candidates
+    return candidates.filter((c) => {
+      const fullName = [c.fname, c.lname].filter(Boolean).join(' ').toLowerCase()
+      return (
+        fullName.includes(q) ||
+        (c.contact_email || '').toLowerCase().includes(q) ||
+        (c.phone || '').toLowerCase().includes(q)
+      )
+    })
+  }, [candidates, search])
+
   if (candidates === null) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   return (
     <div className="dashboard-shell">
       <div className="dashboard-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
-        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички кандидати ({candidates.length})</h1></div>
+        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички кандидати ({filtered.length}{filtered.length !== candidates.length ? ` от ${candidates.length}` : ''})</h1></div>
         <button className="btn-secondary" onClick={exportCsv}>⬇ Export CSV</button>
       </div>
 
+      <input
+        type="text"
+        className="admin-search-input"
+        placeholder="Търси по име, имейл или телефон..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       <div className="blog-admin-list">
-        {candidates.map((c) => {
+        {filtered.map((c) => {
           const { percent } = calculateCvCompleteness(c)
           const fullName = [c.fname, c.lname].filter(Boolean).join(' ') || '(без име)'
           return (
@@ -67,6 +90,7 @@ export function AdminCandidates() {
             </div>
           )
         })}
+        {filtered.length === 0 && <p style={{ color: 'var(--color-text-muted)', padding: '1rem 0' }}>Няма кандидати, отговарящи на търсенето.</p>}
       </div>
 
       {selected && <CvModal cv={selected} onClose={() => setSelected(null)} showDownload={false} />}

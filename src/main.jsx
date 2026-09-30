@@ -5,7 +5,7 @@ import { AuthProvider } from './AuthContext.jsx'
 import { ToastProvider } from './pages/Toast.jsx'
 import { FreeModeProvider } from './FreeModeContext.jsx'
 import './theme.css'
-import { loadTheme } from './loadTheme.js'
+import { ensureThemeSettings, applyThemeSettings } from './loadTheme.js'
 import App from './App.jsx'
 import './App.css'
 import './pages/AdminBlog.css'
@@ -35,9 +35,9 @@ document.documentElement.setAttribute('data-theme', savedTheme)
 // domain=.jobstate.net, за да е достъпна и от jobs.jobstate.net (Next.js SSR)
 const themeCookieDomain = window.location.hostname.endsWith('jobstate.net') ? '; domain=.jobstate.net' : ''
 document.cookie = `theme=${savedTheme}; path=/; max-age=31536000; SameSite=Lax${themeCookieDomain}`
-if (savedTheme === 'dark') {
-  loadTheme()
-}
+// Тегли и dark, и light от site_settings (веднъж), после прилага
+// каквато тема е запазена — не само тъмната, както преди.
+ensureThemeSettings().then(() => applyThemeSettings(savedTheme))
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

@@ -47,6 +47,8 @@ const PublicCv = lazy(() => import('./pages/PublicCv').then(m => ({ default: m.P
 const AccountSettings = lazy(() => import('./pages/AccountSettings').then(m => ({ default: m.AccountSettings })))
 const AdminCandidates = lazy(() => import('./pages/AdminCandidates').then(m => ({ default: m.AdminCandidates })))
 const AdminCompanies = lazy(() => import('./pages/AdminCompanies').then(m => ({ default: m.AdminCompanies })))
+const AdminJobs = lazy(() => import('./pages/AdminJobs').then(m => ({ default: m.AdminJobs })))
+const AdminAnalytics = lazy(() => import('./pages/AdminAnalytics').then(m => ({ default: m.AdminAnalytics })))
 const AdminSearchLogs = lazy(() => import('./pages/AdminSearchLogs').then(m => ({ default: m.AdminSearchLogs })))
 const JobListingsManage = lazy(() => import('./pages/JobListingsManage').then(m => ({ default: m.JobListingsManage })))
 const JobListingForm = lazy(() => import('./pages/JobListingForm').then(m => ({ default: m.JobListingForm })))
@@ -203,6 +205,8 @@ function App() {
                   <Link to="/admin-notifications" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Известия</Link>
                   <Link to="/admin-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Кандидати</Link>
                   <Link to="/admin-companies" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Фирми</Link>
+                  <Link to="/admin-jobs" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Обяви</Link>
+                  <Link to="/admin-analytics" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Статистика</Link>
                   <Link to="/admin-search-logs" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Лог търсения</Link>
                   <Link to="/admin-blog" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Блог статии</Link>
                 </NavDropdown>
@@ -258,6 +262,8 @@ function App() {
             <Route path="/account-settings" element={<AccountSettings />} />
             <Route path="/admin-candidates" element={<AdminCandidates />} />
             <Route path="/admin-companies" element={<AdminCompanies />} />
+            <Route path="/admin-jobs" element={<AdminJobs />} />
+            <Route path="/admin-analytics" element={<AdminAnalytics />} />
             <Route path="/admin-search-logs" element={<AdminSearchLogs />} />
             <Route path="/admin-reports" element={<AdminReports />} />
             <Route path="/company-jobs" element={<JobListingsManage />} />

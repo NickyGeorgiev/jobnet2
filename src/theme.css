@@ -28,26 +28,6 @@
   --radius-sm: 8px;    /* Малки елементи (бутони, инпути, badge вътрешни ъгли) */
 }
 
-/* :root[data-theme="light"] {
- 
-  --color-bg: #f9f1d7;
-  --color-surface: #eedbbb;
-  --color-surface-raised: #fcfaf1;
-  --color-border: #efe0b7;
-
-  --color-text: #172033;
-  --color-text-muted: #5f6b7a;
-
-  --color-gold: linear-gradient(120deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%); 
-  --color-gold-soft: rgba(239, 191, 4, 0.7);
-
-  --color-teal: #1f2a44;
-  --color-teal-soft: rgba(134, 197, 216, 0.20);
-
-  --color-danger: #c94b3c;
-  --color-success: #34845b;
-} */
-
 * { box-sizing: border-box; }
 
 body {

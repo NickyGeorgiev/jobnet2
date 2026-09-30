@@ -209,6 +209,12 @@ export function JobListingsManage() {
   if (allListings === null) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   const statusLabel = { draft: 'Чернова', published: 'Публикувана', closed: 'Затворена', expired: 'Изтекла' }
+  const statusBadgeClass = {
+    draft: 'blog-status-badge--draft',
+    published: 'blog-status-badge--published',
+    closed: 'blog-status-badge--rejected',
+    expired: 'blog-status-badge--rejected',
+  }
 
   return (
     <div className="dashboard-shell">
@@ -241,7 +247,7 @@ export function JobListingsManage() {
           <div key={job.id} className={`tier-card-${job.tier} job-admin-row ${job.status === 'expired' ? 'job-admin-row--expired' : ''}`}>
             <div>
               <p className="blog-admin-row-title">
-                <span className={`blog-status-badge blog-status-badge--${job.status === 'published' ? 'published' : job.status === 'expired' ? 'closed' : 'draft'}`}>
+                <span className={`blog-status-badge ${statusBadgeClass[job.status] || 'blog-status-badge--draft'}`}>
                   {statusLabel[job.status]}
                 </span>
                 {job.title}

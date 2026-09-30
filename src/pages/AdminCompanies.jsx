@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../supabaseClient'
 
 const ACTION_LABELS = { view: 'отворена', download: 'изтеглена', print: 'разпечатана' }
+const ADMIN_STATUS_LABELS = { ok: 'Наред', watch: 'Под наблюдение', suspended: 'Блокирана' }
 
 export function AdminCompanies() {
   const [companies, setCompanies] = useState(null)
   const [selected, setSelected] = useState(null)
   const [invoiceEvents, setInvoiceEvents] = useState(null)
+  const [search, setSearch] = useState('')
+  const [savingNote, setSavingNote] = useState(false)
+  const [noteDraft, setNoteDraft] = useState('')
 
   async function loadInvoiceEvents(companyId) {
     setInvoiceEvents(null)
@@ -47,17 +51,66 @@ export function AdminCompanies() {
     load()
   }, [])
 
+  const filtered = useMemo(() => {
+    if (!companies) return null
+    const q = search.trim().toLowerCase()
+    if (!q) return companies
+    return companies.filter((c) =>
+      (c.company_name || '').toLowerCase().includes(q) ||
+      (c.contact_email || '').toLowerCase().includes(q) ||
+      (c.bulstat || '').toLowerCase().includes(q)
+    )
+  }, [companies, search])
+
+  function openCompany(c) {
+    setSelected(c)
+    setNoteDraft(c.admin_note || '')
+    loadInvoiceEvents(c.id)
+  }
+
+  async function handleAdminStatusChange(newStatus) {
+    setSelected((s) => ({ ...s, admin_status: newStatus }))
+    const { error } = await supabase
+      .from('companies')
+      .update({ admin_status: newStatus })
+      .eq('id', selected.id)
+    if (!error) {
+      setCompanies((prev) => prev.map((c) => (c.id === selected.id ? { ...c, admin_status: newStatus } : c)))
+    }
+  }
+
+  async function handleSaveNote() {
+    setSavingNote(true)
+    const { error } = await supabase
+      .from('companies')
+      .update({ admin_note: noteDraft })
+      .eq('id', selected.id)
+    if (!error) {
+      setSelected((s) => ({ ...s, admin_note: noteDraft }))
+      setCompanies((prev) => prev.map((c) => (c.id === selected.id ? { ...c, admin_note: noteDraft } : c)))
+    }
+    setSavingNote(false)
+  }
+
   if (companies === null) return <div style={{ padding: '2rem' }}>Зареждане...</div>
 
   return (
     <div className="dashboard-shell">
       <div className="dashboard-header" style={{ justifyContent: 'space-between', display: 'flex', width: '100%' }}>
-        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички фирми ({companies.length})</h1></div>
+        <div><p className="dashboard-eyebrow">Администрация</p><h1 className="dashboard-title">Всички фирми ({filtered.length}{filtered.length !== companies.length ? ` от ${companies.length}` : ''})</h1></div>
         <button className="btn-secondary" onClick={exportCsv}>⬇ Export CSV</button>
       </div>
 
+      <input
+        type="text"
+        className="admin-search-input"
+        placeholder="Търси по име, имейл или ЕИК..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
       <div className="blog-admin-list">
-        {companies.map((c) => {
+        {filtered.map((c) => {
           const isInTrial = c.trial_ends_at && new Date(c.trial_ends_at) > new Date()
           const isPaid = c.paid_until && new Date(c.paid_until) > new Date()
 
@@ -67,14 +120,17 @@ export function AdminCompanies() {
                 <p className="blog-admin-row-title">
                   {isPaid && <span className="blog-status-badge blog-status-badge--published">платено</span>}
                   {!isPaid && isInTrial && <span className="blog-status-badge blog-status-badge--draft">trial</span>}
+                  {c.admin_status === 'watch' && <span className="blog-status-badge blog-status-badge--draft">под наблюдение</span>}
+                  {c.admin_status === 'suspended' && <span className="blog-status-badge blog-status-badge--rejected">блокирана</span>}
                   {c.company_name || c.email}
                 </p>
                 <p className="blog-admin-row-meta">{c.contact_email || '—'} · {c.sector || 'без сектор'} · рег. {new Date(c.created_at).toLocaleDateString('bg-BG')}</p>
               </div>
-              <button className="btn-secondary" onClick={() => { setSelected(c); loadInvoiceEvents(c.id) }}>Виж профил</button>
+              <button className="btn-secondary" onClick={() => openCompany(c)}>Виж профил</button>
             </div>
           )
         })}
+        {filtered.length === 0 && <p style={{ color: 'var(--color-text-muted)', padding: '1rem 0' }}>Няма фирми, отговарящи на търсенето.</p>}
       </div>
 
       {selected && (
@@ -109,6 +165,32 @@ export function AdminCompanies() {
                   {selected.contact_address && <span>📍 {selected.contact_address}</span>}
                 </div>
               )}
+
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em', margin: '0 0 0.6rem' }}>
+                  Ръчна проверка
+                </p>
+                <select
+                  className="admin-status-select"
+                  value={selected.admin_status || 'ok'}
+                  onChange={(e) => handleAdminStatusChange(e.target.value)}
+                >
+                  {Object.entries(ADMIN_STATUS_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+                <textarea
+                  className="admin-note-textarea"
+                  rows={3}
+                  placeholder="Бележка за тази фирма (вижда се само от администратори)..."
+                  value={noteDraft}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  style={{ marginTop: '0.6rem' }}
+                />
+                <button className="btn-secondary" onClick={handleSaveNote} disabled={savingNote} style={{ marginTop: '0.5rem' }}>
+                  {savingNote ? 'Запазвам...' : 'Запази бележката'}
+                </button>
+              </div>
 
               <div style={{ marginTop: '1.5rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
                 <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.03em', margin: '0 0 0.6rem' }}>

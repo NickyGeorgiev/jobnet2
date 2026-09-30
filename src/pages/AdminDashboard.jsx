@@ -5,18 +5,24 @@ import { seo } from '../seo'
 import './AdminDashboard.css'
 
 const SETTING_LABELS = {
-  'color-bg': 'color-bg: Фон на страницата',
-  'color-surface': 'color-surface: Фон на карти/панели (status-card, action-tile, candidate-card)',
-  'color-surface-raised': 'color-surface-raised: По-светла повърхност (плейсхолдър лого/аватар, tag фон)',
-  'color-border': 'color-border: Рамки/разделители (карти, полета, hr линии)',
-  'color-text': 'color-text: Основен текст',
-  'color-text-muted': 'color-text-muted: Второстепенен текст (описания, labels, дати)',
-  'color-gold': 'color-gold: Gold акцент',
-  'color-gold-soft':'color-gold-soft: Полупрозрачен златен фон зад badge/tag за заплата',
-  'color-teal': 'color-teal: Company/бизнес акцент (линкове, action-tile hover)',
-  'color-teal-soft':'color-teal-soft: Полупрозрачен тюркоазен фон зад иконки/tag-ове',
-  'color-danger': 'color-danger: Грешки/опасност',
-  'color-success': 'color-success: Успех',
+  'color-bg': 'Фон на страницата',
+  'color-surface': 'Фон на карти/панели',
+  'color-surface-raised': 'По-светла повърхност (вложени елементи)',
+  'color-border': 'Рамки/разделители',
+  'color-text': 'Основен текст',
+  'color-text-muted': 'Второстепенен текст',
+  'color-gold': 'Gold акцент',
+  'color-gold-soft': 'Полупрозрачен златен фон (badge/tag)',
+  'color-teal': 'Company/бизнес акцент',
+  'color-teal-soft': 'Полупрозрачен тюркоазен фон (иконки/tag-ове)',
+  'color-danger': 'Грешки/опасност',
+  'color-success': 'Успех',
+}
+
+// Само чист 6- или 3-цифрен hex може да се редактира и с input type="color" —
+// той не разбира от градиенти или rgba() с прозрачност (color-gold, *-soft).
+function isSimpleHex(value) {
+  return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test((value || '').trim())
 }
 
 export function AdminDashboard() {
@@ -50,6 +56,7 @@ export function AdminDashboard() {
     const [
       candidatesCount,
       companiesCount,
+      goldActiveCount,
       companiesPaidCount,
       trialCount,
       monthPayments,
@@ -64,6 +71,7 @@ export function AdminDashboard() {
     ] = await Promise.all([
       supabase.from('candidates').select('*', { count: 'exact', head: true }),
       supabase.from('companies').select('*', { count: 'exact', head: true }),
+      supabase.from('candidates').select('*', { count: 'exact', head: true }).gt('gold_until', now),
       supabase.from('companies').select('*', { count: 'exact', head: true }).gt('paid_until', now),
       supabase.from('companies').select('*', { count: 'exact', head: true }).gt('trial_ends_at', now),
       supabase.from('payments').select('amount').gte('created_at', startOfMonth),
@@ -91,6 +99,7 @@ export function AdminDashboard() {
     setStats({
       candidates: candidatesCount.count || 0,
       companies: companiesCount.count || 0,
+      goldActive: goldActiveCount.count || 0,
       companiesPaid: companiesPaidCount.count || 0,
       trialing: trialCount.count || 0,
       monthRevenue,
@@ -215,14 +224,24 @@ export function AdminDashboard() {
   }
 
   async function loadSettings() {
-    const { data } = await supabase.from('site_settings').select('*').order('key')
+    const { data } = await supabase
+      .from('site_settings')
+      .select('*')
+      .in('theme', ['dark', 'light'])
+      .order('key')
     setSettings(data || [])
   }
 
-  function handleColorChange(key, value) {
-    setSettings((prev) => prev.map((s) => (s.key === key ? { ...s, value } : s)))
-    // Мигновен преглед — прилагаме веднага върху документа, преди дори да сме запазили
-    document.documentElement.style.setProperty(`--${key}`, value)
+  function handleColorChange(key, theme, value) {
+    setSettings((prev) =>
+      prev.map((s) => (s.key === key && s.theme === theme ? { ...s, value } : s))
+    )
+    // Мигновен преглед само ако редактираш темата, която в момента се вижда —
+    // иначе редакция на светлата тема би променила видимо тъмния изглед в момента.
+    const activeTheme = document.documentElement.getAttribute('data-theme') || 'dark'
+    if (theme === activeTheme) {
+      document.documentElement.style.setProperty(`--${key}`, value)
+    }
   }
 
   async function handleSaveTheme() {
@@ -234,9 +253,10 @@ export function AdminDashboard() {
         .from('site_settings')
         .update({ value: setting.value, updated_at: new Date().toISOString() })
         .eq('key', setting.key)
+        .eq('theme', setting.theme)
     }
 
-    setMessage('Темата е запазена — всички посетители ще я видят при следващо зареждане.')
+    setMessage('Темата е запазена — всички посетители ще я видят при следващо зареждане (до 1 минута за jobs.jobstate.net).')
     setSaving(false)
   }
 
@@ -257,8 +277,8 @@ export function AdminDashboard() {
             </p>
             <p className="status-sub">
               {freeMode
-                ? 'Company search е безплатен за всички потребители.'
-                : 'Company search изисква плащане, както обичайно.'}
+                ? 'Company search и Gold статус са безплатни за всички потребители.'
+                : 'Company search и Gold статус изискват плащане, както обичайно.'}
             </p>
           </div>
           {freeMode !== null && (
@@ -283,14 +303,6 @@ export function AdminDashboard() {
           <div className="admin-stat-card">
             <p className="admin-stat-value">{stats.companies}</p>
             <p className="admin-stat-label">Регистрирани фирми</p>
-          </div>
-          <div className="admin-stat-card">
-            <p className="admin-stat-value">{stats.companiesPaid}</p>
-            <p className="admin-stat-label">Фирми с платен достъп</p>
-          </div>
-          <div className="admin-stat-card">
-            <p className="admin-stat-value">{stats.trialing}</p>
-            <p className="admin-stat-label">Фирми в пробен период</p>
           </div>
           <div className="admin-stat-card" style={{ borderColor: 'var(--color-gold)' }}>
             <p className="admin-stat-value" style={{ color: 'var(--color-gold)' }}>{stats.monthRevenue.toFixed(2)}€</p>
@@ -475,15 +487,51 @@ export function AdminDashboard() {
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Цветове на темата</h2>
 
       <div className="status-card">
-        {settings.map((setting) => (
-          <div key={setting.key} className="theme-editor-row">
+        <h3 className="theme-editor-subtitle">Тъмна тема</h3>
+        {settings.filter((s) => s.theme === 'dark').map((setting) => (
+          <div key={`${setting.key}-${setting.theme}`} className="theme-editor-row">
             <span className="theme-editor-label">{SETTING_LABELS[setting.key] || setting.key}</span>
-            <input
-              type="color"
-              className="theme-editor-swatch"
-              value={setting.value}
-              onChange={(e) => handleColorChange(setting.key, e.target.value)}
-            />
+            <div className="theme-editor-value">
+              <span className="theme-editor-preview" style={{ background: setting.value }} />
+              {isSimpleHex(setting.value) && (
+                <input
+                  type="color"
+                  className="theme-editor-swatch"
+                  value={setting.value}
+                  onChange={(e) => handleColorChange(setting.key, setting.theme, e.target.value)}
+                />
+              )}
+              <input
+                type="text"
+                className="theme-editor-text"
+                value={setting.value}
+                onChange={(e) => handleColorChange(setting.key, setting.theme, e.target.value)}
+              />
+            </div>
+          </div>
+        ))}
+
+        <h3 className="theme-editor-subtitle">Светла тема</h3>
+        {settings.filter((s) => s.theme === 'light').map((setting) => (
+          <div key={`${setting.key}-${setting.theme}`} className="theme-editor-row">
+            <span className="theme-editor-label">{SETTING_LABELS[setting.key] || setting.key}</span>
+            <div className="theme-editor-value">
+              <span className="theme-editor-preview" style={{ background: setting.value }} />
+              {isSimpleHex(setting.value) && (
+                <input
+                  type="color"
+                  className="theme-editor-swatch"
+                  value={setting.value}
+                  onChange={(e) => handleColorChange(setting.key, setting.theme, e.target.value)}
+                />
+              )}
+              <input
+                type="text"
+                className="theme-editor-text"
+                value={setting.value}
+                onChange={(e) => handleColorChange(setting.key, setting.theme, e.target.value)}
+              />
+            </div>
           </div>
         ))}
 
