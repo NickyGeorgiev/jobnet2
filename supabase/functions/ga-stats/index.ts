@@ -307,6 +307,14 @@ Deno.serve(async (req) => {
         "eventCount",
         50
       ),
+      orderedReport(
+        startDate,
+        endDate,
+        ["sessionManualAdContent"],
+        ["sessions", "activeUsers", "screenPageViews"],
+        "sessions",
+        100
+      ),
     ]);
 
     const [b1, b2, b3, b4] = [
@@ -334,6 +342,7 @@ Deno.serve(async (req) => {
         countries: simplifyRows(b3[3]),
         cities: simplifyRows(b3[4]),
         events: simplifyRows(b4[0]),
+        facebookGroups: simplifyRows(b4[1]),
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

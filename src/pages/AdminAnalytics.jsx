@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 
 const CHANNEL_LABELS = {
@@ -238,13 +238,26 @@ export function AdminAnalytics() {
 
   const gaTabs = ['overview', 'traffic', 'pages', 'users', 'behavior']
 
+  // Петте GA таба показват едни и същи вече заредени данни — тук само
+  // при ПЪРВОТО влизане в която и да е от тях зареждаме веднъж.
   useEffect(() => {
-    if (gaTabs.includes(activeTab)) fetchAnalytics()
-  }, [activeTab, fetchAnalytics])
+    if (gaTabs.includes(activeTab) && data === null) fetchAnalytics()
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // При смяна на периода презареждаме GA данните само ако вече сме ги
+  // зареждали поне веднъж — иначе PeriodSelector-ът ще ги тегли двойно
+  // заедно с ефекта по-горе.
+  useEffect(() => {
+    if (data !== null) fetchAnalytics(startDate, endDate, true)
+  }, [startDate, endDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (activeTab === 'platform') fetchDbStats()
-  }, [activeTab, fetchDbStats])
+    if (activeTab === 'platform' && dbData === null) fetchDbStats()
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (dbData !== null) fetchDbStats(startDate, endDate, true)
+  }, [startDate, endDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (activeTab !== 'realtime') return
@@ -254,7 +267,7 @@ export function AdminAnalytics() {
   }, [activeTab, fetchRealtime])
 
   const summary = data?.summary || {}, previous = data?.previousSummary || {}
-  const channels = data?.channels || [], sources = data?.sources || [], campaigns = data?.campaigns || []
+  const channels = data?.channels || [], sources = data?.sources || [], campaigns = data?.campaigns || [], facebookGroups = data?.facebookGroups || []
   const pages = data?.pages || [], landingPages = data?.landingPages || [], devices = data?.devices || []
   const browsers = data?.browsers || [], operatingSystems = data?.operatingSystems || []
   const countries = data?.countries || [], cities = data?.cities || [], events = data?.events || []
@@ -286,7 +299,11 @@ export function AdminAnalytics() {
               else if (activeTab === 'realtime') fetchRealtime()
               else fetchAnalytics(startDate, endDate, true)
             }}
-            disabled={loading || dbLoading || refreshing || realtimeLoading}
+            disabled={
+              activeTab === 'platform' ? dbLoading
+                : activeTab === 'realtime' ? realtimeLoading
+                  : (loading || refreshing)
+            }
             style={{
               color: 'var(--color-text)',
               border: '1px solid var(--color-border)',
@@ -296,7 +313,11 @@ export function AdminAnalytics() {
               cursor: 'pointer',
             }}
           >
-            {refreshing || dbLoading ? 'Обновявам...' : '↻ Обнови'}
+            {(
+              activeTab === 'platform' ? dbLoading
+                : activeTab === 'realtime' ? realtimeLoading
+                  : (loading || refreshing)
+            ) ? 'Обновявам...' : '↻ Обнови'}
           </button>
         </div>
       </div>
@@ -371,6 +392,17 @@ export function AdminAnalytics() {
               </Section>
               <Section title="Кампании" subtitle="UTM кампании и други" full>
                 <DataTable rows={campaigns} columns={[{ key: 'sessionCampaignName', label: 'Кампания', render: r => r.sessionCampaignName === '(not set)' ? 'Без кампания' : r.sessionCampaignName }, { key: 'sessions', label: 'Сесии', align: 'right', render: r => formatNumber(r.sessions) }, { key: 'activeUsers', label: 'Потребители', align: 'right', render: r => formatNumber(r.activeUsers) }, { key: 'screenPageViews', label: 'Views', align: 'right', render: r => formatNumber(r.screenPageViews) }]} />
+              </Section>
+              <Section title="Facebook групи" subtitle="Трафик по UTM content" full>
+                <DataTable
+                  rows={facebookGroups}
+                  columns={[
+                    { key: 'sessionManualAdContent', label: 'Група', render: r => r.sessionManualAdContent === '(not set)' ? 'Без група' : r.sessionManualAdContent },
+                    { key: 'sessions', label: 'Сесии', align: 'right', render: r => formatNumber(r.sessions) },
+                    { key: 'activeUsers', label: 'Потребители', align: 'right', render: r => formatNumber(r.activeUsers) },
+                    { key: 'screenPageViews', label: 'Views', align: 'right', render: r => formatNumber(r.screenPageViews) },
+                  ]}
+                />
               </Section>
               <Section title="Дневна активност" subtitle={`Данни за ${daysBetween(startDate, endDate)} дни`} full>
                 <DataTable rows={data.daily} columns={[{ key: 'date', label: 'Дата', render: r => formatDateLabel(r.date) }, { key: 'activeUsers', label: 'Потребители', align: 'right', render: r => formatNumber(r.activeUsers) }, { key: 'newUsers', label: 'Нови', align: 'right', render: r => formatNumber(r.newUsers) }, { key: 'sessions', label: 'Сесии', align: 'right', render: r => formatNumber(r.sessions) }, { key: 'screenPageViews', label: 'Views', align: 'right', render: r => formatNumber(r.screenPageViews) }]} />
