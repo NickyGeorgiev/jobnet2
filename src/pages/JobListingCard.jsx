@@ -1,4 +1,5 @@
 import { SectorIcon } from './SectorIcon'
+import { ShareJobButton } from './ShareJobButton'
 import { FaLocationDot } from "react-icons/fa6"
 import { SiClockify } from "react-icons/si"
 import { BsCalendarDay } from "react-icons/bs"
@@ -48,16 +49,22 @@ export function JobListingCard({
       tabIndex={0}
       style={{ cursor: 'pointer', position: 'relative' }}
     >
-      {isCandidate && onToggleSave && (
-        <button
-          className="job-card-fav-icon"
-          onClick={(e) => { e.stopPropagation(); onToggleSave(job.id) }}
-          title={isSaved ? 'Премахни от любими' : 'Добави в любими'}
-          aria-label={isSaved ? 'Премахни от любими' : 'Добави в любими'}
-        >
-          {isSaved ? '★' : '☆'}
-        </button>
-      )}
+      {/* Звездата (само за логнати кандидати) е по избор — споделянето е
+          винаги видимо. На десктоп: споделяне вляво от звездата (ред, обърнат
+          наопаки). На мобилен: споделяне под звездата (колона, нормален ред). */}
+      <div className="job-card-action-icons">
+        {isCandidate && onToggleSave && (
+          <button
+            className="job-card-fav-icon"
+            onClick={(e) => { e.stopPropagation(); onToggleSave(job.id) }}
+            title={isSaved ? 'Премахни от любими' : 'Добави в любими'}
+            aria-label={isSaved ? 'Премахни от любими' : 'Добави в любими'}
+          >
+            {isSaved ? '★' : '☆'}
+          </button>
+        )}
+        <ShareJobButton job={job} />
+      </div>
 
       <div className="job-card-header-row">
         {job.company?.logo_url ? (
