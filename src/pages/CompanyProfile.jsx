@@ -119,7 +119,9 @@ export function CompanyProfile() {
     let file
 
     try {
-      file = await convertImageToWebp(rawFile)
+      // PNG, не WebP — Satori (opengraph-image.tsx в SSR сайта) не може да
+      // прочете WebP, а логото там се показва в картинката за Facebook/споделяне.
+      file = await convertImageToWebp(rawFile, 800, 'image/png')
     } catch (err) {
       setMessage('Грешка при обработка на снимката: ' + err.message)
       setUploadingLogo(false)

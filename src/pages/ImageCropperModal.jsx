@@ -1,9 +1,6 @@
 import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 
-// Изрязва зоната, върната от react-easy-crop (пиксели спрямо оригиналната
-// снимка), и я рисува в нов canvas с точно зададени изходни размери —
-// резултатът винаги е с правилното съотношение, независимо от оригинала.
 async function getCroppedBlob(imageSrc, cropAreaPixels, outputWidth, outputHeight) {
     const image = await new Promise((resolve, reject) => {
         const img = new Image()
@@ -51,10 +48,7 @@ export function ImageCropperModal({ imageFile, aspect, outputWidth, outputHeight
         setSaving(true)
         try {
             const blob = await getCroppedBlob(imageSrc, croppedAreaPixels, outputWidth, outputHeight)
-            // Оригиналното име на файла може да съдържа символи, които
-            // Supabase Storage отказва в пътя (напр. ©, интервали, кирилица).
-            // Не пазим оригиналното име за нищо съществено — просто
-            // почистваме до безопасни символи.
+
             const safeName = imageFile.name
                 .replace(/\.[^.]+$/, '')
                 .replace(/[^a-zA-Z0-9-_]/g, '')

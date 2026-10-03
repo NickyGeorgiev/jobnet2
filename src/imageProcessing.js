@@ -1,6 +1,10 @@
 import heic2any from 'heic2any'
 
-export async function convertImageToWebp(file, maxWidth = 800) {
+// mimeType по избор — по подразбиране си остава 'image/webp' (по-малък файл),
+// но логата на фирмите трябва да са 'image/png': Satori (рендерерът на
+// opengraph-image.tsx в SSR сайта) не поддържа WebP и гърми при опит да го
+// прочете — вижте "Can't load image ...webp: Unsupported image type".
+export async function convertImageToWebp(file, maxWidth = 800, mimeType = 'image/webp') {
   let blob = file
   const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || /\.hei[cf]$/i.test(file.name)
 
@@ -24,6 +28,7 @@ export async function convertImageToWebp(file, maxWidth = 800) {
   canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
   URL.revokeObjectURL(imgUrl)
 
-  const webpBlob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.85))
-  return new File([webpBlob], file.name.replace(/\.[^.]+$/, '.webp'), { type: 'image/webp' })
+  const extension = mimeType === 'image/png' ? '.png' : '.webp'
+  const outBlob = await new Promise((resolve) => canvas.toBlob(resolve, mimeType, 0.85))
+  return new File([outBlob], file.name.replace(/\.[^.]+$/, extension), { type: mimeType })
 }
