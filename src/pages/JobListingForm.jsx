@@ -623,8 +623,17 @@ export function JobListingForm() {
             value={formData.title}
             onChange={handleChange}
             placeholder="напр. Продавач-консултант"
+            maxLength={80}
             disabled={saving}
           />
+          <div style={{
+            textAlign: 'right',
+            fontSize: '0.75rem',
+            color: 'var(--color-text-muted)',
+            marginTop: '0.25rem'
+          }}>
+            {formData.title.length}/80
+          </div>
         </div>
 
         <div className="field" style={{ marginTop: '1.5rem' }}>
