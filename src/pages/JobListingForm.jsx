@@ -1013,7 +1013,7 @@ export function JobListingForm() {
                   </div>
                 )}
 
-                {paymentMethod === 'credits' && tokenBalance < currentTierPrice && (
+                {paymentMethod === 'credits' && !saving && tokenBalance < currentTierPrice && (
                   <div className="payment-info-box warning">
                     <span className="info-icon">⚠️</span>
                     <p>
