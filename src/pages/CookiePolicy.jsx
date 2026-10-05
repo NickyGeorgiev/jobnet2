@@ -1,6 +1,7 @@
 import { LegalPage } from './LegalPage'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { OPERATOR } from '../operatorInfo'
 
 
 export function CookiePolicy() {
@@ -117,7 +118,7 @@ export function CookiePolicy() {
         Актуалната версия винаги ще бъде достъпна на Jobstate.net.
       </p>
       <h3>VI. Контакти</h3>
-      <p>При въпроси относно използването на бисквитки можете да се свържете с нас на <strong>info@jobstate.net</strong>.</p>
+      <p>При въпроси относно използването на бисквитки можете да се свържете с нас на <strong>{OPERATOR.email}</strong>.</p>
     </LegalPage>
   )
 }

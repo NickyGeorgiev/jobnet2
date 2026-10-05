@@ -1,13 +1,14 @@
 import { LegalPage } from './LegalPage'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { OPERATOR } from '../operatorInfo'
 
 export function PrivacyPolicy() {
   useSeo(seo.privacy)
 
   
   return (
-    <LegalPage title="Политика за поверителност и защита на личните данни" isPlaceholder>
+    <LegalPage title="Политика за поверителност и защита на личните данни">
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 24.09.2026 г.</p>
       <p>
         Настоящата Политика за поверителност описва начина, по който Jobstate.net („Платформата") събира,
@@ -20,8 +21,8 @@ export function PrivacyPolicy() {
       <h4>1. Данни за администратора</h4>
       <p>
         Администратор на личните данни, обработвани чрез платформата Jobstate.net, е{' '}
-        <strong>ЕН ДИ ЕМ ДЖИ ЕООД</strong>, ЕИК/БУЛСТАТ <strong>[ЕИК]</strong>,
-        със седалище и адрес на управление: <strong>Гр. Русе, ул. Родопи 4, вх.А</strong>, електронна поща: info@jobstate.net,
+        <strong>{OPERATOR.name} {OPERATOR.legalForm}</strong>, ЕИН <strong>{OPERATOR.eik}</strong>, ИН пи ДДС <strong>BG{OPERATOR.eik}</strong>,
+        със седалище и адрес на управление: <strong>{OPERATOR.address}</strong>, електронна поща: {OPERATOR.email},
         наричан по-долу <strong>„Администратор"</strong>. Администраторът определя целите и средствата за
         обработване на личните данни, свързани с използването на платформата.
       </p>

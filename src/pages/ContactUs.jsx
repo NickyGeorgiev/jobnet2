@@ -4,6 +4,7 @@ import { useToast } from './Toast'
 import { TurnstileWidget } from './TurnstileWidget'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { OPERATOR } from '../operatorInfo'
 
 export function ContactUs() {
   useSeo(seo.contact)
@@ -93,7 +94,7 @@ export function ContactUs() {
         <div>
           <div className="status-card" style={{ marginBottom: '1rem' }}>
             <p className="status-title" style={{ marginBottom: '0.3rem' }}>✉ Имейл</p>
-            <p className="status-sub">info@jobstate.net</p>
+            <p className="status-sub">{OPERATOR.email}</p>
           </div>
           <div className="status-card">
             <p className="status-title" style={{ marginBottom: '0.3rem' }}>🕐 Работно време</p>

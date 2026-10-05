@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import logo from '../assets/logo-light.svg'
+import { OPERATOR } from '../operatorInfo'
 
 const VAT_RATE = 0.2
 
@@ -132,11 +133,12 @@ export function InvoiceModal({ payment, userEmail, onClose }) {
             <div>
               <p className="invoice-title"><img src={logo} alt="Jobstate" /></p>
               <p style={{ fontSize: '0.8rem', color: '#777', margin: '0.2rem 0 0' }}>
-                Наименование: ЕН ДИ ЕМ ДЖИ ЕООД<br />
-                ЕИК: [попълни]<br />
-                ИН по ДДС: BG<br />
-                Адрес: гр. Русе, ул. Родопи 4, вх.А<br />
-                jobstate.net · info@jobstate.net
+                Наименование: {OPERATOR.name} {OPERATOR.legalForm}<br />
+                ЕИН: {OPERATOR.eik}<br />
+                ИН по ДДС: BG{OPERATOR.eik}<br />
+                МОЛ: {OPERATOR.mol}<br />
+                Адрес: {OPERATOR.address}<br />
+                jobstate.net · {OPERATOR.email}
               </p>
             </div>
             <div className="invoice-meta">

@@ -1,6 +1,7 @@
 import { LegalPage } from './LegalPage'
 import { useSeo } from '../useSeo'
 import { seo } from '../seo'
+import { OPERATOR } from '../operatorInfo'
 
 
 export function TermsOfService() {
@@ -9,7 +10,7 @@ export function TermsOfService() {
 
   return (
 
-    <LegalPage title="Общи условия за използване на платформата Jobstate.net" isPlaceholder>
+    <LegalPage title="Общи условия за използване на платформата Jobstate.net">
 
       <p style={{ fontSize: '0.85rem' }}>Последна актуализация: 24.09.2026 г.</p>
       
@@ -23,9 +24,14 @@ export function TermsOfService() {
       <h3>I. Общи положения</h3>
       <h4>1. Данни за оператора</h4>
       <p>
-        1.1. Платформата Jobstate.net се управлява от: <strong>ЕН ДИ ЕМ ДЖИ ЕООД</strong>,
-        ЕИК/БУЛСТАТ <strong>[ЕИК]</strong>, със седалище и адрес на управление: <strong>гр. Русе, ул. Родопи 4, вх.А</strong>,
-        електронна поща: info@jobstate.net, наричан по-долу за краткост <strong>„Оператор"</strong>.
+        1.1. Платформата Jobstate.net се управлява от: <br/>
+        Фирма: <strong>{OPERATOR.name} {OPERATOR.legalForm}</strong><br/>
+        ЕИН: <strong>{OPERATOR.eik}</strong><br/>
+        ИН по ДДС: <strong>BG{OPERATOR.eik}</strong><br/>
+        Представлявана от: <strong>{OPERATOR.mol}</strong><br/>
+        Адрес на управление: <strong>{OPERATOR.address}</strong><br/>
+        електронна поща: <strong>{OPERATOR.email}</strong><br/>
+        наричан по-долу за краткост <strong>„Оператор"</strong>.
       </p>
       <p>1.2. Операторът предоставя онлайн платформа за публикуване на обяви за работа и кандидатстване по тях, за създаване на професионални профили (CV) от кандидати, за автоматично известяване на кандидатите при съвпадение между техни критерии и публикувана обява, както и за търсене на кандидати от работодатели.</p>
       <h3>II. Предмет на платформата</h3>
