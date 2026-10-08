@@ -218,6 +218,21 @@ Deno.serve(async (req) => {
               const functionsBase = `${Deno.env.get("SUPABASE_URL")}/functions/v1`
               const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 
+              // Генерираме OG картинката ПЪРВА и я изчакваме (await) — ако после викаме
+              // Facebook, той трябва да ползва вече готовия PNG от Storage, не да кара
+              // crawler-а да дърпа нещо несъществуващо.
+              try {
+                await fetch(`${functionsBase}/generate-og-image`, {
+                  method: "POST",
+                  headers: { Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
+                  body: JSON.stringify({ jobId: jobListingId }),
+                })
+              } catch (err) {
+                console.error("generate-og-image call failed:", err)
+                // Не спираме целия webhook заради това — обявата си остава published,
+                // просто ще падне към динамичния /opengraph-image fallback.
+              }
+
               try {
                 await fetch(`${functionsBase}/match-job-listing`, {
                   method: "POST",
