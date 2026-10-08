@@ -49,11 +49,34 @@ Deno.serve(async (req) => {
     const isServiceRole = token === SERVICE_KEY
 
     if (!isServiceRole) {
-      const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
-        global: { headers: { Authorization: authHeader } },
-      })
-      const { data: { user } } = await supabaseAuth.auth.getUser()
-      if (!user || user.id !== job.company_id) {
+      const supabaseAuth = createClient(
+        SUPABASE_URL,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        {
+          global: { headers: { Authorization: authHeader } },
+        }
+      )
+
+      const {
+        data: { user },
+      } = await supabaseAuth.auth.getUser()
+
+      if (!user) {
+        return new Response(JSON.stringify({ error: "Не си влязъл в профила си" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle()
+
+      const isAdmin = profile?.role === "admin"
+
+      if (!isAdmin && user.id !== job.company_id) {
         return new Response(JSON.stringify({ error: "Нямаш достъп до тази обява" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -61,10 +84,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    await supabaseAdmin
-      .from("job_listings")
-      .update({ og_image_status: "processing" })
-      .eq("id", jobId)
 
     // 1. Рендерираме PNG-то през Next.js (SSR сайта).
     const renderRes = await fetch(`${SSR_SITE_URL}/api/generate-og/${jobId}`, {
