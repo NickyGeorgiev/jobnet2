@@ -17,8 +17,7 @@
 }
 
 .job-status-badge--closed {
-  /* background: rgba(248, 42, 1, 0.15); */
-  background: yellow;
+  background: rgba(248, 42, 1, 0.15);
   color: var(--color-danger);
 }
 
@@ -94,17 +93,10 @@
 .job-card-action-icons {
   position: absolute;
   right: 0.85rem;
-  top: 0.3rem;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   z-index: 1;
-}
-
-@media (max-width: 640px) {
-  .job-card-action-icons {
-    flex-direction: column;
-  }
 }
 
 .job-card-fav-icon,
@@ -141,7 +133,7 @@
    .job-admin-row (картата) има overflow:hidden и иначе би го отрязала. */
 .job-card-share-popover {
   position: fixed;
-  transform: translate(-50%, calc(-100% - 10px));
+  transform: translate(-65%, calc(-100% - 10px));
   display: flex;
   gap: 0.35rem;
   background: var(--color-surface);
@@ -177,26 +169,16 @@
   font-weight: 900;
   font-size: 1rem;
   color: var(--color-text);
-  background: rgba(111, 207, 151, 0.2);
+  background: rgba(111, 207, 151, 0.4);
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
+  white-space: nowrap; 
+  flex-shrink: 0;
 }
 
 .job-card-date {
   font-size: 0.78rem;
   color: var(--color-text-muted);
-}
-
-@media (max-width: 640px) {
-  .job-admin-row--with-logo {
-    flex-direction: row;
-  }
-
-  .job-card-logo,
-  .job-card-logo-placeholder {
-    width: 48px;
-    height: 48px;
-  }
 }
 
 .tier-option-card {
@@ -220,16 +202,14 @@
 .tier-option-card--selected {
   border-color: var(--color-gold-soft);
   background: var(--color-gold);
+}
 
-  .tier-option-name {
-    color: var(--color-bg)
-  }
+.tier-option-card--selected .tier-option-name {
+  color: var(--color-bg);
+}
 
-
-  .tier-option-price {
-    color: var(--color-border)
-  }
-
+.tier-option-card--selected .tier-option-price {
+  color: var(--color-border);
 }
 
 .tier-option-name {
@@ -281,111 +261,44 @@
   background: rgba(224, 224, 224, 0.4); 
   color: #d4d4d4; 
   border: 1px solid #a8a9ad; 
-  box-shadow: 0 0 8px rgba(168, 169, 173, 0.4); /* Нежно сребърно сияние */
+  box-shadow: 0 0 8px 1px rgba(168, 169, 173, 0.4); /* Нежно сребърно сияние */
 }
 
 /* 2. GOLD TIER */
 .tier-card-gold::before { 
   background: linear-gradient(180deg, #fcf6ba, #bf953f); 
-  box-shadow: 0 0 10px rgba(191, 149, 63, 0.4); 
+  box-shadow: 0 0 12px 2px rgba(191, 149, 63, 0.5); 
 }
 .tier-badge--gold { 
   background: rgba(191, 149, 63, 0.5); 
   color: #fcf6ba; 
   border: 1px solid #bf953f; 
-  box-shadow: 0 0 10px rgba(191, 149, 63, 0.6); /* Топъл златен отблясък */
+  box-shadow: 0 0 10px 2px rgba(191, 149, 63, 0.6); /* Топъл златен отблясък */
 }
 
 /* 3. PLATINUM TIER */
 .tier-card-platinum::before { 
   background: linear-gradient(180deg, #ffffff, #e5e4e2, #707070); 
-  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6); 
+  box-shadow: 0 0 12px 2px rgba(229, 228, 226, 0.6); 
 }
 .tier-badge--platinum { 
   background: rgba(229, 228, 226, 0.4); 
   color: #e5e4e2; 
   border: 1px solid #e5e4e2; 
-  box-shadow: 0 0 12px rgba(229, 228, 226, 0.6); /* Ярък платинен блясък */
+  box-shadow: 0 0 12px 2px rgba(229, 228, 226, 0.6); /* Ярък платинен блясък */
 }
 
 /* 4. DIAMOND TIER */
 .tier-card-diamond::before { 
   background: linear-gradient(180deg, #b9f2ff, #f0b9ff, #b9ffdb); 
-  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8); 
+  box-shadow: 0 0 15px 2px rgba(185, 242, 255, 0.8); 
 }
 .tier-badge--diamond { 
   background: rgba(185, 242, 255, 0.4); 
   color: #b9f2ff; 
   border: 1px solid #b9f2ff; 
-  box-shadow: 0 0 15px rgba(185, 242, 255, 0.8), inset 0 0 6px rgba(240, 185, 255, 0.3); /* Двойно сияние */
+  box-shadow: 0 0 15px 2px rgba(185, 242, 255, 0.8), inset 0 0 6px rgba(240, 185, 255, 0.3); /* Двойно сияние */
 }
-
-/* ===== По-компактен мобилен изглед на списъка с обяви ===== */
-@media (max-width: 640px) {
-  .job-admin-row {
-    padding: 0.6rem 0.75rem;
-  }
-
-  .job-admin-row--with-logo {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 0.6rem;
-  }
-
-  .job-card-logo,
-  .job-card-logo-placeholder {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
-  }
-
-  .blog-admin-row-title { font-size: 0.92rem; }
-  .blog-admin-row-meta { font-size: 0.76rem; }
-
-  .job-card-salary,
-  .job-card-date {
-    font-size: 0.74rem;
-  }
-
-  .job-listing-row-actions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .job-listing-row-actions > a,
-  .job-listing-row-actions > button {
-    flex: 1 1 auto;
-    font-size: 0.78rem;
-    text-align: center;
-  }
-
-  .job-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .job-filters select.input,
-  .job-filters input.input,
-  .job-filters .sector-select {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .job-filters .sector-select-trigger {
-    padding: 0.5rem 0.65rem;
-  }
-
-  .job-card-fav-icon {
-    width: 26px;
-    height: 26px;
-    font-size: 1rem;
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-}
-
-
 
 
 /* Мрежа за избор на тиъри */
@@ -622,7 +535,7 @@
 /* Избран начин на плащане (Златист акцент) */
 .payment-option-card.active {
   background: rgba(220, 176, 89, 0.08);
-  border-color: rgba(5, 228, 42);
+  border-color: rgba(5, 228, 42, 1);
   box-shadow: 0 0 15px rgba(191, 149, 63, 0.25);
 }
 
@@ -671,8 +584,8 @@
 }
 
 .payment-option-card.active .payment-radio-indicator {
-  border-color: rgba(5, 228, 42);
-  background: rgba(5, 228, 42);
+  border-color: rgba(5, 228, 42, 1);
+  background: rgba(5, 228, 42, 1);
   box-shadow: 0 0 4px rgba(5, 228, 42, 0.6);
 }
 
@@ -870,6 +783,7 @@
   gap: 1rem;
   flex-wrap: wrap;
   padding-right: 2rem;
+  max-width: 85%;
 }
 
 .job-card-company-line {
@@ -897,16 +811,17 @@
 
 .job-card-bottom-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 0.3rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .job-card-tags {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  max-width: 70%;
 }
 
 .job-pill {
@@ -940,12 +855,12 @@
 }
 
 @media (max-width: 700px) {
-  /* .job-card-description {
-    display: none;
-  } */
+  .job-card-share-popover {
+    flex-direction: column;
+  }
 
   .job-pill:nth-child(2),
-  .job-pill:nth-child(3){
+  .job-pill:nth-child(3) {
     display: none;
   }
 
@@ -955,8 +870,8 @@
 
   .job-card-logo-small,
   .job-card-logo-placeholder--small {
-    width: 36px;
-    height: 36px;
+    width: 48px;
+    height: 48px;
   }
 
   .job-card-divider {
@@ -965,11 +880,13 @@
 
   .job-card-top-row {
     padding-right: 1.5rem;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    max-width: 75%;
   }
 
   .job-card-company-line {
     font-size: 0.8rem;
+    max-width: 80%;
   }
 
   .job-pill {
@@ -979,5 +896,84 @@
 
   .job-card-salary {
     font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .job-filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .job-filters select.input,
+  .job-filters input.input,
+  .job-filters .sector-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .job-filters .sector-select-trigger {
+    padding: 0.5rem 0.65rem;
+  }
+
+  .job-admin-row {
+    padding: 0.6rem 0.75rem;
+  }
+
+  .job-admin-row--with-logo {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .job-card-logo,
+  .job-card-logo-placeholder {
+    width: 36px;
+    height: 36px;
+  }
+
+  .job-card-logo-placeholder {
+    font-size: 1rem;
+  }
+
+  .blog-admin-row-title {
+    font-size: 0.92rem;
+  }
+
+  .blog-admin-row-meta {
+    font-size: 0.76rem;
+  }
+
+  .job-card-salary,
+  .job-card-date {
+    font-size: 0.74rem;
+  }
+
+  .job-listing-row-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .job-listing-row-actions > a,
+  .job-listing-row-actions > button {
+    flex: 1 1 auto;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .job-card-fav-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .job-card-bottom-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

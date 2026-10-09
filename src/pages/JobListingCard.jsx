@@ -53,17 +53,28 @@ export function JobListingCard({
           винаги видимо. На десктоп: споделяне вляво от звездата (ред, обърнат
           наопаки). На мобилен: споделяне под звездата (колона, нормален ред). */}
       <div className="job-card-action-icons">
-        {isCandidate && onToggleSave && (
-          <button
-            className="job-card-fav-icon"
-            onClick={(e) => { e.stopPropagation(); onToggleSave(job.id) }}
-            title={isSaved ? 'Премахни от любими' : 'Добави в любими'}
-            aria-label={isSaved ? 'Премахни от любими' : 'Добави в любими'}
-          >
-            {isSaved ? '★' : '☆'}
-          </button>
+        {job.tier && job.tier !== 'free' && (
+          <span className={`tier-badge tier-badge--${job.tier}`}>
+            {job.tier === 'silver' && '✦ Silver'}
+            {job.tier === 'gold' && '✦ Gold'}
+            {job.tier === 'platinum' && '❖ Platinum'}
+            {job.tier === 'diamond' && '💎 Diamond'}
+          </span>
         )}
-        <ShareJobButton job={job} />
+
+        <div style={{ display: 'flex', gap:'0.5rem', flexDirection: 'row', justifyContent: 'flex-end', marginTop: '0.2rem' }}>
+          {isCandidate && onToggleSave && (
+            <button
+              className="job-card-fav-icon"
+              onClick={(e) => { e.stopPropagation(); onToggleSave(job.id) }}
+              title={isSaved ? 'Премахни от любими' : 'Добави в любими'}
+              aria-label={isSaved ? 'Премахни от любими' : 'Добави в любими'}
+            >
+              {isSaved ? '★' : '☆'}
+            </button>
+          )}
+          <ShareJobButton job={job} />
+        </div>
       </div>
 
       <div className="job-card-header-row">
@@ -79,21 +90,21 @@ export function JobListingCard({
           <div className="job-card-top-row">
             <span style={{ fontWeight: 'bold' }}>{job.title}</span>
 
-            {job.tier && job.tier !== 'free' && (
+            {/* {job.tier && job.tier !== 'free' && (
               <span className={`tier-badge tier-badge--${job.tier}`}>
                 {job.tier === 'silver' && '✦ Silver'}
                 {job.tier === 'gold' && '✦ Gold'}
                 {job.tier === 'platinum' && '❖ Platinum'}
                 {job.tier === 'diamond' && '💎 Diamond'}
               </span>
-            )}
+            )} */}
           </div>
 
           <p className="job-card-company-line">
             {showCompany && (job.company?.company_name || 'Фирма')}
             {job.published_at && (
               <>
-                {showCompany &&  <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px', color: 'var(--color-gold-soft)' }}/>} 
+                {showCompany && <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px', color: 'var(--color-gold-soft)' }} />}
                 {formatRelativeDate(job.published_at)}
               </>
             )}
@@ -109,13 +120,13 @@ export function JobListingCard({
 
       <div className="job-card-bottom-row">
         <div className="job-card-tags">
-          {job.city && <span className="job-pill"><FaLocationDot style={{color: 'var(--color-gold-soft)'}}/> {job.city}</span>}
+          {job.city && <span className="job-pill"><FaLocationDot style={{ color: 'var(--color-gold-soft)' }} /> {job.city}</span>}
           {job.sector && (
             <span className="job-pill">
               <SectorIcon sector={job.sector} /> {job.sector}
             </span>
           )}
-          {job.duration && <span className="job-pill"><SiClockify style={{color: 'var(--color-gold-soft)'}} /> {job.duration}</span>}
+          {job.duration && <span className="job-pill"><SiClockify style={{ color: 'var(--color-gold-soft)' }} /> {job.duration}</span>}
         </div>
 
         {job.salary_visible && job.salary && (
