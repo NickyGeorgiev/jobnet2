@@ -15,9 +15,6 @@ function buildShareUrl(job, source) {
   return `${base}?${params.toString()}`
 }
 
-// Бутон „Сподели" с изкачащо меню (Facebook / Viber / LinkedIn / копирай линк).
-// Рендерира менюто през portal в <body>, защото картата (.job-admin-row) има
-// overflow:hidden и иначе менюто би се отрязало.
 export function ShareJobButton({ job }) {
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)

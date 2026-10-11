@@ -89,15 +89,6 @@ export function JobListingCard({
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="job-card-top-row">
             <span style={{ fontWeight: 'bold' }}>{job.title}</span>
-
-            {/* {job.tier && job.tier !== 'free' && (
-              <span className={`tier-badge tier-badge--${job.tier}`}>
-                {job.tier === 'silver' && '✦ Silver'}
-                {job.tier === 'gold' && '✦ Gold'}
-                {job.tier === 'platinum' && '❖ Platinum'}
-                {job.tier === 'diamond' && '💎 Diamond'}
-              </span>
-            )} */}
           </div>
 
           <p className="job-card-company-line">
