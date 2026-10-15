@@ -300,6 +300,36 @@
   box-shadow: 0 0 15px 2px rgba(185, 242, 255, 0.8), inset 0 0 6px rgba(240, 185, 255, 0.3); /* Двойно сияние */
 }
 
+/* Светла тема: по-тъмни текст и рамка, по-слабо сияние (светлите цветове се губят на бял фон) */
+html[data-theme="light"] .tier-badge--silver {
+  background: rgba(110, 113, 120, 0.15);
+  color: #2f3237;
+  border: 1px solid #6b6e75;
+  box-shadow: 0 0 6px 1px rgba(110, 113, 120, 0.3);
+}
+html[data-theme="light"] .tier-badge--gold {
+  background: rgba(191, 149, 63, 0.2);
+  color: #4a3305;
+  border: 1px solid #9a7420;
+  box-shadow: 0 0 6px 1px rgba(154, 116, 32, 0.35);
+}
+html[data-theme="light"] .tier-badge--platinum {
+  background: rgba(95, 105, 125, 0.15);
+  color: #2b3340;
+  border: 1px solid #556070;
+  box-shadow: 0 0 6px 1px rgba(85, 96, 112, 0.35);
+}
+html[data-theme="light"] .tier-badge--diamond {
+  background: rgba(27, 160, 192, 0.15);
+  color: #04485c;
+  border: 1px solid #1596b6;
+  box-shadow: 0 0 6px 1px rgba(21, 150, 182, 0.4), inset 0 0 5px rgba(160, 90, 200, 0.2);
+}
+
+html[data-theme="light"] .job-pill > svg {
+  color: var(--color-teal)
+}
+
 
 /* Мрежа за избор на тиъри */
 .tier-select-grid {
@@ -834,6 +864,10 @@
   white-space: nowrap;
 }
 
+.job-pill > svg {
+  color: var(--color-gold-soft);
+}
+
 .job-card-status-pill {
   display: inline-block;
   margin-top: 0.6rem;
@@ -935,6 +969,8 @@
   .job-card-logo-placeholder {
     font-size: 1rem;
   }
+
+  .job-card-description {display: none;}
 
   .blog-admin-row-title {
     font-size: 0.92rem;

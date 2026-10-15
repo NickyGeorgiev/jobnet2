@@ -1,4 +1,5 @@
 import { SectorIcon } from './SectorIcon'
+import { htmlToPlainText } from '../richText'
 import { ShareJobButton } from './ShareJobButton'
 import { FaLocationDot } from "react-icons/fa6"
 import { SiClockify } from "react-icons/si"
@@ -106,18 +107,18 @@ export function JobListingCard({
       <hr className="job-card-divider" />
 
       {job.description && (
-        <p className="job-card-description">{job.description}</p>
+        <p className="job-card-description">{htmlToPlainText(job.description)}</p>
       )}
 
       <div className="job-card-bottom-row">
         <div className="job-card-tags">
-          {job.city && <span className="job-pill"><FaLocationDot style={{ color: 'var(--color-gold-soft)' }} /> {job.city}</span>}
+          {job.city && <span className="job-pill"><FaLocationDot /> {job.city}</span>}
           {job.sector && (
             <span className="job-pill">
               <SectorIcon sector={job.sector} /> {job.sector}
             </span>
           )}
-          {job.duration && <span className="job-pill"><SiClockify style={{ color: 'var(--color-gold-soft)' }} /> {job.duration}</span>}
+          {job.duration && <span className="job-pill"><SiClockify /> {job.duration}</span>}
         </div>
 
         {job.salary_visible && job.salary && (

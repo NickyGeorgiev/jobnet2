@@ -10,6 +10,8 @@ import { useTierOptions } from '../useTierOptions'
 import stateCreditSvg from '../assets/state-credit.svg'
 import { ImageCropperModal } from './ImageCropperModal'
 import { SectorSelect } from './SectorSelect'
+import { RichTextEditor } from './RichTextEditor'
+import { legacyTextToHtml, isRichTextEmpty } from '../richText'
 import './JobListings.css'
 
 const TIER_DESCRIPTIONS = {
@@ -174,7 +176,7 @@ export function JobListingForm() {
 
         setFormData({
           title: data.title ?? '',
-          description: data.description ?? '',
+          description: legacyTextToHtml(data.description ?? ''),
           sector: data.sector ?? '',
           level: data.level ?? '',
           duration: data.duration ?? '',
@@ -195,7 +197,7 @@ export function JobListingForm() {
 
         setOriginalOgData({
           title: data.title ?? '',
-          description: data.description ?? '',
+          description: legacyTextToHtml(data.description ?? ''),
           city: data.city ?? '',
           salary: data.salary ?? '',
           salary_max: data.salary_max ?? '',
@@ -242,7 +244,7 @@ export function JobListingForm() {
     }
 
     const title = formData.title?.trim() || ''
-    const description = formData.description?.trim() || ''
+    const description = isRichTextEmpty(formData.description) ? '' : formData.description.trim()
 
     if (!title || !description) {
       showToast('Заглавие и описание са задължителни.', 'error')
@@ -477,7 +479,11 @@ export function JobListingForm() {
 
         <div className="field">
           <label>Описание *</label>
-          <textarea className="input" name="description" value={formData.description} onChange={handleChange} rows={6} disabled={saving} />
+          <RichTextEditor
+            value={formData.description}
+            onChange={html => setFormData(p => ({ ...p, description: html }))}
+            disabled={saving}
+          />
         </div>
 
         <div className="cv-entry-row">

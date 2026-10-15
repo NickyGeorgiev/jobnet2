@@ -6,7 +6,6 @@ import { CvModal } from './CvModal'
 import { Spinner } from './Spinner'
 import './CompanySearch.css'
 
-const JOBS_SITE_URL = import.meta.env.VITE_JOBS_SITE_URL || 'https://jobs.jobstate.net'
 
 const STATUS_LABEL = {
   submitted: 'Нова',
@@ -162,10 +161,7 @@ export function JobApplicants() {
                       handleStatusChange(app.id, 'viewed')
                     }
                     try {
-                      await supabase.rpc('notify_cv_viewed', {
-                        p_candidate_id: c.id,
-                        p_link: `${JOBS_SITE_URL}/jobs/${job.slug}-${job.id}`,
-                      })
+                      await supabase.rpc('notify_cv_viewed', { p_candidate_id: c.id })
                     } catch (err) {
                       console.error('Failed to send CV view notification:', err)
                     }

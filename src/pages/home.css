@@ -10,7 +10,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  mask-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 70%, rgba(0, 0, 0, 0) 100%);
 }
 
 .hero-banner-overlay {
@@ -278,7 +279,7 @@
 
   text-transform: uppercase;
 
-  color: #f0f4f8;
+  color: var(--color-text);
   padding: 0.6rem;
 }
 
