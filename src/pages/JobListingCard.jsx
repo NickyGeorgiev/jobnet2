@@ -96,7 +96,7 @@ export function JobListingCard({
             {showCompany && (job.company?.company_name || 'Фирма')}
             {job.published_at && (
               <>
-                {showCompany && <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px', color: 'var(--color-gold-soft)' }} />}
+                {showCompany && <BsCalendarDay style={{ fontSize: '17px', marginLeft: '6px', marginRight: '4px' }} />}
                 {formatRelativeDate(job.published_at)}
               </>
             )}

@@ -161,7 +161,7 @@ export function JobApplicants() {
                       handleStatusChange(app.id, 'viewed')
                     }
                     try {
-                      await supabase.rpc('notify_cv_viewed', { p_candidate_id: c.id })
+                      await supabase.rpc('notify_cv_viewed', { p_candidate_id: c.id, p_job_listing_id: job.id })
                     } catch (err) {
                       console.error('Failed to send CV view notification:', err)
                     }

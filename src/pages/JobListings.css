@@ -326,8 +326,9 @@ html[data-theme="light"] .tier-badge--diamond {
   box-shadow: 0 0 6px 1px rgba(21, 150, 182, 0.4), inset 0 0 5px rgba(160, 90, 200, 0.2);
 }
 
-html[data-theme="light"] .job-pill > svg {
-  color: var(--color-teal)
+html[data-theme="light"] .job-pill > svg,
+html[data-theme="light"] .job-card-company-line > svg {
+  color: var(--color-teal);
 }
 
 
@@ -820,6 +821,10 @@ html[data-theme="light"] .job-pill > svg {
   color: var(--color-text-muted);
   font-size: 0.85rem;
   margin: 0.2rem 0 0;
+}
+
+.job-card-company-line > svg {
+  color:var(--color-gold-soft)
 }
 
 .job-card-description {
