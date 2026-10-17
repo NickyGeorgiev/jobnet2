@@ -276,9 +276,7 @@
   text-decoration: none;
   font-family: var(--font-body);
   font-weight: 700;
-
   text-transform: uppercase;
-
   color: var(--color-text);
   padding: 0.6rem;
 }
@@ -367,6 +365,15 @@
   box-sizing: border-box;
 }
 
+html[data-theme="light"] .btn-94::before {
+background: #0b132b;
+}
+
+html[data-theme="light"] .btn-192 > a,
+html[data-theme="light"] .btn-192 > svg {
+  color: #f0f4f8;
+}
+
 .btn-94 span {
   display: inline-flex;
   align-items: center;
@@ -383,7 +390,7 @@
   content: '';
   inset: 3px;
   border-radius: 0.3em;
-  background: var(--bg-color_94);
+  background: var(--color-bg);
   z-index: -1;
   box-sizing: border-box;
 }
@@ -404,6 +411,8 @@
 .btn-94:active span {
   animation: move_94 1s infinite alternate ease-in-out;
 }
+
+
 
 @keyframes move_94 {
   0% {

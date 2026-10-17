@@ -21,6 +21,13 @@
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 </IfModule>
 
+# ===== ТЕСТОВ РЕЖИМ: Google да не индексира сайта =====
+# ПРЕДИ ПУСКАНЕТО: изтрий целия този блок (до следващия ред с =====), пребилдни и качи наново.
+<IfModule mod_headers.c>
+  Header always set X-Robots-Tag "noindex, nofollow"
+</IfModule>
+# ===== КРАЙ НА ТЕСТОВИЯ РЕЖИМ =====
+
 <IfModule mod_headers.c>
   Header always set Content-Security-Policy-Report-Only "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.google-analytics.com https://challenges.cloudflare.com https://*.clarity.ms https://c.bing.com https://connect.facebook.net https://analytics.tiktok.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com https://*.clarity.ms data:; img-src 'self' data: https://bfyugufkxajywdxnzbjs.supabase.co https://www.googletagmanager.com https://*.google-analytics.com https://cdn.simpleicons.org https://www.facebook.com https://*.clarity.ms; connect-src 'self' https://bfyugufkxajywdxnzbjs.supabase.co https://*.google-analytics.com https://www.googletagmanager.com https://challenges.cloudflare.com https://*.clarity.ms https://c.bing.com https://www.facebook.com https://analytics.tiktok.com; frame-src https://challenges.cloudflare.com https://www.youtube.com https://player.vimeo.com; object-src 'none'; base-uri 'self'; form-action 'self'"
 </IfModule>
