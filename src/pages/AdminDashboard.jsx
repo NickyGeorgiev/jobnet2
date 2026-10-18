@@ -269,27 +269,6 @@ export function AdminDashboard() {
         </div>
       </div>
 
-      <div className="status-card" style={{ marginBottom: '2rem', borderColor: freeMode ? 'var(--color-teal)' : 'var(--color-border)' }}>
-        <div className="toggle-row">
-          <div>
-            <p className="status-title" style={{ marginBottom: '0.2rem' }}>
-              {freeMode ? '🎉 Безплатен launch период — активен' : '💳 Плащанията са включени'}
-            </p>
-            <p className="status-sub">
-              {freeMode
-                ? 'Company search и Gold статус са безплатни за всички потребители.'
-                : 'Company search и Gold статус изискват плащане, както обичайно.'}
-            </p>
-          </div>
-          {freeMode !== null && (
-            <label className="toggle-switch">
-              <input type="checkbox" checked={!freeMode} onChange={handleToggleFreeMode} disabled={togglingFreeMode} />
-              <span className="toggle-slider"></span>
-            </label>
-          )}
-        </div>
-      </div>
-
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', marginBottom: '1rem' }}>Статистики</h2>
 
       {!stats ? (

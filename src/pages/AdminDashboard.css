@@ -21,11 +21,12 @@
 
 .admin-stat-label {
   font-size: 0.8rem;
-  color: var(--color-text-muted);
+  color: var(--color-teext-muted);
 }
 
 .theme-editor-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 0;
