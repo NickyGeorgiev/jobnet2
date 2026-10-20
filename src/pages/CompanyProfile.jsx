@@ -302,6 +302,15 @@ export function CompanyProfile() {
       }
     }
 
+    for (const link of [formData.video_url, ...formData.video_urls]) {
+      const val = link?.trim()
+
+      if (val && !/^https?:\/\//i.test(val)) {
+        showToast('Линковете към видеата трябва да започват с http:// или https://', 'error')
+        return
+      }
+    }
+
     setSaving(true)
     setMessage('')
 
@@ -625,14 +634,19 @@ export function CompanyProfile() {
           </div>
 
           <div className="field">
-            <label>Линк към видео (YouTube/Vimeo, по избор)</label>
+            <label>Линк към видео (по избор)</label>
             <input
               className="input"
               name="video_url"
               value={formData.video_url}
               onChange={handleChange}
-              placeholder="https://youtube.com/watch?v=..."
+              placeholder="https://..."
             />
+            <p style={{ marginTop: '0.4rem', color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+              Вграждат се YouTube, Vimeo, Facebook, TikTok, Dailymotion, Loom и Wistia, както и директни
+              видео файлове (.mp4, .webm). Всеки друг линк, например страница от вашия сайт, се показва като
+              бутон „Гледай видеото“.
+            </p>
           </div>
 
           <div className="field">
@@ -745,7 +759,7 @@ export function CompanyProfile() {
                   onChange={(e) =>
                     updateListItem('video_urls', index, e.target.value)
                   }
-                  placeholder="https://youtube.com/watch?v=..."
+                  placeholder="https://..."
                 />
 
                 <button

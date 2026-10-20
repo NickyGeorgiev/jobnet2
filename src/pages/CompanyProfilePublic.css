@@ -135,6 +135,51 @@
   border: none;
 }
 
+/* Вертикални видеа (TikTok, YouTube Shorts) — тясна рамка 9:16 */
+.company-public-video--vertical {
+  padding-top: 0;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 9 / 16;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Директен видео файл */
+.company-public-video-file {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  background: #000;
+  border-radius: var(--radius-lg);
+  margin-bottom: 2rem;
+}
+
+/* Непознат адрес — бутон към видеото */
+.company-public-video-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+  margin-bottom: 2rem;
+}
+
+.company-public-video-link:hover {
+  border-color: var(--color-teal);
+}
+
+.company-public-video-link strong {
+  color: var(--color-teal);
+  white-space: nowrap;
+}
+
 .company-public-section {
   margin-bottom: 2.5rem;
 }

@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
 import { useDocumentTitle } from '../useDocumentTitle'
-import { useFreeMode } from '../FreeModeContext'
 import bannerDesktop from '../assets/background-desktop.avif'
 import bannerMobile from '../assets/background-mobile.avif'
 import { useSeo } from '../useSeo'
@@ -11,27 +10,41 @@ import heroArt from '../assets/hero.svg'
 import { MdManageSearch } from "react-icons/md";
 import './Home.css'
 
+// function HeroArt() {
+//   return (
+//     <svg width="320" height="280" viewBox="0 0 320 280" fill="none">
+//       <rect x="40" y="40" width="150" height="190" rx="16" fill="var(--color-surface)" stroke="var(--color-border)" />
+//       <rect x="60" y="70" width="70" height="10" rx="5" fill="var(--color-border)" />
+//       <rect x="60" y="90" width="100" height="8" rx="4" fill="var(--color-surface-raised)" />
+//       <rect x="60" y="106" width="100" height="8" rx="4" fill="var(--color-surface-raised)" />
+//       <rect x="60" y="122" width="60" height="8" rx="4" fill="var(--color-surface-raised)" />
+
+//       <rect x="130" y="60" width="150" height="190" rx="16" fill="var(--color-surface-raised)" stroke="var(--color-gold-soft)" strokeWidth="1.5" />
+//       <circle cx="165" cy="100" r="18" fill="var(--color-gold-soft)" stroke="var(--color-gold-soft)" strokeWidth="1.5" />
+//       <path d="M158 100l5 5 10-11" stroke="var(--color-text)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+//       <rect x="150" y="135" width="110" height="8" rx="4" fill="rgba(212,162,76,0.25)" />
+//       <rect x="150" y="151" width="80" height="8" rx="4" fill="var(--color-border)" />
+//       <rect x="150" y="175" width="110" height="34" rx="8" fill="var(--color-gold-soft)" />
+//       <text x="205" y="196" textAnchor="middle" fontFamily="IBM Plex Mono" fontSize="11" fill="var(--color-text)">MATCH</text>
+//     </svg>
+//   )
+// }
+
 export function Home() {
   useSeo(seo.home)
   useDocumentTitle(null)
-  const { freeMode } = useFreeMode()
   const [logos, setLogos] = useState([])
 
   useEffect(() => {
     async function loadLogos() {
-      if (freeMode) {
-        const { data } = await supabase
-          .from('company_directory')
-          .select('id, company_name, logo_url')
-          .not('logo_url', 'is', null)
-        setLogos(data || [])
-      } else {
-        const { data } = await supabase.from('partner_logos').select('*')
-        setLogos(data || [])
-      }
+      const { data } = await supabase
+        .from('company_directory')
+        .select('id, company_name, logo_url')
+        .not('logo_url', 'is', null)
+      setLogos(data || [])
     }
     loadLogos()
-  }, [freeMode])
+  }, [])
 
   return (
     <div>

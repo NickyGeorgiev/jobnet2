@@ -1,4 +1,5 @@
-import heic2any from 'heic2any'
+// heic2any се зарежда само при HEIC файл (динамичен import) — библиотеката е ~1.3 MB и ползва
+// new Function(), което не бива да се изпълнява при всяко отваряне на страница.
 
 // mimeType по избор — по подразбиране си остава 'image/webp' (по-малък файл),
 // но логата на фирмите трябва да са 'image/png': Satori (рендерерът на
@@ -9,6 +10,7 @@ export async function convertImageToWebp(file, maxWidth = 800, mimeType = 'image
   const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || /\.hei[cf]$/i.test(file.name)
 
   if (isHeic) {
+    const { default: heic2any } = await import('heic2any')
     blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 })
     if (Array.isArray(blob)) blob = blob[0]
   }

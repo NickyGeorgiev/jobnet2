@@ -40,13 +40,149 @@ const MobileIcon = () => (
   </svg>
 )
 
-function getVideoEmbedUrl(url) {
-  if (!url) return null
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
-  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
-  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`
-  return null
+const YT_ID = /^[\w-]{11}$/
+
+function parseVideoUrl(raw) {
+  if (!raw || typeof raw !== 'string') return null
+  let text = raw.trim()
+  if (!text) return null
+  if (!/^https?:\/\//i.test(text)) text = `https://${text}`
+  try {
+    const u = new URL(text)
+    return u.protocol === 'https:' || u.protocol === 'http:' ? u : null
+  } catch {
+    return null
+  }
+}
+
+// Връща { kind: 'embed' | 'file' | 'link', ... } или null.
+// embed — известна платформа (вгражда се; адресите са в frame-src на CSP в .htaccess)
+// file  — директен видео файл (<video>; media-src https: в CSP)
+// link  — всичко останало: бутон, който отваря адреса в нов раздел
+function getVideoInfo(raw) {
+  const u = parseVideoUrl(raw)
+  if (!u) return null
+
+  const host = u.hostname.toLowerCase().replace(/^(www|m)\./, '')
+  const parts = u.pathname.split('/').filter(Boolean)
+  const embed = (src, vertical = false) => ({ kind: 'embed', src, vertical })
+
+  // YouTube (watch, youtu.be, shorts, embed, live)
+  if (host === 'youtu.be' && YT_ID.test(parts[0] || '')) {
+    return embed(`https://www.youtube.com/embed/${parts[0]}`)
+  }
+  if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+    let id = null
+    if (parts[0] === 'watch') id = u.searchParams.get('v')
+    else if (['shorts', 'embed', 'live', 'v'].includes(parts[0])) id = parts[1]
+    // Shorts са вертикални — показват се в тясна рамка 9:16
+    if (id && YT_ID.test(id)) return embed(`https://www.youtube.com/embed/${id}`, parts[0] === 'shorts')
+  }
+
+  // Vimeo (включително скрити видеа с hash)
+  if (host === 'vimeo.com' || host === 'player.vimeo.com') {
+    const idx = parts.findIndex((p) => /^\d{5,}$/.test(p))
+    if (idx !== -1) {
+      const next = parts[idx + 1] || ''
+      const hash = u.searchParams.get('h') || (/^[a-z0-9]{8,}$/i.test(next) ? next : null)
+      return embed(
+        `https://player.vimeo.com/video/${parts[idx]}${hash ? `?h=${encodeURIComponent(hash)}` : ''}`
+      )
+    }
+  }
+
+  // Facebook (пълен линк към видео/reel; късите fb.watch не могат да се вградят)
+  if (
+    host === 'facebook.com' &&
+    (parts.includes('videos') ||
+      parts[0] === 'watch' ||
+      parts[0] === 'reel' ||
+      (parts[0] === 'share' && parts[1] === 'v'))
+  ) {
+    const href = `https://www.facebook.com${u.pathname}${u.search}`
+    return embed(
+      `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(href)}&show_text=false`
+    )
+  }
+
+  // TikTok (пълен линк tiktok.com/@име/video/число; официален плейър, вертикален формат)
+  if (host === 'tiktok.com' && parts[1] === 'video' && /^\d+$/.test(parts[2] || '')) {
+    return embed(`https://www.tiktok.com/player/v1/${parts[2]}?rel=0`, true)
+  }
+
+  // Instagram не се вгражда (вграденият плейър е твърде голям и не може да се смали) —
+  // минава през бутона „Гледай видеото“ най-долу.
+
+  // Dailymotion
+  if (host === 'dailymotion.com' && parts[0] === 'video' && /^[a-z0-9]+$/i.test(parts[1] || '')) {
+    return embed(`https://www.dailymotion.com/embed/video/${parts[1]}`)
+  }
+  if (host === 'dai.ly' && /^[a-z0-9]+$/i.test(parts[0] || '')) {
+    return embed(`https://www.dailymotion.com/embed/video/${parts[0]}`)
+  }
+
+  // Loom
+  if (host === 'loom.com' && ['share', 'embed'].includes(parts[0]) && /^[a-f0-9]{32}$/i.test(parts[1] || '')) {
+    return embed(`https://www.loom.com/embed/${parts[1]}`)
+  }
+
+  // Wistia (company.wistia.com/medias/ID или fast.wistia.net/embed/iframe/ID)
+  if (host === 'wistia.com' || host.endsWith('.wistia.com') || host.endsWith('.wistia.net')) {
+    const id =
+      parts[0] === 'medias' ? parts[1] : parts[0] === 'embed' && parts[1] === 'iframe' ? parts[2] : null
+    if (id && /^[a-z0-9]+$/i.test(id)) return embed(`https://fast.wistia.net/embed/iframe/${id}`)
+  }
+
+  // Директен видео файл (от всякакъв сайт, само през https)
+  if (u.protocol === 'https:' && /\.(mp4|webm|ogv|ogg|mov|m4v)$/i.test(u.pathname)) {
+    return { kind: 'file', src: u.href }
+  }
+
+  // Всичко останало — бутон към адреса
+  return { kind: 'link', href: u.href, host: u.hostname.replace(/^www\./, '') }
+}
+
+function CompanyVideo({ url, title }) {
+  const video = getVideoInfo(url)
+  if (!video) return null
+
+  if (video.kind === 'embed') {
+    return (
+      <div className={`company-public-video${video.vertical ? ' company-public-video--vertical' : ''}`}>
+        <iframe
+          src={video.src}
+          title={title}
+          loading="lazy"
+          allow="fullscreen; picture-in-picture; encrypted-media"
+        />
+      </div>
+    )
+  }
+
+  if (video.kind === 'file') {
+    return (
+      <video
+        className="company-public-video-file"
+        src={video.src}
+        title={title}
+        controls
+        playsInline
+        preload="metadata"
+      />
+    )
+  }
+
+  return (
+    <a
+      className="company-public-video-link"
+      href={video.href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+    >
+      <span>{video.host}</span>
+      <strong>Гледай видеото ↗</strong>
+    </a>
+  )
 }
 
 function isSafeUrl(url) {
@@ -111,7 +247,6 @@ export function CompanyProfilePublic() {
     )
   }
 
-  const embedUrl = getVideoEmbedUrl(company.video_url)
   const socials = [
     { url: company.social_website, label: 'Уебсайт', icon: <GlobeIcon /> },
     { url: company.social_facebook, label: 'Facebook', icon: <FacebookIcon /> },
@@ -200,25 +335,15 @@ export function CompanyProfilePublic() {
 
         {company.bio && <p className="company-public-bio">{company.bio}</p>}
 
-        {embedUrl && (
-          <div className="company-public-video">
-            <iframe src={embedUrl} title="Видео на фирмата" allowFullScreen />
-          </div>
-        )}
+        <CompanyVideo url={company.video_url} title="Видео на фирмата" />
 
         {company.video_urls?.length > 0 && (
           <div className="company-public-section">
             <h2>Още видеа</h2>
             <div className="company-public-video-grid">
-              {company.video_urls.map((url, i) => {
-                const embed = getVideoEmbedUrl(url)
-                if (!embed) return null
-                return (
-                  <div key={i} className="company-public-video company-public-video--small">
-                    <iframe src={embed} title={`Видео ${i + 1}`} allowFullScreen />
-                  </div>
-                )
-              })}
+              {company.video_urls.map((url, i) => (
+                <CompanyVideo key={i} url={url} title={`Видео ${i + 1}`} />
+              ))}
             </div>
           </div>
         )}
