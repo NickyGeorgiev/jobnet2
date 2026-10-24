@@ -544,7 +544,7 @@ button {
 .notification-bell-panel {
   position: absolute;
   top: calc(100% + 8px);
-  right: 0;
+  right: calc(100% - 60px);
   width: 340px;
   max-width: 90vw;
   max-height: 420px;
