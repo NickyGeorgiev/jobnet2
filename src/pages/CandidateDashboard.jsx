@@ -13,6 +13,7 @@ import { MdOutlineMarkEmailRead } from "react-icons/md"
 import { TbMailOff } from "react-icons/tb"
 import { FaRegEyeSlash } from "react-icons/fa"
 import { FaRegEye } from "react-icons/fa"
+import { RiListCheck3 } from "react-icons/ri";
 import './CandidateDashboard.css'
 
 export function CandidateDashboard() {
@@ -102,16 +103,16 @@ export function CandidateDashboard() {
         <div className="toggle-row">
           <div>
             <p className="status-title" style={{ marginBottom: '0.2rem' }}>
-              {cv.active ? 
-              <>
-              <FaRegEye size={25} style={{ marginRight: '6px'}}/>
-              Профилът е видим за фирмите
-              </>
-              : 
-              <>
-              <FaRegEyeSlash size={25} style={{ marginRight: '6px'}}/>
-              Профилът е скрит
-              </>
+              {cv.active ?
+                <>
+                  <FaRegEye size={25} style={{ marginRight: '6px' }} />
+                  Профилът е видим за фирмите
+                </>
+                :
+                <>
+                  <FaRegEyeSlash size={25} style={{ marginRight: '6px' }} />
+                  Профилът е скрит
+                </>
               }
             </p>
             <p className="status-sub">
@@ -173,6 +174,17 @@ export function CandidateDashboard() {
           <div>
             <p className="action-tile-title">Виж CV</p>
             <p className="action-tile-sub">Как изглежда за фирмите</p>
+          </div>
+        </button>
+        <button
+          onClick={() => setShowCvModal(true)}
+          className="action-tile"
+          style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer', font: 'inherit' }}
+        >
+          <span className="action-tile-icon"><RiListCheck3 /></span>
+          <div>
+            <p className="action-tile-title">Кандидатствания</p>
+            <p className="action-tile-sub">Виж статуса на кандидатстванията</p>
           </div>
         </button>
         <button

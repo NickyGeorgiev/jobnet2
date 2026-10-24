@@ -178,7 +178,7 @@ function App() {
                 <Link to="/company-profile" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Редактирай профил</Link>
                 <Link to="/buy-credits" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Портфейл</Link>
                 <Link to="/search" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Търсене на кандидати</Link>
-                <Link to="/saved-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Запазени кандидати</Link>
+                <Link to="/saved-candidates" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Одобрени кандидати</Link>
                 <Link to="/payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>Плащания</Link>
               </NavDropdown>
             )}

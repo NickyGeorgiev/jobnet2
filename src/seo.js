@@ -56,8 +56,8 @@ export const seo = {
     description: 'Съвети за търсене на работа, пазар на труда и кариерно развитие от екипа на Jobstate.',
   },
   savedCandidates: {
-    title: 'Запазени кандидати',
-    description: 'Разгледай запазените от теб кандидати в Jobstate.',
+    title: 'Одобрени кандидати',
+    description: 'Одобрени и запазени от теб кандидати в Jobstate.',
   },
   payments: {
     title: 'История на плащанията',
